@@ -1,0 +1,36 @@
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+.app-container {
+  display: flex;
+  height: 100vh;
+}
+
+.main-section {
+  flex: 1;
+  position: relative;
+}
+
+.open-sidebar-button {
+  position: absolute;
+  top: 0;
+  left: 0;
+  height: 3.5rem;
+  width: 3.5rem;
+  z-index: 10;
+  background: none;
+  border: none;
+  cursor: pointer;
+  color: #666;
+  transition: color 0.2s;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.open-sidebar-button:hover {
+  color: #333;
+} 
