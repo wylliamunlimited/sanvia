@@ -48,8 +48,8 @@ const Login: React.FC<LoginProps> = ({ onLoginSuccess }) => {
         
         <p className="toggleText">
           Don't have an account?{" "}
-          <span className="link" onClick={() => navigate("/auth")}>
-            Register here
+          <span className="link" onClick={() => navigate("/auth/signup")}>
+            Sign Up here
           </span>
         </p>
       </div>

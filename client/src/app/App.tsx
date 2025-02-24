@@ -5,7 +5,7 @@ import Sidebar from '../components/Sidebar/Sidebar'
 import Chat from '../components/Chat/Chat'
 import Documents from '../components/Documents/Documents'
 import History from '../components/History/History'
-import Auth from '../components/Auth/Auth'
+import SignUp from '../components/SignUp/SignUp'
 import Login from '../components/Login/Login'
 
 
@@ -13,7 +13,7 @@ function App() {
   const [activeSection, setActiveSection] = useState('chat')
   const [isSidebarOpen, setSidebarOpen] = useState(true)
   const [isLogged, setIsLogged] = useState(false);
-  const [isAuthenticated, setIsAuthenticated] = useState(false); // Simulating authentication state
+  const [isSignUp, setIsSignUp] = useState(false); 
 
   const getActiveComponent = () => {
     if (activeSection === 'chat') {
@@ -32,22 +32,22 @@ function App() {
       <Routes>
         {/* Login/Register Route */}
         <Route
-          path="/auth"
+          path="/auth/signup"
           element={
-            isAuthenticated ? (
-              <Navigate to="/login" replace />
+            isSignUp? (
+              <Navigate to="/auth/login" replace />
             ) : (
-              <Auth
-                onRegisterSuccess={() => {
-                  setIsAuthenticated(true);
-                  localStorage.setItem('isAuthenticated', 'true');
+              <SignUp
+                onSignUpSuccess={() => {
+                  setIsSignUp(true);
+                  localStorage.setItem('isSignUp', 'true');
                 }}
               />
             )
           }
         />
         <Route
-          path="/login"
+          path="/auth/login"
           element={
             isLogged ? (
               <Navigate to="/" replace />
@@ -87,7 +87,7 @@ function App() {
                 {getActiveComponent()}
               </div>
             </div>
-          ) : <Navigate to="/login" replace/>}
+          ) : <Navigate to="/auth/login" replace/>}
         />
       </Routes>
     </Router>

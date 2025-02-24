@@ -1,20 +1,22 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import "./Auth.css"; // Import shared styles
+import "./SignUp.css"; // Import shared styles
 
-interface RegisterProps {
-  onRegisterSuccess: () => void;
+interface SignUpProps {
+  onSignUpSuccess: () => void;
 }
 
-const Register: React.FC<RegisterProps> = ({ onRegisterSuccess }) => {
-  const [username, setUsername] = useState<string>("");
+const SignUp: React.FC<SignUpProps> = ({ onSignUpSuccess }) => {
+  const [name, setName] = useState<string>("");
+  const [lastName, setLastName] = useState<string>("");
+  const [email, setEmail] = useState<string>("");
   const [password, setPassword] = useState<string>("");
   const [confirmPassword, setConfirmPassword] = useState<string>("");
   const [error, setError] = useState<string>("");
   const navigate = useNavigate();
 
-  const handleRegister = () => {
-    if (!username || !password || !confirmPassword) {
+  const handleSignUp = () => {
+    if (!email || !password || !confirmPassword||!name||!lastName) {
       setError("Please fill out all fields.");
       return;
     }
@@ -25,23 +27,36 @@ const Register: React.FC<RegisterProps> = ({ onRegisterSuccess }) => {
     }
 
     setError("");
-    alert(`Registered as ${username}`);
-    onRegisterSuccess();
+    alert(`Signed up as ${email}`);
+    onSignUpSuccess();
     navigate("/login");
   };
 
   return (
     <div className="container">
       <div className="card">
-        <h2 className="title">Register</h2>
+        <h2 className="title">Sign Up</h2>
         {error && <p className="error">{error}</p>}
-        
+        <input
+          type="name"
+          placeholder="Name"
+          className="input"
+          value={name}
+          onChange={(e) => setName(e.target.value)}
+        />
+        <input
+          type="lastName"
+          placeholder="Last Name"
+          className="input"
+          value={name}
+          onChange={(e) => setLastName(e.target.value)}
+        />
         <input
           type="text"
-          placeholder="Username"
+          placeholder="Email"
           className="input"
-          value={username}
-          onChange={(e) => setUsername(e.target.value)}
+          value={email}
+          onChange={(e) => setEmail(e.target.value)}
         />
         <input
           type="password"
@@ -58,13 +73,13 @@ const Register: React.FC<RegisterProps> = ({ onRegisterSuccess }) => {
           onChange={(e) => setConfirmPassword(e.target.value)}
         />
 
-        <button onClick={handleRegister} className="button">
-          Register
+        <button onClick={handleSignUp} className="button">
+          Sign up
         </button>
 
         <p className="toggleText">
           Already have an account?{" "}
-          <span className="link" onClick={() => navigate("/login")}>
+          <span className="link" onClick={() => navigate("/auth/login")}>
             Login
           </span>
         </p>
@@ -73,4 +88,4 @@ const Register: React.FC<RegisterProps> = ({ onRegisterSuccess }) => {
   );
 };
 
-export default Register;
+export default SignUp;
