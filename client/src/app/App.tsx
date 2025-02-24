@@ -5,7 +5,7 @@ import Sidebar from '../components/Sidebar/Sidebar'
 import Chat from '../components/Chat/Chat'
 import Documents from '../components/Documents/Documents'
 import History from '../components/History/History'
-import Auth from '../components/Auth/Auth'
+import Register from '../components/Register/Register'
 import Login from '../components/Login/Login'
 
 
@@ -13,7 +13,7 @@ function App() {
   const [activeSection, setActiveSection] = useState('chat')
   const [isSidebarOpen, setSidebarOpen] = useState(true)
   const [isLogged, setIsLogged] = useState(false);
-  const [isAuthenticated, setIsAuthenticated] = useState(false); // Simulating authentication state
+  const [isRegistered, setIsRegistered] = useState(false); 
 
   const getActiveComponent = () => {
     if (activeSection === 'chat') {
@@ -32,15 +32,15 @@ function App() {
       <Routes>
         {/* Login/Register Route */}
         <Route
-          path="/auth"
+          path="/register"
           element={
-            isAuthenticated ? (
+            isRegistered ? (
               <Navigate to="/login" replace />
             ) : (
-              <Auth
+              <Register
                 onRegisterSuccess={() => {
-                  setIsAuthenticated(true);
-                  localStorage.setItem('isAuthenticated', 'true');
+                  setIsRegistered(true);
+                  localStorage.setItem('isRegistered', 'true');
                 }}
               />
             )

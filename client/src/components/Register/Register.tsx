@@ -1,20 +1,22 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import "./Auth.css"; // Import shared styles
+import "./Register.css"; // Import shared styles
 
 interface RegisterProps {
   onRegisterSuccess: () => void;
 }
 
 const Register: React.FC<RegisterProps> = ({ onRegisterSuccess }) => {
-  const [username, setUsername] = useState<string>("");
+  const [name, setName] = useState<string>("");
+  const [surname, setSurname] = useState<string>("");
+  const [mail, setMail] = useState<string>("");
   const [password, setPassword] = useState<string>("");
   const [confirmPassword, setConfirmPassword] = useState<string>("");
   const [error, setError] = useState<string>("");
   const navigate = useNavigate();
 
   const handleRegister = () => {
-    if (!username || !password || !confirmPassword) {
+    if (!mail || !password || !confirmPassword||!name||!surname) {
       setError("Please fill out all fields.");
       return;
     }
@@ -25,7 +27,7 @@ const Register: React.FC<RegisterProps> = ({ onRegisterSuccess }) => {
     }
 
     setError("");
-    alert(`Registered as ${username}`);
+    alert(`Registered as ${mail}`);
     onRegisterSuccess();
     navigate("/login");
   };
@@ -35,13 +37,26 @@ const Register: React.FC<RegisterProps> = ({ onRegisterSuccess }) => {
       <div className="card">
         <h2 className="title">Register</h2>
         {error && <p className="error">{error}</p>}
-        
+        <input
+          type="name"
+          placeholder="name"
+          className="input"
+          value={name}
+          onChange={(e) => setName(e.target.value)}
+        />
+        <input
+          type="surname"
+          placeholder="surname"
+          className="input"
+          value={surname}
+          onChange={(e) => setSurname(e.target.value)}
+        />
         <input
           type="text"
-          placeholder="Username"
+          placeholder="mail"
           className="input"
-          value={username}
-          onChange={(e) => setUsername(e.target.value)}
+          value={mail}
+          onChange={(e) => setMail(e.target.value)}
         />
         <input
           type="password"
