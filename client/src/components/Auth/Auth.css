@@ -46,3 +46,14 @@
     font-size: 16px;
   }
   
+  .toggleText {
+    margin-top: 10px;
+    font-size: 14px;
+  }
+  
+  .link {
+    color: #007bff;
+    cursor: pointer;
+    text-decoration: underline;
+  }
+  

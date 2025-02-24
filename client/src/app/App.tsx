@@ -38,7 +38,7 @@ function App() {
               <Navigate to="/login" replace />
             ) : (
               <Auth
-                onAuthSuccess={() => {
+                onRegisterSuccess={() => {
                   setIsAuthenticated(true);
                   localStorage.setItem('isAuthenticated', 'true');
                 }}
@@ -56,7 +56,6 @@ function App() {
                 onLoginSuccess={() => {
                   setIsLogged(true);
                   localStorage.setItem('isLogged', 'true');
-                  navigate('/');
                 }}
               />
             )
