@@ -7,18 +7,18 @@ interface LoginProps {
 }
 
 const Login: React.FC<LoginProps> = ({ onLoginSuccess }) => {
-  const [username, setUsername] = useState<string>("");
+  const [email, setEmail] = useState<string>("");
   const [password, setPassword] = useState<string>("");
   const [error, setError] = useState<string>("");
   const navigate = useNavigate();
 
   const handleLogin = () => {
-    if (!username || !password) {
-      setError("Please enter both username and password.");
+    if (!email || !password) {
+      setError("Please enter both email and password.");
       return;
     }
     setError("");
-    alert(`Logged in as ${username}`);
+    alert(`Logged in as ${email}`);
     onLoginSuccess();
     navigate("/");
   };
@@ -30,10 +30,10 @@ const Login: React.FC<LoginProps> = ({ onLoginSuccess }) => {
         {error && <p className="error">{error}</p>}
         <input
           type="text"
-          placeholder="Username"
+          placeholder="Email"
           className="input"
-          value={username}
-          onChange={(e) => setUsername(e.target.value)}
+          value={email}
+          onChange={(e) => setEmail(e.target.value)}
         />
         <input
           type="password"
