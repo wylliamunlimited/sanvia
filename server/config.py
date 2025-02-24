@@ -8,6 +8,18 @@ from typing import Annotated
 from fastapi import Depends, HTTPException, status
 from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
 from firebase_admin.auth import verify_id_token
+from firebase_admin import firestore
+
+db = firestore.client()
+
+
+def update_survey_entry(user_id: str, survey_data: dict):
+    """Updates a user's survey entry in Firestore."""
+    doc_ref = db.collection("surveys").document(user_id)
+    doc_ref.set(
+        survey_data, merge=True
+    )  # Merges new data without overwriting everything
+
 
 # we need to load the env file because it contains the GOOGLE_APPLICATION_CREDENTIALS
 basedir = pathlib.Path(__file__).parents[1]
