@@ -5,7 +5,7 @@ import Sidebar from '../components/Sidebar/Sidebar'
 import Chat from '../components/Chat/Chat'
 import Documents from '../components/Documents/Documents'
 import History from '../components/History/History'
-import Register from '../components/SignUp/SignUp'
+import SignUp from '../components/SignUp/SignUp'
 import Login from '../components/Login/Login'
 
 
@@ -13,7 +13,7 @@ function App() {
   const [activeSection, setActiveSection] = useState('chat')
   const [isSidebarOpen, setSidebarOpen] = useState(true)
   const [isLogged, setIsLogged] = useState(false);
-  const [isRegistered, setIsRegistered] = useState(false); 
+  const [isSignUp, setIsSignUp] = useState(false); 
 
   const getActiveComponent = () => {
     if (activeSection === 'chat') {
@@ -34,13 +34,13 @@ function App() {
         <Route
           path="/auth/signup"
           element={
-            isRegistered ? (
+            isSignUp? (
               <Navigate to="/auth/login" replace />
             ) : (
-              <Register
-                onRegisterSuccess={() => {
-                  setIsRegistered(true);
-                  localStorage.setItem('isRegistered', 'true');
+              <SignUp
+                onSignUpSuccess={() => {
+                  setIsSignUp(true);
+                  localStorage.setItem('isSignUp', 'true');
                 }}
               />
             )
