@@ -45,6 +45,13 @@ const Login: React.FC<LoginProps> = ({ onLoginSuccess }) => {
         <button onClick={handleLogin} className="button">
           Login
         </button>
+        
+        <p className="toggleText">
+          Don't have an account?{" "}
+          <span className="link" onClick={() => navigate("/auth")}>
+            Register here
+          </span>
+        </p>
       </div>
     </div>
   );
