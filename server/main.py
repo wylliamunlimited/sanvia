@@ -14,5 +14,6 @@ app = FastAPI()
 app.include_router(router)
 firebase_admin.initialize_app()
 # print("Current App Name:", firebase_admin.get_app().project_id)
+# iewhnoiregnoreiunh
 
 origins = [get_settings().frontend_url]
