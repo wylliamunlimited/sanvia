@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import "./Register.css"; // Import shared styles
+import "./SignUp.css"; // Import shared styles
 
 interface RegisterProps {
   onRegisterSuccess: () => void;
@@ -8,6 +8,7 @@ interface RegisterProps {
 
 const Register: React.FC<RegisterProps> = ({ onRegisterSuccess }) => {
   const [name, setName] = useState<string>("");
+  const [lastName, setLastName] = useState<string>("");
   const [email, setEmail] = useState<string>("");
   const [password, setPassword] = useState<string>("");
   const [confirmPassword, setConfirmPassword] = useState<string>("");
@@ -15,7 +16,7 @@ const Register: React.FC<RegisterProps> = ({ onRegisterSuccess }) => {
   const navigate = useNavigate();
 
   const handleRegister = () => {
-    if (!email || !password || !confirmPassword||!name) {
+    if (!email || !password || !confirmPassword||!name||!lastName) {
       setError("Please fill out all fields.");
       return;
     }
@@ -34,7 +35,7 @@ const Register: React.FC<RegisterProps> = ({ onRegisterSuccess }) => {
   return (
     <div className="container">
       <div className="card">
-        <h2 className="title">Register</h2>
+        <h2 className="title">Sign Up</h2>
         {error && <p className="error">{error}</p>}
         <input
           type="name"
@@ -42,6 +43,13 @@ const Register: React.FC<RegisterProps> = ({ onRegisterSuccess }) => {
           className="input"
           value={name}
           onChange={(e) => setName(e.target.value)}
+        />
+        <input
+          type="lastName"
+          placeholder="Last Name"
+          className="input"
+          value={name}
+          onChange={(e) => setLastName(e.target.value)}
         />
         <input
           type="text"
