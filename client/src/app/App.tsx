@@ -5,7 +5,7 @@ import Sidebar from '../components/Sidebar/Sidebar'
 import Chat from '../components/Chat/Chat'
 import Documents from '../components/Documents/Documents'
 import History from '../components/History/History'
-import Register from '../components/Register/Register'
+import Register from '../components/SignUp/SignUp'
 import Login from '../components/Login/Login'
 
 
@@ -32,10 +32,10 @@ function App() {
       <Routes>
         {/* Login/Register Route */}
         <Route
-          path="/register"
+          path="/auth/signup"
           element={
             isRegistered ? (
-              <Navigate to="/login" replace />
+              <Navigate to="/auth/login" replace />
             ) : (
               <Register
                 onRegisterSuccess={() => {
@@ -47,7 +47,7 @@ function App() {
           }
         />
         <Route
-          path="/login"
+          path="/auth/login"
           element={
             isLogged ? (
               <Navigate to="/" replace />
@@ -87,7 +87,7 @@ function App() {
                 {getActiveComponent()}
               </div>
             </div>
-          ) : <Navigate to="/login" replace/>}
+          ) : <Navigate to="/auth/login" replace/>}
         />
       </Routes>
     </Router>
