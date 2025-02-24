@@ -1,13 +1,19 @@
 import { useState } from 'react'
+import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import './App.css'
 import Sidebar from '../components/Sidebar/Sidebar'
 import Chat from '../components/Chat/Chat'
 import Documents from '../components/Documents/Documents'
 import History from '../components/History/History'
+import Auth from '../components/Auth/Auth'
+import Login from '../components/Login/Login'
+
 
 function App() {
   const [activeSection, setActiveSection] = useState('chat')
   const [isSidebarOpen, setSidebarOpen] = useState(true)
+  const [isLogged, setIsLogged] = useState(false);
+  const [isAuthenticated, setIsAuthenticated] = useState(false); // Simulating authentication state
 
   const getActiveComponent = () => {
     if (activeSection === 'chat') {
@@ -22,30 +28,70 @@ function App() {
   }
 
   return (
-    <div className="app-container">
-      {isSidebarOpen && (
-        <Sidebar 
-          activeSection={activeSection} 
-          onSectionChange={setActiveSection}
-          onCollapse={() => setSidebarOpen(false)}
+    <Router>
+      <Routes>
+        {/* Login/Register Route */}
+        <Route
+          path="/auth"
+          element={
+            isAuthenticated ? (
+              <Navigate to="/login" replace />
+            ) : (
+              <Auth
+                onRegisterSuccess={() => {
+                  setIsAuthenticated(true);
+                  localStorage.setItem('isAuthenticated', 'true');
+                }}
+              />
+            )
+          }
         />
-      )}
-      <div className="main-section">
-        {!isSidebarOpen && (
-          <button 
-            className="open-sidebar-button"
-            onClick={() => setSidebarOpen(true)}
-            aria-label="Open sidebar"
-          >
-            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-              <polyline points="9 18 15 12 9 6"/>
-            </svg>
-          </button>
-        )}
-        {getActiveComponent()}
-      </div>
-    </div>
-  )
+        <Route
+          path="/login"
+          element={
+            isLogged ? (
+              <Navigate to="/" replace />
+            ) : (
+              <Login
+                onLoginSuccess={() => {
+                  setIsLogged(true);
+                  localStorage.setItem('isLogged', 'true');
+                }}
+              />
+            )
+          }
+        />
+        <Route 
+          path="/*" 
+          element={isLogged ? (
+            <div className="app-container">
+              {isSidebarOpen && (
+                <Sidebar 
+                  activeSection={activeSection} 
+                  onSectionChange={setActiveSection}
+                  onCollapse={() => setSidebarOpen(false)}
+                />
+              )}
+              <div className="main-section">
+                {!isSidebarOpen && (
+                  <button 
+                    className="open-sidebar-button"
+                    onClick={() => setSidebarOpen(true)}
+                    aria-label="Open sidebar"
+                  >
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                      <polyline points="9 18 15 12 9 6"/>
+                    </svg>
+                  </button>
+                )}
+                {getActiveComponent()}
+              </div>
+            </div>
+          ) : <Navigate to="/login" replace/>}
+        />
+      </Routes>
+    </Router>
+  );
 }
 
-export default App 
+export default App;
