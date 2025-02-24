@@ -6,7 +6,7 @@ interface AuthProps {
 }
 
 const Auth: React.FC<AuthProps> = ({ onAuthSuccess }) => {
-    const [isRegister, setIsRegister] = useState<boolean>(false);
+  const [isRegister, setIsRegister] = useState<boolean>(false);
   const [username, setUsername] = useState<string>("");
   const [password, setPassword] = useState<string>("");
   const [confirmPassword, setConfirmPassword] = useState<string>("");
@@ -29,7 +29,7 @@ const Auth: React.FC<AuthProps> = ({ onAuthSuccess }) => {
     alert(isRegister ? `Registered as ${username}` : `Logged in as ${username}`);
 
     onAuthSuccess();
-    navigate("/");
+    navigate("/login");
   };
 
   return (

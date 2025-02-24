@@ -1,9 +1,16 @@
 import { useState } from "react";
 
-const Login: React.FC = () => {
+import { useNavigate } from "react-router-dom";
+
+interface LoginProps {
+  onLoginSuccess: () => void;
+}
+
+const Login: React.FC<LoginProps> = ({ onLoginSuccess }) => {
   const [username, setUsername] = useState<string>("");
   const [password, setPassword] = useState<string>("");
   const [error, setError] = useState<string>("");
+  const navigate = useNavigate();
 
   const handleLogin = () => {
     if (!username || !password) {
@@ -12,6 +19,8 @@ const Login: React.FC = () => {
     }
     setError("");
     alert(`Logged in as ${username}`);
+    onLoginSuccess();
+    navigate("/");
   };
 
   return (

@@ -12,6 +12,7 @@ import Login from '../components/Login/Login'
 function App() {
   const [activeSection, setActiveSection] = useState('chat')
   const [isSidebarOpen, setSidebarOpen] = useState(true)
+  const [isLogged, setIsLogged] = useState(false);
   const [isAuthenticated, setIsAuthenticated] = useState(false); // Simulating authentication state
 
   const getActiveComponent = () => {
@@ -30,12 +31,40 @@ function App() {
     <Router>
       <Routes>
         {/* Login/Register Route */}
-        <Route path="/auth" element={<Auth onAuthSuccess={() => setIsAuthenticated(true)} />} />
-
-        {/* Protected Routes (Redirect to /auth if not logged in) */}
+        <Route
+          path="/auth"
+          element={
+            isAuthenticated ? (
+              <Navigate to="/login" replace />
+            ) : (
+              <Auth
+                onAuthSuccess={() => {
+                  setIsAuthenticated(true);
+                  localStorage.setItem('isAuthenticated', 'true');
+                }}
+              />
+            )
+          }
+        />
+        <Route
+          path="/login"
+          element={
+            isLogged ? (
+              <Navigate to="/" replace />
+            ) : (
+              <Login
+                onLoginSuccess={() => {
+                  setIsLogged(true);
+                  localStorage.setItem('isLogged', 'true');
+                  navigate('/');
+                }}
+              />
+            )
+          }
+        />
         <Route 
           path="/*" 
-          element={isAuthenticated ? (
+          element={isLogged ? (
             <div className="app-container">
               {isSidebarOpen && (
                 <Sidebar 
@@ -59,7 +88,7 @@ function App() {
                 {getActiveComponent()}
               </div>
             </div>
-          ) : <Navigate to="/auth" />}
+          ) : <Navigate to="/login" replace/>}
         />
       </Routes>
     </Router>
