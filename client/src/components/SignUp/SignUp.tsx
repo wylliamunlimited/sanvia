@@ -2,11 +2,11 @@ import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import "./SignUp.css"; // Import shared styles
 
-interface RegisterProps {
-  onRegisterSuccess: () => void;
+interface SignUpProps {
+  onSignUpSuccess: () => void;
 }
 
-const Register: React.FC<RegisterProps> = ({ onRegisterSuccess }) => {
+const SignUp: React.FC<SignUpProps> = ({ onSignUpSuccess }) => {
   const [name, setName] = useState<string>("");
   const [lastName, setLastName] = useState<string>("");
   const [email, setEmail] = useState<string>("");
@@ -15,7 +15,7 @@ const Register: React.FC<RegisterProps> = ({ onRegisterSuccess }) => {
   const [error, setError] = useState<string>("");
   const navigate = useNavigate();
 
-  const handleRegister = () => {
+  const handleSignUp = () => {
     if (!email || !password || !confirmPassword||!name||!lastName) {
       setError("Please fill out all fields.");
       return;
@@ -27,8 +27,8 @@ const Register: React.FC<RegisterProps> = ({ onRegisterSuccess }) => {
     }
 
     setError("");
-    alert(`Registered as ${email}`);
-    onRegisterSuccess();
+    alert(`Signed up as ${email}`);
+    onSignUpSuccess();
     navigate("/login");
   };
 
@@ -73,13 +73,13 @@ const Register: React.FC<RegisterProps> = ({ onRegisterSuccess }) => {
           onChange={(e) => setConfirmPassword(e.target.value)}
         />
 
-        <button onClick={handleRegister} className="button">
-          Register
+        <button onClick={handleSignUp} className="button">
+          Sign up
         </button>
 
         <p className="toggleText">
           Already have an account?{" "}
-          <span className="link" onClick={() => navigate("/login")}>
+          <span className="link" onClick={() => navigate("/auth/login")}>
             Login
           </span>
         </p>
@@ -88,4 +88,4 @@ const Register: React.FC<RegisterProps> = ({ onRegisterSuccess }) => {
   );
 };
 
-export default Register;
+export default SignUp;
