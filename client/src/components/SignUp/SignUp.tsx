@@ -48,7 +48,7 @@ const SignUp: React.FC<SignUpProps> = ({ onSignUpSuccess }) => {
           type="lastName"
           placeholder="Last Name"
           className="input"
-          value={name}
+          value={lastName}
           onChange={(e) => setLastName(e.target.value)}
         />
         <input
