@@ -55,7 +55,7 @@ const Sidebar = ({ activeSection, onSectionChange, onCollapse }: SidebarProps) =
   const userInitials = 'JW'
   const userName = 'Justin Wang'
   const handleLogout = () => {
-    navigate('/login');
+    navigate('/auth/login');
   };
 
   const menuItems = [

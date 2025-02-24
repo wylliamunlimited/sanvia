@@ -29,7 +29,7 @@ const SignUp: React.FC<SignUpProps> = ({ onSignUpSuccess }) => {
     setError("");
     alert(`Signed up as ${email}`);
     onSignUpSuccess();
-    navigate("/login");
+    navigate("/auth/login");
   };
 
   return (
