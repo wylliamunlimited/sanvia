@@ -8,15 +8,14 @@ interface RegisterProps {
 
 const Register: React.FC<RegisterProps> = ({ onRegisterSuccess }) => {
   const [name, setName] = useState<string>("");
-  const [surname, setSurname] = useState<string>("");
-  const [mail, setMail] = useState<string>("");
+  const [email, setEmail] = useState<string>("");
   const [password, setPassword] = useState<string>("");
   const [confirmPassword, setConfirmPassword] = useState<string>("");
   const [error, setError] = useState<string>("");
   const navigate = useNavigate();
 
   const handleRegister = () => {
-    if (!mail || !password || !confirmPassword||!name||!surname) {
+    if (!email || !password || !confirmPassword||!name) {
       setError("Please fill out all fields.");
       return;
     }
@@ -27,7 +26,7 @@ const Register: React.FC<RegisterProps> = ({ onRegisterSuccess }) => {
     }
 
     setError("");
-    alert(`Registered as ${mail}`);
+    alert(`Registered as ${email}`);
     onRegisterSuccess();
     navigate("/login");
   };
@@ -39,24 +38,17 @@ const Register: React.FC<RegisterProps> = ({ onRegisterSuccess }) => {
         {error && <p className="error">{error}</p>}
         <input
           type="name"
-          placeholder="name"
+          placeholder="Name"
           className="input"
           value={name}
           onChange={(e) => setName(e.target.value)}
         />
         <input
-          type="surname"
-          placeholder="surname"
-          className="input"
-          value={surname}
-          onChange={(e) => setSurname(e.target.value)}
-        />
-        <input
           type="text"
-          placeholder="mail"
+          placeholder="Email"
           className="input"
-          value={mail}
-          onChange={(e) => setMail(e.target.value)}
+          value={email}
+          onChange={(e) => setEmail(e.target.value)}
         />
         <input
           type="password"
