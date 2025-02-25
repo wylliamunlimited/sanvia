@@ -1,8 +1,7 @@
 # config.py
 import os
-import pathlib
-from functools import lru_cache
 from dotenv import load_dotenv
+from functools import lru_cache
 from pydantic_settings import BaseSettings
 from typing import Annotated
 from fastapi import Depends, HTTPException, status
@@ -11,12 +10,20 @@ import firebase_admin
 from firebase_admin.auth import verify_id_token
 from firebase_admin import credentials, firestore
 
-# Load environment variables
-basedir = pathlib.Path(__file__).parents[1]
-load_dotenv(basedir / "server" / ".env")
 
+# Load environment variables
+load_dotenv()
+
+# Check if GOOGLE_APPLICATION_CREDENTIALS is loaded
+cred_path = os.getenv("GOOGLE_APPLICATION_CREDENTIALS")
+
+if cred_path:
+    print(f"✅ GOOGLE_APPLICATION_CREDENTIALS is set: {cred_path}")
+else:
+    print("❌ GOOGLE_APPLICATION_CREDENTIALS is NOT set.")
 # Firebase Setup
 firebase_credentials_path = os.getenv("GOOGLE_APPLICATION_CREDENTIALS")
+print(firebase_credentials_path)
 if not firebase_credentials_path:
     raise ValueError("Firebase credentials file path is missing. Check your .env file.")
 
