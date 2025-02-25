@@ -15,8 +15,8 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 import firebase_admin
 from firebase_admin import credentials
-from server.router import router
-from server.config import get_settings
+from router import router
+from config import get_settings
 
 # Initialize Firebase if not already initialized
 if not firebase_admin._apps:

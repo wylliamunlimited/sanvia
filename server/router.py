@@ -4,7 +4,7 @@ from fastapi import APIRouter, Depends, HTTPException
 from typing import Annotated
 import requests
 from firebase_admin import auth
-from server.config import get_firebase_user_from_token, update_survey_entry, db
+from config import get_firebase_user_from_token, update_survey_entry, db
 
 router = APIRouter()
 
