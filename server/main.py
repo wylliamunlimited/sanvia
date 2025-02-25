@@ -1,21 +1,28 @@
-from fastapi import FastAPI
-from fastapi.middleware.cors import CORSMiddleware
-import firebase_admin
-from firebase_admin import credentials
 from dotenv import load_dotenv
 import os
 import pathlib
 
+
+# Load environment variables
+basedir = pathlib.Path(__file__).parent
+dotenv_path = os.path.join(basedir, ".env")
+load_dotenv(dotenv_path)
+# print(
+#     f"GOOGLE_APPLICATION_CREDENTIALS: {os.getenv('GOOGLE_APPLICATION_CREDENTIALS')}"
+# )  # Debugging line
+
+from fastapi import FastAPI
+from fastapi.middleware.cors import CORSMiddleware
+import firebase_admin
+from firebase_admin import credentials
 from server.router import router
 from server.config import get_settings
 
-# Load environment variables
-basedir = pathlib.Path(__file__).parents[1]  # Project root
-load_dotenv(os.path.join(basedir, "server", ".env"))
-
 # Initialize Firebase if not already initialized
 if not firebase_admin._apps:
-    cred = credentials.Certificate(os.getenv("FIREBASE_CREDENTIALS"))  # Load from .env
+    cred = credentials.Certificate(
+        os.getenv("GOOGLE_APPLICATION_CREDENTIALS")
+    )  # Load from .env
     firebase_admin.initialize_app(cred)
 
 # Print Firebase App Project ID
@@ -24,6 +31,14 @@ print("Current App Name:", firebase_admin.get_app().project_id)
 # FastAPI setup
 app = FastAPI()
 app.include_router(router)
+
+import pprint
+
+
+@app.on_event("startup")
+async def debug_routes():
+    pprint.pprint(app.routes)
+
 
 origins = [get_settings().frontend_url]
 

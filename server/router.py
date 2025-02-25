@@ -1,4 +1,5 @@
 # router.py
+print("🔥 router.py is being loaded!")
 from fastapi import APIRouter, Depends, HTTPException
 from typing import Annotated
 import requests
@@ -10,8 +11,8 @@ router = APIRouter()
 
 @router.get("/")
 def hello():
-    """Hello world route to test if the app is running."""
-    return {"msg": "Hello World!"}
+    """Server is running route to test if the app is running."""
+    return {"msg": "Server is running"}
 
 
 @router.get("/userid")
@@ -50,13 +51,13 @@ async def get_ehr_data(patient_id: str):
 async def health_check():
     """Checks the connection to Firebase Auth and Firestore."""
     try:
-        # Check Firestore connection
-        test_collection = db.collection("test").document("health_check").get()
+        # Try fetching Firestore collections to confirm connectivity
+        collections = db.collections()
+        collections_list = [col.id for col in collections]
 
         return {
-            "firestore_status": (
-                "Connected" if test_collection.exists else "No Data Found"
-            ),
+            "firestore_status": "Connected",
+            "available_collections": collections_list,
         }
     except Exception as e:
         raise HTTPException(

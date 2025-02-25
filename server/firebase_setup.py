@@ -1,16 +1,16 @@
-# firebase_setup.py
-import firebase_admin
-from firebase_admin import credentials
-
 import os
+import firebase_admin
+from firebase_admin import credentials, auth
 
-# Load Firebase credentials from environment variables
+# Get the path to service account JSON
 cred_path = os.getenv("GOOGLE_APPLICATION_CREDENTIALS")
 
 if not cred_path:
-    raise ValueError("GOOGLE_APPLICATION_CREDENTIALS not set in .env file")
+    raise ValueError("❌ GOOGLE_APPLICATION_CREDENTIALS is NOT set properly.")
 
-# Initialize Firebase only if not already initialized
+# Initialize Firebase if not already initialized
 if not firebase_admin._apps:
     cred = credentials.Certificate(cred_path)
     firebase_admin.initialize_app(cred)
+
+print("✅ Firebase Admin SDK initialized successfully!")
