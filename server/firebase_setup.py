@@ -3,7 +3,7 @@ import firebase_admin
 from firebase_admin import credentials, auth
 
 # Get the path to service account JSON
-cred_path = os.getenv("GOOGLE_APPLICATION_CREDENTIALS")
+cred_path = "server/" + os.getenv("GOOGLE_APPLICATION_CREDENTIALS")
 
 if not cred_path:
     raise ValueError("❌ GOOGLE_APPLICATION_CREDENTIALS is NOT set properly.")

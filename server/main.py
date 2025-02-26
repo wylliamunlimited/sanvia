@@ -16,7 +16,11 @@ import firebase_admin
 from firebase_admin import credentials
 from routers import firebase_auth
 from routers import firebase_db
-from dependencies.firebase_dependencies import get_settings, initialize_firebase, get_firestore_client
+from dependencies.firebase_dependencies import (
+    get_settings,
+    initialize_firebase,
+    get_firestore_client,
+)
 
 ## initializing firebase sdk
 initialize_firebase()
@@ -36,7 +40,8 @@ import pprint
 @app.on_event("startup")
 async def debug_routes():
     pprint.pprint(app.routes)
-    
+
+
 @app.get("/")
 def hello():
     """Server is running route to test if the app is running."""
@@ -53,6 +58,3 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
-
-
-
