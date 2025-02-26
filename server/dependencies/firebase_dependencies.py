@@ -15,7 +15,7 @@ import json
 load_dotenv()
 
 # Check if GOOGLE_APPLICATION_CREDENTIALS is loaded
-firebase_credentials_json = os.getenv("FIREBASE_ADMIN_SDK_KEY")
+firebase_credentials_json = os.getenv("GOOGLE_APPLICATION_CREDENTIALS")
 if firebase_credentials_json:
     print(f"✅ FIREBASE_ADMIN_SDK_KEY is Detected")
     firebase_credentials_json = json.loads(firebase_credentials_json)
@@ -24,7 +24,7 @@ else:
     raise ValueError("Firebase credentials file path is missing. Check your .env file.")
 
 
-def initialize_firebase(): 
+def initialize_firebase():
     """Initialize Firebase Admin SDK if not already initialized."""
     if not firebase_admin._apps:
         print(f"⏳⏳⏳ Initializing Firebase Admin SDK ⏳⏳⏳")
@@ -32,8 +32,8 @@ def initialize_firebase():
         firebase_admin.initialize_app(cred)
     else:
         print("🔥🔥🔥 Firebase Admin SDK already initialized 🔥🔥🔥")
-        
-        
+
+
 def get_firestore_client():
     """Retrieve Firestore client."""
     initialize_firebase()
@@ -84,4 +84,3 @@ def get_firebase_user_from_token(
             detail="Not logged in or Invalid credentials",
             headers={"WWW-Authenticate": "Bearer"},
         )
-
