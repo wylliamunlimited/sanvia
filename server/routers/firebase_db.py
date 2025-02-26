@@ -1,15 +1,21 @@
 import sys
+
 # caution: path[0] is reserved for script path (or '' in REPL)
-sys.path.insert(1, '../dependencies')
+sys.path.insert(1, "../dependencies")
 
 
 from fastapi import APIRouter, Depends, HTTPException
 from typing import Annotated
 import requests
 from firebase_admin import auth
-from dependencies.firebase_dependencies import get_firebase_user_from_token, update_survey_entry, get_firestore_client
+from dependencies.firebase_dependencies import (
+    get_firebase_user_from_token,
+    update_survey_entry,
+    get_firestore_client,
+)
 
 router = APIRouter()
+
 
 @router.post("/survey")
 async def submit_survey(
@@ -36,4 +42,3 @@ async def health_check():
         raise HTTPException(
             status_code=500, detail=f"Firebase connection issue: {str(e)}"
         )
-
