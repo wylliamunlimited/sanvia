@@ -15,7 +15,7 @@ import json
 load_dotenv()
 
 # Check if GOOGLE_APPLICATION_CREDENTIALS is loaded
-firebase_credentials_json = os.getenv("GOOGLE_APPLICATION_CREDENTIALS")
+firebase_credentials_json = os.getenv("FIREBASE_ADMIN_SDK_KEY")
 if firebase_credentials_json:
     print(f"✅ FIREBASE_ADMIN_SDK_KEY is Detected")
     firebase_credentials_json = json.loads(firebase_credentials_json)
