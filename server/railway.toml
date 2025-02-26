@@ -4,6 +4,4 @@ buildCommand = "echo Building Sanvia!"
 
 [deploy]
 startCommand = "uvicorn main:app --host 0.0.0.0 --port 80"
-healthcheckPath = "/"
-healthcheckTimeout = 100
 restartPolicyType = "never"
