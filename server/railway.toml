@@ -3,8 +3,5 @@ builder = "nixpacks"
 buildCommand = "echo Building Sanvia!"
 
 [deploy]
-preDeployCommand = ["uvicorn main:app --host 0.0.0.0 --port 80"]
-startCommand = "echo Sanvia Server Starting---"
-healthcheckPath = "/"
-healthcheckTimeout = 100
+startCommand = "uvicorn main:app --host 0.0.0.0 --port 80"
 restartPolicyType = "never"

@@ -31,8 +31,7 @@ async def health_check():
     """Checks the connection to Firebase Auth and Firestore."""
     try:
         # Try fetching Firestore collections to confirm connectivity
-        db = get_firestore_client()  # Ensure db is properly initialized
-        collections = db.collections()
+        collections = get_firestore_client().collections()
         collections_list = [col.id for col in collections]
 
         return {
