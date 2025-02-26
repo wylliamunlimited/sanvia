@@ -10,35 +10,38 @@ import firebase_admin
 from firebase_admin.auth import verify_id_token
 from firebase_admin import credentials, firestore
 
-
 # Load environment variables
 load_dotenv()
 
 # Check if GOOGLE_APPLICATION_CREDENTIALS is loaded
-cred_path = os.getenv("GOOGLE_APPLICATION_CREDENTIALS")
-
-if cred_path:
-    print(f"✅ GOOGLE_APPLICATION_CREDENTIALS is set: {cred_path}")
+firebase_credentials_path = os.getenv("FIREBASE_ADMIN_SDK_KEY")
+if firebase_credentials_path:
+    print(f"✅ FIREBASE_ADMIN_SDK_KEY is Detected\n+--------> {firebase_credentials_path}")
 else:
-    print("❌ GOOGLE_APPLICATION_CREDENTIALS is NOT set.")
-# Firebase Setup
-firebase_credentials_path = os.getenv("GOOGLE_APPLICATION_CREDENTIALS")
-print(firebase_credentials_path)
-if not firebase_credentials_path:
+    print("❌ FIREBASE_ADMIN_SDK_KEY is NOT set.")
     raise ValueError("Firebase credentials file path is missing. Check your .env file.")
 
-# Initialize Firebase Admin SDK if not already initialized
-if not firebase_admin._apps:
-    cred = credentials.Certificate(firebase_credentials_path)
-    firebase_admin.initialize_app(cred)
 
-# Firestore Client
-db = firestore.client()
+def initialize_firebase(): 
+    """Initialize Firebase Admin SDK if not already initialized."""
+    if not firebase_admin._apps:
+        print(f"⏳⏳⏳ Initializing Firebase Admin SDK ⏳⏳⏳")
+        cred = credentials.Certificate(firebase_credentials_path)
+        firebase_admin.initialize_app(cred)
+    else:
+        print("🔥🔥🔥 Firebase Admin SDK already initialized 🔥🔥🔥")
+        
+        
+def get_firestore_client():
+    """Retrieve Firestore client."""
+    initialize_firebase()
+    return firestore.client()
 
 
+## this function should be under utils for sign up or database operation script [will come back and check]
 def update_survey_entry(user_id: str, survey_data: dict):
     """Updates a user's survey entry in Firestore."""
-    doc_ref = db.collection("surveys").document(user_id)
+    doc_ref = get_firestore_client().collection("surveys").document(user_id)
     doc_ref.set(survey_data, merge=True)
 
 
@@ -79,3 +82,4 @@ def get_firebase_user_from_token(
             detail="Not logged in or Invalid credentials",
             headers={"WWW-Authenticate": "Bearer"},
         )
+
