@@ -2,7 +2,6 @@ from dotenv import load_dotenv
 import os
 import pathlib
 
-
 # Load environment variables
 basedir = pathlib.Path(__file__).parent
 dotenv_path = os.path.join(basedir, ".env")
@@ -15,22 +14,21 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 import firebase_admin
 from firebase_admin import credentials
-from server.router import router
-from server.config import get_settings
+from routers import firebase_auth
+from routers import firebase_db
+from dependencies.firebase_dependencies import get_settings, initialize_firebase, get_firestore_client
 
-# Initialize Firebase if not already initialized
-if not firebase_admin._apps:
-    cred = credentials.Certificate(
-        os.getenv("GOOGLE_APPLICATION_CREDENTIALS")
-    )  # Load from .env
-    firebase_admin.initialize_app(cred)
+## initializing firebase sdk
+initialize_firebase()
 
 # Print Firebase App Project ID
 print("Current App Name:", firebase_admin.get_app().project_id)
 
+
 # FastAPI setup
 app = FastAPI()
-app.include_router(router)
+app.include_router(firebase_auth.router)
+app.include_router(firebase_db.router)
 
 import pprint
 
@@ -38,6 +36,11 @@ import pprint
 @app.on_event("startup")
 async def debug_routes():
     pprint.pprint(app.routes)
+    
+@app.get("/")
+def hello():
+    """Server is running route to test if the app is running."""
+    return {"msg": "Server is running"}
 
 
 origins = [get_settings().frontend_url]
@@ -50,3 +53,6 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
+
+
+
