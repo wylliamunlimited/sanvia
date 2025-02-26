@@ -9,14 +9,16 @@ from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
 import firebase_admin
 from firebase_admin.auth import verify_id_token
 from firebase_admin import credentials, firestore
+import json
 
 # Load environment variables
 load_dotenv()
 
 # Check if GOOGLE_APPLICATION_CREDENTIALS is loaded
-firebase_credentials_path = os.getenv("FIREBASE_ADMIN_SDK_KEY")
-if firebase_credentials_path:
-    print(f"✅ FIREBASE_ADMIN_SDK_KEY is Detected\n+--------> {firebase_credentials_path}")
+firebase_credentials_json = os.getenv("FIREBASE_ADMIN_SDK_KEY")
+if firebase_credentials_json:
+    print(f"✅ FIREBASE_ADMIN_SDK_KEY is Detected")
+    firebase_credentials_json = json.loads(firebase_credentials_json)
 else:
     print("❌ FIREBASE_ADMIN_SDK_KEY is NOT set.")
     raise ValueError("Firebase credentials file path is missing. Check your .env file.")
@@ -26,7 +28,7 @@ def initialize_firebase():
     """Initialize Firebase Admin SDK if not already initialized."""
     if not firebase_admin._apps:
         print(f"⏳⏳⏳ Initializing Firebase Admin SDK ⏳⏳⏳")
-        cred = credentials.Certificate(firebase_credentials_path)
+        cred = credentials.Certificate(firebase_credentials_json)
         firebase_admin.initialize_app(cred)
     else:
         print("🔥🔥🔥 Firebase Admin SDK already initialized 🔥🔥🔥")
