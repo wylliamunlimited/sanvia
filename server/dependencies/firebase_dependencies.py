@@ -18,7 +18,10 @@ load_dotenv()
 firebase_credentials_json = os.getenv("FIREBASE_ADMIN_SDK_KEY")
 if firebase_credentials_json:
     print(f"✅ FIREBASE_ADMIN_SDK_KEY is Detected")
-    firebase_credentials_json = json.loads(firebase_credentials_json)
+
+    with open(firebase_credentials_json, "r") as f:
+        firebase_credentials_json = json.load(f)
+
 else:
     print("❌ FIREBASE_ADMIN_SDK_KEY is NOT set.")
     raise ValueError("Firebase credentials file path is missing. Check your .env file.")
