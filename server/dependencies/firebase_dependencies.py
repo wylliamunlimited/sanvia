@@ -14,13 +14,15 @@ import json
 # Load environment variables
 load_dotenv()
 
-# Check if GOOGLE_APPLICATION_CREDENTIALS is loaded
+# Check if FIREBASE_ADMIN_SDK_KEY is loaded
+# 🚨🚨🚨 IMPORTANT 🚨🚨🚨: the env variable has to be the json content inside the key file, ❌❌❌ NOT the path to the file 
+#                                        so you need to copy the content of the file and paste it in the env variable
+#                                        This is because deployment on Railway doesn't allow file upload
 firebase_credentials_json = os.getenv("FIREBASE_ADMIN_SDK_KEY")
 if firebase_credentials_json:
     print(f"✅ FIREBASE_ADMIN_SDK_KEY is Detected")
 
-    with open(firebase_credentials_json, "r") as f:
-        firebase_credentials_json = json.load(f)
+    firebase_credentials_json = json.loads(firebase_credentials_json) ## 🚨🚨🚨 DON'T CHANGE. If needed, change the env variable to json
 
 else:
     print("❌ FIREBASE_ADMIN_SDK_KEY is NOT set.")
