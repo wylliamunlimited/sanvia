@@ -44,3 +44,12 @@ if TAVILY_API_KEY:
 else:
     print("❌ TAVILY_API_KEY is NOT set.")
     raise ValueError("Tavily API key is missing. Check your .env file.")
+
+
+JWT_HASH_KEY = os.getenv("JWT_HASH_KEY")
+
+if JWT_HASH_KEY:
+    print(f"✅ JWT_HASH_KEY is Detected")
+else:
+    print("❌ JWT_HASH_KEY is NOT set.")
+    raise ValueError("JWT hash key is missing. Check your .env file.")
