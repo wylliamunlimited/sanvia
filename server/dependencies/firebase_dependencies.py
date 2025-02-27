@@ -80,8 +80,3 @@ def get_firebase_user_from_token(
             detail="Not logged in or Invalid credentials",
             headers={"WWW-Authenticate": "Bearer realm='Invalid Token'"},
         )
-
-
-def get_firebase_user(id_token: str):
-    """Get Firebase user from token."""
-    return
