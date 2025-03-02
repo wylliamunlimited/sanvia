@@ -60,7 +60,7 @@ def hello():
     return {"msg": "Server is running"}
 
 
-origins = [get_settings().frontend_url]
+origins = ["*"] # For development, allow all origins
 
 # CORS settings (if needed)
 app.add_middleware(
