@@ -15,7 +15,7 @@ from firebase_admin.auth import verify_id_token
 from firebase_admin import credentials, firestore
 from datetime import datetime
 from constants.credentials import FIREBASE_ADMIN_API_KEY
-from ai_dependencies import AIBrain
+from .ai_dependencies import AIBrain
 
 
 def initialize_firebase():
