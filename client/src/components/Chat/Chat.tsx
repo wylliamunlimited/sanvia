@@ -1,6 +1,7 @@
 import { useState, useRef, useEffect } from 'react'
 import './Chat.css'
 import { getScrollbarWidth } from '../../utils/scrollbar'
+import chatApi, { ChatMessage } from '../../api/chatApi'
 
 type Message = {
   id: number
@@ -8,16 +9,24 @@ type Message = {
   isUser: boolean
 }
 
-const SAMPLE_AI_RESPONSE = `Lorem ipsum dolor sit amet, consectetur adipiscing elit...`
-
 const Chat = () => {
   const [messages, setMessages] = useState<Message[]>([])
   const [inputText, setInputText] = useState('')
   const [isThinking, setIsThinking] = useState(false)
   const [shouldAutoScroll, setShouldAutoScroll] = useState(true)
+  const [error, setError] = useState<string | null>(null)
   
   const textareaRef = useRef<HTMLTextAreaElement>(null)
   const messageAreaRef = useRef<HTMLDivElement>(null)
+
+  // Load initial greeting message
+  useEffect(() => {
+    setMessages([{
+      id: Date.now(),
+      text: "Hello! How can I help with your health related questions?",
+      isUser: false
+    }])
+  }, [])
 
   // Auto-adjust textarea height based on content
   useEffect(() => {
@@ -42,28 +51,54 @@ const Chat = () => {
     document.documentElement.style.setProperty('--scrollbar-width', `${getScrollbarWidth()}px`)
   }, [])
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     if (!inputText.trim() || isThinking) return
+    
+    // Clear any previous errors
+    setError(null)
 
-    setMessages(prev => [...prev, { 
-      id: Date.now(), 
+    // Add user message to chat
+    const userMessage = {
+      id: Date.now(),
       text: inputText,
       isUser: true
-    }])
+    }
+    setMessages(prev => [...prev, userMessage])
     
+    // Clear input and set thinking state
     setInputText('')
     setIsThinking(true)
     setShouldAutoScroll(true)
 
-    setTimeout(() => {
+    try {
+      const response = await chatApi.testSendMessage(inputText.trim())  // Change to chatApi.sendMessage once auth is implemented
+      
+      // Find last assistant message in chat history
+      const assistantMessages = response.chat.filter(msg => msg.role === 'assistant')
+      if (assistantMessages.length > 0) {
+        const lastAssistantMessage = assistantMessages[assistantMessages.length - 1]
+        
+        // Add AI response to chat
+        setMessages(prev => [...prev, {
+          id: Date.now(),
+          text: lastAssistantMessage.content,
+          isUser: false
+        }])
+      }
+    } catch (err) {
+      console.error('Error sending message:', err)
+      setError('Failed to get response. Please try again.')
+      
+      // Add error message to chat
       setMessages(prev => [...prev, {
         id: Date.now(),
-        text: SAMPLE_AI_RESPONSE,
+        text: "Sorry, I'm having trouble connecting to the server. Please try again later.",
         isUser: false
       }])
+    } finally {
       setIsThinking(false)
-    }, 2000)
+    }
   }
 
   const handleScroll = () => {
@@ -100,6 +135,11 @@ const Chat = () => {
         {isThinking && (
           <div className="thinking-indicator">
             Thinking...
+          </div>
+        )}
+        {error && (
+          <div className="error-message">
+            {error}
           </div>
         )}
       </div>
