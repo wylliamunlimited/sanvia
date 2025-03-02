@@ -2,6 +2,7 @@ import { useState, useRef, useEffect } from 'react'
 import './Chat.css'
 import { getScrollbarWidth } from '../../utils/scrollbar'
 import chatApi, { ChatMessage } from '../../api/chatApi'
+import ReactMarkdown from 'react-markdown'
 
 type Message = {
   id: number
@@ -108,6 +109,21 @@ const Chat = () => {
     }
   }
 
+  // Render message content with Markdown
+  const renderMessageContent = (text: string, isUser: boolean) => {
+    if (isUser) {
+      // Don't apply Markdown to user messages
+      return <div className="message-text">{text}</div>
+    }
+    
+    // Apply Markdown to AI responses
+    return (
+      <div className="message-text markdown-content">
+        <ReactMarkdown>{text}</ReactMarkdown>
+      </div>
+    )
+  }
+
   return (
     <div className="chat-content">
       <div className="chat-header">
@@ -129,7 +145,7 @@ const Chat = () => {
             key={message.id} 
             className={`message ${message.isUser ? 'user' : 'ai'}`}
           >
-            {message.text}
+            {renderMessageContent(message.text, message.isUser)}
           </div>
         ))}
         {isThinking && (
@@ -170,4 +186,4 @@ const Chat = () => {
   )
 }
 
-export default Chat 
+export default Chat
