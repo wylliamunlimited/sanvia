@@ -1,5 +1,6 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react';
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
+
 import './App.css'
 import Sidebar from '../components/Sidebar/Sidebar'
 import Chat from '../components/Chat/Chat'
@@ -18,16 +19,13 @@ function App() {
   const [isSignUp, setIsSignUp] = useState(false);
 
   const getActiveComponent = () => {
-    if (activeSection === 'chat') {
-      return <Chat />
-    } else if (activeSection === 'documents') {
-      return <Documents />
-    } else if (activeSection === 'history') {
-      return <History />
-    } else {
-      return <Chat />
+    switch (activeSection) {
+      case 'chat': return <Chat />;
+      case 'documents': return <Documents />;
+      case 'history': return <History />;
+      default: return <Chat />;
     }
-  }
+  };
 
   const AppRoutes = () => {
     const { user, loading } = useAuth();
@@ -35,7 +33,7 @@ function App() {
     if (loading) return <div>Loading...</div>;
     return (
       <Routes>
-        {/* Login/Register Route */}
+        {/* Sign-Up Route */}
         <Route
           path="/auth/signup"
           element={
@@ -48,9 +46,13 @@ function App() {
                   localStorage.setItem('isSignUp', 'true');
                 }}
               />
+            ) : (
+              <Navigate to="/auth/survey" replace />
             )
           }
         />
+
+        {/* Login Route */}
         <Route
           path="/auth/login"
           element={
@@ -63,9 +65,27 @@ function App() {
                   localStorage.setItem('isLogged', 'true');
                 }}
               />
+            ) 
+          }
+        />
+        
+        {/* Survey Route */}
+        <Route
+          path="/auth/survey"
+          element={
+            isSignUp && !isSurveyCompleted ? (
+              <Survey
+                onSurveyComplete={() => {
+                  setIsSurveyCompleted(true);
+                  localStorage.setItem('isSurveyCompleted', 'true');
+                }}
+              />
+            ) : (
+              <Navigate to="/" replace />
             )
           }
         />
+        
         <Route
           path="/*"
           element={user ? (
@@ -89,7 +109,20 @@ function App() {
                     </svg>
                   </button>
                 )}
-                {getActiveComponent()}
+                <div className="main-section">
+                  {!isSidebarOpen && (
+                    <button 
+                      className="open-sidebar-button"
+                      onClick={() => setSidebarOpen(true)}
+                      aria-label="Open sidebar"
+                    >
+                      <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                        <polyline points="9 18 15 12 9 6"/>
+                      </svg>
+                    </button>
+                  )}
+                  {getActiveComponent()}
+                </div>
               </div>
             </div>
           ) : <Navigate to="/auth/login" replace />}
@@ -109,7 +142,5 @@ function App() {
     </FirebaseProvider>
   );
 }
-
-
 
 export default App;

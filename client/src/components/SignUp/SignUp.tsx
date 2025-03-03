@@ -79,7 +79,7 @@ const SignUp: React.FC<SignUpProps> = ({ onSignUpSuccess }) => {
 
         <p className="toggleText">
           Already have an account?{" "}
-          <span className="link" onClick={() => navigate("/auth/login")}>
+          <span className="link" onClick={() => navigate("/auth/survey")}>
             Login
           </span>
         </p>
