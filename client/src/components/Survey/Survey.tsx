@@ -129,7 +129,6 @@ const Survey: React.FC<SurveyProps> = ({ onSurveyComplete }) => {
                 </button>
               ))}
             </div>
-            {(sex || sex === '') && <button type="button" onClick={handleNext}>Next</button>}
           </div>
         )}
 
