@@ -7,13 +7,15 @@ import Documents from '../components/Documents/Documents'
 import History from '../components/History/History'
 import SignUp from '../components/SignUp/SignUp'
 import Login from '../components/Login/Login'
+import { FirebaseProvider } from '../provider/FirebaseContext';
+import { AuthProvider, useAuth } from '../provider/AuthContext';
 
 
 function App() {
   const [activeSection, setActiveSection] = useState('chat')
   const [isSidebarOpen, setSidebarOpen] = useState(true)
   const [isLogged, setIsLogged] = useState(false);
-  const [isSignUp, setIsSignUp] = useState(false); 
+  const [isSignUp, setIsSignUp] = useState(false);
 
   const getActiveComponent = () => {
     if (activeSection === 'chat') {
@@ -27,15 +29,18 @@ function App() {
     }
   }
 
-  return (
-    <Router>
+  const AppRoutes = () => {
+    const { user, loading } = useAuth();
+
+    if (loading) return <div>Loading...</div>;
+    return (
       <Routes>
         {/* Login/Register Route */}
         <Route
           path="/auth/signup"
           element={
-            isSignUp? (
-              <Navigate to="/auth/login" replace />
+            user ? (
+              <Navigate to="/" replace />
             ) : (
               <SignUp
                 onSignUpSuccess={() => {
@@ -49,7 +54,7 @@ function App() {
         <Route
           path="/auth/login"
           element={
-            isLogged ? (
+            user ? (
               <Navigate to="/" replace />
             ) : (
               <Login
@@ -61,37 +66,50 @@ function App() {
             )
           }
         />
-        <Route 
-          path="/*" 
-          element={isLogged ? (
+        <Route
+          path="/*"
+          element={user ? (
             <div className="app-container">
               {isSidebarOpen && (
-                <Sidebar 
-                  activeSection={activeSection} 
+                <Sidebar
+                  activeSection={activeSection}
                   onSectionChange={setActiveSection}
                   onCollapse={() => setSidebarOpen(false)}
                 />
               )}
               <div className="main-section">
                 {!isSidebarOpen && (
-                  <button 
+                  <button
                     className="open-sidebar-button"
                     onClick={() => setSidebarOpen(true)}
                     aria-label="Open sidebar"
                   >
                     <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                      <polyline points="9 18 15 12 9 6"/>
+                      <polyline points="9 18 15 12 9 6" />
                     </svg>
                   </button>
                 )}
                 {getActiveComponent()}
               </div>
             </div>
-          ) : <Navigate to="/auth/login" replace/>}
+          ) : <Navigate to="/auth/login" replace />}
         />
       </Routes>
-    </Router>
+    );
+
+  };
+
+  return (
+    <FirebaseProvider>
+      <AuthProvider>
+        <Router>
+          <AppRoutes></AppRoutes>
+        </Router>
+      </AuthProvider>
+    </FirebaseProvider>
   );
 }
+
+
 
 export default App;
