@@ -1,38 +1,50 @@
+# = = = = = = = = = = = = = = = = = = = Load Env Variable = = = = = = = = = = = = = = = = = = = =
 from dotenv import load_dotenv
 import os
 import pathlib
 
-# Load environment variables
 basedir = pathlib.Path(__file__).parent
 dotenv_path = os.path.join(basedir, ".env")
 load_dotenv(dotenv_path)
-# print(
-#     f"GOOGLE_APPLICATION_CREDENTIALS: {os.getenv('GOOGLE_APPLICATION_CREDENTIALS')}"
-# )  # Debugging line
+# = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = =
 
+
+# = = = = = = = = = = = = = = = = = = = = = = Imports = = = = = = = = = = = = = = = = = = = = = =
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 import firebase_admin
 from firebase_admin import credentials
-from routers import firebase_auth
-from routers import firebase_db
+from routers import ( 
+                        firebase_auth, 
+                        firebase_db, 
+                        search,
+                        ai_agent
+                    )
 from dependencies.firebase_dependencies import (
-    get_settings,
-    initialize_firebase,
-    get_firestore_client,
-)
+                                                get_settings,
+                                                initialize_firebase,
+                                                get_firestore_client,
+                                            )
+# = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = =
 
+# = = = = = = = = = = = = = = = = = = = Initialization  = = = = = = = = = = = = = = = = = = = = =
 ## initializing firebase sdk
 initialize_firebase()
-
 # Print Firebase App Project ID
 print("Current App Name:", firebase_admin.get_app().project_id)
+# = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = =
 
 
+# = = = = = = = = = = = = = = = = = = = = Server Router = = = = = = = = = = = = = = = = = = = = =
 # FastAPI setup
+# Set up the routes for the application
 app = FastAPI()
 app.include_router(firebase_auth.router)
 app.include_router(firebase_db.router)
+app.include_router(search.router)
+app.include_router(ai_agent.router)
+# = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = =
+
 
 import pprint
 
@@ -48,7 +60,7 @@ def hello():
     return {"msg": "Server is running"}
 
 
-origins = [get_settings().frontend_url]
+origins = ["*"] # For development, allow all origins
 
 # CORS settings (if needed)
 app.add_middleware(

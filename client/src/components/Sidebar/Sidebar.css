@@ -3,6 +3,7 @@
   min-width: 260px;
   flex-shrink: 0;
   background-color: #f0f0f0;
+  background-image: linear-gradient(to top, rgba(0, 0, 0, 0.05), rgba(255, 255, 255, 0.02));
   border-right: 1px solid #ddd;
   display: flex;
   flex-direction: column;

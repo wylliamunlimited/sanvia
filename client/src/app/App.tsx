@@ -1,38 +1,22 @@
 import { useState, useEffect } from 'react';
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
-import './App.css';
-import Sidebar from '../components/Sidebar/Sidebar';
-import Chat from '../components/Chat/Chat';
-import Documents from '../components/Documents/Documents';
-import History from '../components/History/History';
-import SignUp from '../components/SignUp/SignUp';
-import Login from '../components/Login/Login';
-import Survey from '../components/Survey/Survey';
+
+import './App.css'
+import Sidebar from '../components/Sidebar/Sidebar'
+import Chat from '../components/Chat/Chat'
+import Documents from '../components/Documents/Documents'
+import History from '../components/History/History'
+import SignUp from '../components/SignUp/SignUp'
+import Login from '../components/Login/Login'
+import { FirebaseProvider } from '../provider/FirebaseContext';
+import { AuthProvider, useAuth } from '../provider/AuthContext';
+
 
 function App() {
-  const [activeSection, setActiveSection] = useState<string>('chat');
-  const [isSidebarOpen, setSidebarOpen] = useState<boolean>(true);
-  const [isLogged, setIsLogged] = useState<boolean>(false);
-  const [isSignUp, setIsSignUp] = useState<boolean>(false);
-  const [isSurveyCompleted, setIsSurveyCompleted] = useState<boolean>(false);
-
-  useEffect(() => {
-    // Checking localStorage to persist state across page reloads
-    const logged = localStorage.getItem('isLogged') === 'true';
-    const signedUp = localStorage.getItem('isSignUp') === 'true';
-    const surveyCompleted = localStorage.getItem('isSurveyCompleted') === 'true';
-    
-    setIsLogged(logged);
-    setIsSignUp(signedUp);
-    setIsSurveyCompleted(surveyCompleted);
-  }, []);
-
-  useEffect(() => {
-    // Persist state to localStorage whenever there is a change
-    localStorage.setItem('isLogged', isLogged.toString());
-    localStorage.setItem('isSignUp', isSignUp.toString());
-    localStorage.setItem('isSurveyCompleted', isSurveyCompleted.toString());
-  }, [isLogged, isSignUp, isSurveyCompleted]);
+  const [activeSection, setActiveSection] = useState('chat')
+  const [isSidebarOpen, setSidebarOpen] = useState(true)
+  const [isLogged, setIsLogged] = useState(false);
+  const [isSignUp, setIsSignUp] = useState(false);
 
   const getActiveComponent = () => {
     switch (activeSection) {
@@ -43,14 +27,19 @@ function App() {
     }
   };
 
-  return (
-    <Router>
+  const AppRoutes = () => {
+    const { user, loading } = useAuth();
+
+    if (loading) return <div>Loading...</div>;
+    return (
       <Routes>
         {/* Sign-Up Route */}
         <Route
           path="/auth/signup"
           element={
-            !isSignUp ? (
+            user ? (
+              <Navigate to="/" replace />
+            ) : (
               <SignUp
                 onSignUpSuccess={() => {
                   setIsSignUp(true);
@@ -67,19 +56,19 @@ function App() {
         <Route
           path="/auth/login"
           element={
-            !isLogged ? (
+            user ? (
+              <Navigate to="/" replace />
+            ) : (
               <Login
                 onLoginSuccess={() => {
                   setIsLogged(true);
                   localStorage.setItem('isLogged', 'true');
                 }}
               />
-            ) : (
-              <Navigate to="/" replace />
-            )
+            ) 
           }
         />
-
+        
         {/* Survey Route */}
         <Route
           path="/auth/survey"
@@ -96,19 +85,29 @@ function App() {
             )
           }
         />
-
-        {/* Home Page (Main App) */}
-        <Route 
-          path="/*" 
-          element={
-            isLogged || isSurveyCompleted ? (
-              <div className="app-container">
-                {isSidebarOpen && (
-                  <Sidebar 
-                    activeSection={activeSection} 
-                    onSectionChange={setActiveSection}
-                    onCollapse={() => setSidebarOpen(false)}
-                  />
+        
+        <Route
+          path="/*"
+          element={user ? (
+            <div className="app-container">
+              {isSidebarOpen && (
+                <Sidebar
+                  activeSection={activeSection}
+                  onSectionChange={setActiveSection}
+                  onCollapse={() => setSidebarOpen(false)}
+                />
+              )}
+              <div className="main-section">
+                {!isSidebarOpen && (
+                  <button
+                    className="open-sidebar-button"
+                    onClick={() => setSidebarOpen(true)}
+                    aria-label="Open sidebar"
+                  >
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                      <polyline points="9 18 15 12 9 6" />
+                    </svg>
+                  </button>
                 )}
                 <div className="main-section">
                   {!isSidebarOpen && (
@@ -125,13 +124,22 @@ function App() {
                   {getActiveComponent()}
                 </div>
               </div>
-            ) : (
-              <Navigate to="/auth/login" replace />
-            )
-          }
+            </div>
+          ) : <Navigate to="/auth/login" replace />}
         />
       </Routes>
-    </Router>
+    );
+
+  };
+
+  return (
+    <FirebaseProvider>
+      <AuthProvider>
+        <Router>
+          <AppRoutes></AppRoutes>
+        </Router>
+      </AuthProvider>
+    </FirebaseProvider>
   );
 }
 
