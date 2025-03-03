@@ -63,8 +63,15 @@ const Sidebar = ({ activeSection, onSectionChange, onCollapse }: SidebarProps) =
     navigate('/auth/login');
   };
 
+  //make these buttons that work
+  // <button id= "settings">Hello </button>;
+  // <button id= "feedback"></button>;
+  // <button id= "logout"></button>
+
+
   const menuItems = [
     { 
+
       id: 'settings', 
       label: 'Settings',
       icon: (
@@ -96,7 +103,6 @@ const Sidebar = ({ activeSection, onSectionChange, onCollapse }: SidebarProps) =
       onClick: () => handleLogout()
     }
   ]
-
   return (
     <div className="sidebar">
       <div className="sidebar-header">
