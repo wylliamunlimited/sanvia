@@ -7,6 +7,8 @@ import Documents from '../components/Documents/Documents'
 import History from '../components/History/History'
 import SignUp from '../components/SignUp/SignUp'
 import Login from '../components/Login/Login'
+import Survey from '../components/Survey/Survey'
+
 
 
 function App() {
@@ -35,7 +37,7 @@ function App() {
           path="/auth/signup"
           element={
             isSignUp? (
-              <Navigate to="/auth/login" replace />
+              <Navigate to="/auth/survey" replace />
             ) : (
               <SignUp
                 onSignUpSuccess={() => {
@@ -58,6 +60,16 @@ function App() {
                   localStorage.setItem('isLogged', 'true');
                 }}
               />
+            )
+          }
+        />
+        <Route
+          path="/auth/survey"
+          element={
+            isSignUp ? (
+              <Survey />
+            ) : (
+              <Navigate to="/auth/login" replace />
             )
           }
         />
