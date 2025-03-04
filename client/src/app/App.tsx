@@ -10,13 +10,16 @@ import SignUp from '../components/SignUp/SignUp'
 import Login from '../components/Login/Login'
 import { FirebaseProvider } from '../provider/FirebaseContext';
 import { AuthProvider, useAuth } from '../provider/AuthContext';
+import Survey from '../components/Survey/Survey';
 
 
 function App() {
   const [activeSection, setActiveSection] = useState('chat')
   const [isSidebarOpen, setSidebarOpen] = useState(true)
-  const [isLogged, setIsLogged] = useState(false);
+  // const [isLogged, setIsLogged] = useState(false);
   const [isSignUp, setIsSignUp] = useState(false);
+
+  // const [isSurveyCompleted, setIsSurveyCompleted] = useState(false);
 
   const getActiveComponent = () => {
     switch (activeSection) {
@@ -37,8 +40,8 @@ function App() {
         <Route
           path="/auth/signup"
           element={
-            user ? (
-              <Navigate to="/" replace />
+            isSignUp ? (
+              <Navigate to="/auth/survey" replace />
             ) : (
               <SignUp
                 onSignUpSuccess={() => {
@@ -46,9 +49,7 @@ function App() {
                   localStorage.setItem('isSignUp', 'true');
                 }}
               />
-            ) : (
-              <Navigate to="/auth/survey" replace />
-            )
+            ) 
           }
         />
 
@@ -61,7 +62,7 @@ function App() {
             ) : (
               <Login
                 onLoginSuccess={() => {
-                  setIsLogged(true);
+                  // setIsLogged(true);
                   localStorage.setItem('isLogged', 'true');
                 }}
               />
@@ -73,10 +74,10 @@ function App() {
         <Route
           path="/auth/survey"
           element={
-            isSignUp && !isSurveyCompleted ? (
+            user && isSignUp ? (
               <Survey
                 onSurveyComplete={() => {
-                  setIsSurveyCompleted(true);
+                  // setIsSurveyCompleted(true);
                   localStorage.setItem('isSurveyCompleted', 'true');
                 }}
               />
