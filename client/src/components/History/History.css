@@ -6,12 +6,12 @@
 }
 
 .search-section {
-  padding: 2rem calc(max(1rem, (100% - 768px) / 2));
+  padding: 1rem calc(max(1rem, (100% - 768px) / 2));
 }
 
 .history-area {
   flex: 1;
-  padding: 0 calc(max(1rem, (100% - 768px) / 2)) 2rem;
+  padding: 1rem calc(max(1rem, (100% - 768px) / 2)) 2rem;
   padding-right: calc(max(1rem, (100% - 768px) / 2) - var(--scrollbar-width));
   overflow-y: auto;
   display: flex;
@@ -43,6 +43,16 @@
   display: flex;
   gap: 1rem;
   animation: fadeIn 0.2s ease-in-out;
+  padding: 1rem;
+  background-color: white;
+  border-radius: 8px;
+  border: 1px solid #e5e7eb;
+  cursor: pointer;
+  transition: background-color 0.2s;
+}
+
+.history-item:hover {
+  background-color: #f8f9fa;
 }
 
 .history-icon {
@@ -199,7 +209,4 @@
   color: #666;
   font-size: 0.875rem;
   font-weight: 500;
-  padding: 0.5rem 0;
-  border-bottom: 1px solid #eee;
-  margin-bottom: 0.5rem;
 } 
