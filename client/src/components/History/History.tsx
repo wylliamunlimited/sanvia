@@ -1,5 +1,6 @@
 import { useState } from 'react'
 import './History.css'
+import Header from '../ui/Header'
 
 type ChatSession = {
   id: string;
@@ -122,15 +123,15 @@ const History = () => {
 
   return (
     <div className="history-content">
-      <div className="chat-header">
-        <div className="header-content">
+      <Header 
+        icon={
           <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
             <path d="M12 8v4l3 3"/>
             <circle cx="12" cy="12" r="9"/>
           </svg>
-          <h2>History</h2>
-        </div>
-      </div>
+        }
+        title="History"
+      />
 
       <div className="search-section">
         <div className="search-row">
