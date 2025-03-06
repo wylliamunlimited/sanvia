@@ -75,7 +75,6 @@ const Chat = () => {
 
     try {
       const response = await chatApi.sendMessage(inputText.trim())  // Change to chatApi.sendMessage once auth is implemented
-      
       // Find last assistant message in chat history
       const assistantMessages = response.chat.filter(msg => msg.role === 'assistant')
       if (assistantMessages.length > 0) {
