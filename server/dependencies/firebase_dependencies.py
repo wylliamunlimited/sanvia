@@ -13,7 +13,9 @@ from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
 import firebase_admin
 from firebase_admin.auth import verify_id_token
 from firebase_admin import credentials, firestore
+from datetime import datetime
 from constants.credentials import FIREBASE_ADMIN_API_KEY
+from .ai_dependencies import AIBrain
 
 
 def initialize_firebase():
@@ -41,7 +43,6 @@ def update_survey_entry(user_id: str, survey_data: dict):
 
 # Authentication setup (Bearer Token)
 bearer_scheme = HTTPBearer(auto_error=False)
-
 
 class Settings(BaseSettings):
     """Main app settings."""
@@ -80,3 +81,8 @@ def get_firebase_user_from_token(
             detail="Not logged in or Invalid credentials",
             headers={"WWW-Authenticate": "Bearer realm='Invalid Token'"},
         )
+        
+        
+## NEED TO UPLOAD THE STATE OF LANGGRAPH ONTO FIRESTORE
+def update_langgraph_thread_state(state: AIBrain):
+    pass
