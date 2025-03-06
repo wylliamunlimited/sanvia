@@ -52,10 +52,10 @@ const navItems: NavItem[] = [
 const Sidebar = ({ activeSection, onSectionChange, onCollapse }: SidebarProps) => {
   const [menuOpen, setMenuOpen] = useState(false)
 
-  const { user, loading, logout } = useAuth();
+  const { logout } = useAuth();
   const navigate = useNavigate();
   
-  const userInitials = 'JW'
+  // const userInitials = 'JW'
   const userName = 'Justin Wang'
   const handleLogout = () => {
     setMenuOpen(false);

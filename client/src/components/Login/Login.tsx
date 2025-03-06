@@ -14,7 +14,7 @@ const Login: React.FC<LoginProps> = ({ onLoginSuccess }) => {
   const [error, setError] = useState<string>("");
   const navigate = useNavigate();
 
-  const { auth, db } = useFirebase();
+  const { auth } = useFirebase();
 
   const handleLogin = () => {
 
