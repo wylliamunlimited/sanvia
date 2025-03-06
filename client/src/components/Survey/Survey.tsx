@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import './Survey.css';
 
@@ -20,7 +20,7 @@ const Survey: React.FC<SurveyProps> = ({ onSurveyComplete }) => {
 
   const handleNext = () => setStep(step + 1);
 
-  const handleSubmit = (e) => {
+  const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     const formattedHeight = heightUnit === 'cm' 
       ? `${height} cm` 
