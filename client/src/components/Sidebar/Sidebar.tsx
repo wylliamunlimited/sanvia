@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import './Sidebar.css'
 import { useNavigate } from 'react-router-dom'
+import { useAuth } from '../../provider/AuthContext'
 
 type NavItem = {
   id: string
@@ -50,16 +51,27 @@ const navItems: NavItem[] = [
 
 const Sidebar = ({ activeSection, onSectionChange, onCollapse }: SidebarProps) => {
   const [menuOpen, setMenuOpen] = useState(false)
+
+  const { user, loading, logout } = useAuth();
   const navigate = useNavigate();
   
   const userInitials = 'JW'
   const userName = 'Justin Wang'
   const handleLogout = () => {
+    setMenuOpen(false);
+    logout();
     navigate('/auth/login');
   };
 
+  //make these buttons that work
+  // <button id= "settings">Hello </button>;
+  // <button id= "feedback"></button>;
+  // <button id= "logout"></button>
+
+
   const menuItems = [
     { 
+
       id: 'settings', 
       label: 'Settings',
       icon: (
@@ -88,10 +100,9 @@ const Sidebar = ({ activeSection, onSectionChange, onCollapse }: SidebarProps) =
           <line x1="21" y1="12" x2="9" y2="12"/>
         </svg>
       ),
-      onClick: handleLogout
+      onClick: () => handleLogout()
     }
   ]
-
   return (
     <div className="sidebar">
       <div className="sidebar-header">
@@ -136,7 +147,7 @@ const Sidebar = ({ activeSection, onSectionChange, onCollapse }: SidebarProps) =
               <button 
                 key={item.id}
                 className="menu-item"
-                onClick={() => setMenuOpen(false)}
+                onClick={item.onClick}
               >
                 <span className="menu-item-icon">{item.icon}</span>
                 {item.label}
