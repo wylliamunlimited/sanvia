@@ -24,7 +24,7 @@
   gap: 1rem;
   color: #666;
   transition: all 0.2s;
-  background-color: #f8f9fa;
+  background-color: white;
 }
 
 .upload-zone.dragging {
@@ -38,7 +38,7 @@
 
 .upload-button {
   padding: 0.5rem 1rem;
-  background-color: white;
+  background-color: #F9F9F9;
   border: 1px solid #ddd;
   border-radius: 6px;
   color: #333;
