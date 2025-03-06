@@ -1,6 +1,9 @@
 import { useState, useRef, useEffect } from 'react'
 import './Chat.css'
 import { getScrollbarWidth } from '../../utils/scrollbar'
+import chatApi, { ChatMessage } from '../../api/chatApi'
+import ReactMarkdown from 'react-markdown'
+import Header from '../ui/Header'
 
 type Message = {
   id: number
@@ -8,16 +11,24 @@ type Message = {
   isUser: boolean
 }
 
-const SAMPLE_AI_RESPONSE = `Lorem ipsum dolor sit amet, consectetur adipiscing elit...`
-
 const Chat = () => {
   const [messages, setMessages] = useState<Message[]>([])
   const [inputText, setInputText] = useState('')
   const [isThinking, setIsThinking] = useState(false)
   const [shouldAutoScroll, setShouldAutoScroll] = useState(true)
+  const [error, setError] = useState<string | null>(null)
   
   const textareaRef = useRef<HTMLTextAreaElement>(null)
   const messageAreaRef = useRef<HTMLDivElement>(null)
+
+  // Load initial greeting message
+  useEffect(() => {
+    setMessages([{
+      id: Date.now(),
+      text: "Hello! How can I help with your health related questions?",
+      isUser: false
+    }])
+  }, [])
 
   // Auto-adjust textarea height based on content
   useEffect(() => {
@@ -42,28 +53,53 @@ const Chat = () => {
     document.documentElement.style.setProperty('--scrollbar-width', `${getScrollbarWidth()}px`)
   }, [])
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     if (!inputText.trim() || isThinking) return
+    
+    // Clear any previous errors
+    setError(null)
 
-    setMessages(prev => [...prev, { 
-      id: Date.now(), 
+    // Add user message to chat
+    const userMessage = {
+      id: Date.now(),
       text: inputText,
       isUser: true
-    }])
+    }
+    setMessages(prev => [...prev, userMessage])
     
+    // Clear input and set thinking state
     setInputText('')
     setIsThinking(true)
     setShouldAutoScroll(true)
 
-    setTimeout(() => {
+    try {
+      const response = await chatApi.sendMessage(inputText.trim())  // Change to chatApi.sendMessage once auth is implemented
+      // Find last assistant message in chat history
+      const assistantMessages = response.chat.filter(msg => msg.role === 'assistant')
+      if (assistantMessages.length > 0) {
+        const lastAssistantMessage = assistantMessages[assistantMessages.length - 1]
+        
+        // Add AI response to chat
+        setMessages(prev => [...prev, {
+          id: Date.now(),
+          text: lastAssistantMessage.content,
+          isUser: false
+        }])
+      }
+    } catch (err) {
+      console.error('Error sending message:', err)
+      setError('Failed to get response. Please try again.')
+      
+      // Add error message to chat
       setMessages(prev => [...prev, {
         id: Date.now(),
-        text: SAMPLE_AI_RESPONSE,
+        text: "Sorry, I'm having trouble connecting to the server. Please try again later.",
         isUser: false
       }])
+    } finally {
       setIsThinking(false)
-    }, 2000)
+    }
   }
 
   const handleScroll = () => {
@@ -73,16 +109,31 @@ const Chat = () => {
     }
   }
 
+  // Render message content with Markdown
+  const renderMessageContent = (text: string, isUser: boolean) => {
+    if (isUser) {
+      // Don't apply Markdown to user messages
+      return <div className="message-text">{text}</div>
+    }
+    
+    // Apply Markdown to AI responses
+    return (
+      <div className="message-text markdown-content">
+        <ReactMarkdown>{text}</ReactMarkdown>
+      </div>
+    )
+  }
+
   return (
     <div className="chat-content">
-      <div className="chat-header">
-        <div className="header-content">
+      <Header 
+        icon={
           <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
             <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>
           </svg>
-          <h2>Chat</h2>
-        </div>
-      </div>
+        }
+        title="Chat"
+      />
 
       <div 
         ref={messageAreaRef}
@@ -94,12 +145,17 @@ const Chat = () => {
             key={message.id} 
             className={`message ${message.isUser ? 'user' : 'ai'}`}
           >
-            {message.text}
+            {renderMessageContent(message.text, message.isUser)}
           </div>
         ))}
         {isThinking && (
           <div className="thinking-indicator">
             Thinking...
+          </div>
+        )}
+        {error && (
+          <div className="error-message">
+            {error}
           </div>
         )}
       </div>
@@ -130,4 +186,4 @@ const Chat = () => {
   )
 }
 
-export default Chat 
+export default Chat
