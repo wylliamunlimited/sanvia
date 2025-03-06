@@ -39,7 +39,7 @@ const Survey: React.FC<SurveyProps> = ({ onSurveyComplete }) => {
     navigate('/');
   };
 
-  const handleNumericInput = (setter) => (e) => {
+  const handleNumericInput = (setter: (value: string) => void) => (e: React.ChangeEvent<HTMLInputElement>) => {
     const value = e.target.value;
     if (value === '' || /^[0-9]*\.?[0-9]*$/.test(value)) {
       setter(value);
