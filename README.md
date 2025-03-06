@@ -10,3 +10,8 @@
 ![WHOOP API](https://img.shields.io/badge/WHOOP_API-00BFFF?style=for-the-badge&logo=whoop&logoColor=white)
 ![Firebase](https://img.shields.io/badge/Firebase-FFCA28?style=for-the-badge&logo=firebase&logoColor=white)
 
+
+---
+
+# Mission
+Sanvia aims at providing personalized search experiences when users are querying for online health knowledge information from the internet. 
