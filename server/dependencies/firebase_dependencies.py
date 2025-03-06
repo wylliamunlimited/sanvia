@@ -1,6 +1,10 @@
-# config.py
+import sys
+
+# caution: path[0] is reserved for script path (or '' in REPL)
+sys.path.insert(2, "../constants")
+
+
 import os
-from dotenv import load_dotenv
 from functools import lru_cache
 from pydantic_settings import BaseSettings
 from typing import Annotated
@@ -9,26 +13,16 @@ from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
 import firebase_admin
 from firebase_admin.auth import verify_id_token
 from firebase_admin import credentials, firestore
-import json
-
-# Load environment variables
-load_dotenv()
-
-# Check if GOOGLE_APPLICATION_CREDENTIALS is loaded
-firebase_credentials_json = os.getenv("FIREBASE_ADMIN_SDK_KEY")
-if firebase_credentials_json:
-    print(f"✅ FIREBASE_ADMIN_SDK_KEY is Detected")
-    firebase_credentials_json = json.loads(firebase_credentials_json)
-else:
-    print("❌ FIREBASE_ADMIN_SDK_KEY is NOT set.")
-    raise ValueError("Firebase credentials file path is missing. Check your .env file.")
+from datetime import datetime
+from constants.credentials import FIREBASE_ADMIN_API_KEY
+from .ai_dependencies import AIBrain
 
 
 def initialize_firebase():
     """Initialize Firebase Admin SDK if not already initialized."""
     if not firebase_admin._apps:
         print(f"⏳⏳⏳ Initializing Firebase Admin SDK ⏳⏳⏳")
-        cred = credentials.Certificate(firebase_credentials_json)
+        cred = credentials.Certificate(FIREBASE_ADMIN_API_KEY)
         firebase_admin.initialize_app(cred)
     else:
         print("🔥🔥🔥 Firebase Admin SDK already initialized 🔥🔥🔥")
@@ -49,7 +43,6 @@ def update_survey_entry(user_id: str, survey_data: dict):
 
 # Authentication setup (Bearer Token)
 bearer_scheme = HTTPBearer(auto_error=False)
-
 
 class Settings(BaseSettings):
     """Main app settings."""
@@ -75,12 +68,21 @@ def get_firebase_user_from_token(
     """
     try:
         if not token:
-            raise ValueError("No token provided")
+            raise HTTPException(
+                status_code=status.HTTP_401_UNAUTHORIZED,
+                detail="Token Required.",
+                headers={"WWW-Authenticate": "Bearer realm='Authentication Required'"},
+            )
         user = verify_id_token(token.credentials)
         return user
     except Exception:
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
             detail="Not logged in or Invalid credentials",
-            headers={"WWW-Authenticate": "Bearer"},
+            headers={"WWW-Authenticate": "Bearer realm='Invalid Token'"},
         )
+        
+        
+## NEED TO UPLOAD THE STATE OF LANGGRAPH ONTO FIRESTORE
+def update_langgraph_thread_state(state: AIBrain):
+    pass

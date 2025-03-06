@@ -12,6 +12,7 @@
 .main-section {
   flex: 1;
   position: relative;
+  background-color: #f9f9f9;
 }
 
 .open-sidebar-button {
