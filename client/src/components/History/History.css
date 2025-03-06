@@ -6,7 +6,7 @@
 }
 
 .search-section {
-  padding: 1rem calc(max(1rem, (100% - 768px) / 2));
+  padding: 2rem calc(max(1rem, (100% - 768px) / 2)) 1rem;
 }
 
 .history-area {

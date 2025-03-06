@@ -9,14 +9,6 @@
   height: 100vh;
 }
 
-.chat-header {
-  height: 3.5rem;
-}
-
-.chat-header h2 {
-  display: none;
-}
-
 .message-area {
   flex: 1;
   overflow-y: auto;
@@ -124,10 +116,6 @@
 .input-container button svg {
   width: 16px;
   height: 16px;
-}
-
-.header-content {
-  display: none;
 }
 
 .thinking-indicator {
