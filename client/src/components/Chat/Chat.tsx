@@ -3,6 +3,7 @@ import './Chat.css'
 import { getScrollbarWidth } from '../../utils/scrollbar'
 import chatApi, { ChatMessage } from '../../api/chatApi'
 import ReactMarkdown from 'react-markdown'
+import Header from '../ui/Header'
 
 type Message = {
   id: number
@@ -74,7 +75,6 @@ const Chat = () => {
 
     try {
       const response = await chatApi.sendMessage(inputText.trim())  // Change to chatApi.sendMessage once auth is implemented
-      
       // Find last assistant message in chat history
       const assistantMessages = response.chat.filter(msg => msg.role === 'assistant')
       if (assistantMessages.length > 0) {
@@ -126,14 +126,14 @@ const Chat = () => {
 
   return (
     <div className="chat-content">
-      <div className="chat-header">
-        <div className="header-content">
+      <Header 
+        icon={
           <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
             <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>
           </svg>
-          <h2>Chat</h2>
-        </div>
-      </div>
+        }
+        title="Chat"
+      />
 
       <div 
         ref={messageAreaRef}
