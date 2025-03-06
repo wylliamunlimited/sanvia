@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import './Sidebar.css'
 import { useNavigate } from 'react-router-dom'
+import { useAuth } from '../../provider/AuthContext'
 
 type NavItem = {
   id: string
@@ -50,16 +51,27 @@ const navItems: NavItem[] = [
 
 const Sidebar = ({ activeSection, onSectionChange, onCollapse }: SidebarProps) => {
   const [menuOpen, setMenuOpen] = useState(false)
+
+  const { user, loading, logout } = useAuth();
   const navigate = useNavigate();
   
   const userInitials = 'JW'
   const userName = 'Justin Wang'
   const handleLogout = () => {
+    setMenuOpen(false);
+    logout();
     navigate('/auth/login');
   };
 
+  //make these buttons that work
+  // <button id= "settings">Hello </button>;
+  // <button id= "feedback"></button>;
+  // <button id= "logout"></button>
+
+
   const menuItems = [
     { 
+
       id: 'settings', 
       label: 'Settings',
       icon: (
@@ -88,14 +100,12 @@ const Sidebar = ({ activeSection, onSectionChange, onCollapse }: SidebarProps) =
           <line x1="21" y1="12" x2="9" y2="12"/>
         </svg>
       ),
-      onClick: handleLogout
+      onClick: () => handleLogout()
     }
   ]
-
   return (
     <div className="sidebar">
       <div className="sidebar-header">
-        <span>Sanvia</span>
         <button 
           className="collapse-button"
           onClick={onCollapse}
@@ -105,6 +115,12 @@ const Sidebar = ({ activeSection, onSectionChange, onCollapse }: SidebarProps) =
             <polyline points="15 18 9 12 15 6"/>
           </svg>
         </button>
+      </div>
+      <div className="logo-section">
+        <div className="logo-container">
+          <img src="/images/logo.png" alt="Logo" />
+          <span className="logo-text">Sanvia</span>
+        </div>
       </div>
       <div className="sidebar-content">
         <nav className="sidebar-nav">
@@ -126,7 +142,10 @@ const Sidebar = ({ activeSection, onSectionChange, onCollapse }: SidebarProps) =
           onClick={() => setMenuOpen(!menuOpen)}
         >
           <div className="profile-icon">
-            {userInitials}
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+              <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/>
+              <circle cx="12" cy="7" r="4"/>
+            </svg>
           </div>
           <span className="user-name">{userName}</span>
         </button>
@@ -136,7 +155,7 @@ const Sidebar = ({ activeSection, onSectionChange, onCollapse }: SidebarProps) =
               <button 
                 key={item.id}
                 className="menu-item"
-                onClick={() => setMenuOpen(false)}
+                onClick={item.onClick}
               >
                 <span className="menu-item-icon">{item.icon}</span>
                 {item.label}
