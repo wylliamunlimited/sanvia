@@ -15,13 +15,9 @@ if FIREBASE_ADMIN_API_KEY:
     print(f"✅ FIREBASE_ADMIN_SDK_KEY is Detected")
 
     import json
-
-    with open("service-account.json", "r") as f:
-        FIREBASE_ADMIN_API_KEY = json.load(f)
-
-    # FIREBASE_ADMIN_API_KEY = json.loads(
-    #     FIREBASE_ADMIN_API_KEY
-    # )  ## 🚨🚨🚨 DON'T CHANGE. If needed, change the env variable to json
+    FIREBASE_ADMIN_API_KEY = json.loads(
+        FIREBASE_ADMIN_API_KEY
+    )  ## 🚨🚨🚨 DON'T CHANGE. If needed, change the env variable to json
 else:
     print("❌ FIREBASE_ADMIN_SDK_KEY is NOT set.", FIREBASE_ADMIN_API_KEY)
     raise ValueError(
