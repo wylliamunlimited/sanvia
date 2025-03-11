@@ -1,5 +1,12 @@
+import sys
+
+# caution: path[0] is reserved for script path (or '' in REPL)
+sys.path.insert(1, "../dependencies")
+sys.path.insert(2, "../constants")
+
+from fastapi import APIRouter, UploadFile, File, Depends, HTTPException, Response
+from fastapi.responses import StreamingResponse
 from typing import List, Annotated
-from fastapi import APIRouter, UploadFile, File, Depends, HTTPException
 import uuid
 import fitz  # PyMuPDF
 import pytesseract
