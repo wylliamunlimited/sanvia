@@ -5,15 +5,18 @@ import sys
 sys.path.insert(1, "../dependencies")
 sys.path.insert(2, "../constants")
 
-from fastapi import APIRouter, UploadFile, File, Depends, HTTPException
+from fastapi import APIRouter, UploadFile, File, Depends, HTTPException, Response
+from fastapi.responses import StreamingResponse
 from typing import List, Annotated
 import uuid
 import fitz  # PyMuPDF
 import pytesseract
 from pdf2image import convert_from_bytes
-import io
-from datetime import datetime
 from google.cloud import storage
+import os
+from google.oauth2 import service_account
+import io
+from datetime import datetime, timedelta
 from dependencies.firebase_dependencies import (
     get_firestore_client,
     get_firebase_user_from_token,
@@ -23,7 +26,40 @@ from constants.utils import POPPLER_PATH
 
 router = APIRouter()
 
-# POPPLER_PATH = r"C:\poppler-24.08.0\Library\bin"  # Change to your Poppler path
+
+BUCKET_NAME = "sanvia-file-storage"  # Google Cloud Storage bucket
+
+
+def upload_to_gcs(file_bytes, destination_blob_name):
+    """Uploads a file to Google Cloud Storage and returns a signed URL."""
+    try:
+        credentials_path = os.getenv("GOOGLE_APPLICATION_CREDENTIALS")
+
+        if not credentials_path:
+            raise ValueError("❌ GOOGLE_APPLICATION_CREDENTIALS is not set in .env!")
+
+        credentials = service_account.Credentials.from_service_account_file(
+            credentials_path
+        )
+
+        storage_client = storage.Client(credentials=credentials)
+        bucket = storage_client.bucket(BUCKET_NAME)
+        blob = bucket.blob(destination_blob_name)
+
+        # Upload from memory
+        blob.upload_from_file(file_bytes, content_type="application/pdf")
+
+        # Generate a signed URL (valid for 1 hour)
+        signed_url = blob.generate_signed_url(
+            version="v4",
+            expiration=timedelta(hours=1),  # URL expires in 1 hour
+            method="GET",
+        )
+
+        print(f"✅ File uploaded to {signed_url}")
+        return signed_url  # Return signed URL instead of public URL
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Error uploading to GCS: {str(e)}")
 
 
 def extract_text_with_ocr(file_bytes: io.BytesIO):
@@ -57,7 +93,7 @@ async def upload_document(
     try:
         user_id = user["uid"]
         document_id = str(uuid.uuid4())
-        upload_date = datetime.utcnow().isoformat()
+        upload_date = datetime.now().isoformat()
 
         print(f"📂 Received file: {file.filename} from user {user_id}")
 
@@ -115,11 +151,27 @@ async def upload_document(
         raise HTTPException(status_code=500, detail=str(e))
 
 
+def download_from_gcs(gcs_path):
+    """
+    Streams the PDF file directly from Google Cloud Storage.
+    """
+    try:
+        storage_client = storage.Client()
+        bucket = storage_client.bucket(BUCKET_NAME)
+        blob = bucket.blob(gcs_path)
+
+        file_data = blob.download_as_bytes()  # Download as bytes
+
+        return io.BytesIO(file_data)  # Convert to a streamable object
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Error downloading file: {str(e)}")
+
+
 @router.get("/document/{document_id}")
 async def get_document(
     user: Annotated[dict, Depends(get_firebase_user_from_token)], document_id: str
 ):
-    """Retrieves a full document from Firestore."""
+    """Streams the complete PDF file to the frontend for display."""
     user_id = user["uid"]
     db = get_firestore_client()
     doc_ref = (
@@ -134,9 +186,18 @@ async def get_document(
         raise HTTPException(status_code=404, detail="Document not found")
 
     document_data = doc.to_dict()
-    return {
-        "filename": document_data["filename"],
-        "upload_date": document_data["upload_date"],
-        "content": document_data["content"],
-        "tables": document_data["tables"],
-    }
+    gcs_path = document_data.get("gcs_url")
+
+    if not gcs_path:
+        raise HTTPException(status_code=500, detail="File URL not found in Firestore")
+
+    # Download PDF from GCS
+    pdf_stream = download_from_gcs(gcs_path)
+
+    return StreamingResponse(
+        pdf_stream,
+        media_type="application/pdf",
+        headers={
+            "Content-Disposition": f'inline; filename="{document_data["filename"]}"'
+        },
+    )
