@@ -1,13 +1,5 @@
 from typing import List, Annotated
-import sys
-
-# caution: path[0] is reserved for script path (or '' in REPL)
-sys.path.insert(1, "../dependencies")
-sys.path.insert(2, "../constants")
-
-from fastapi import APIRouter, UploadFile, File, Depends, HTTPException, Response
-from fastapi.responses import StreamingResponse
-from typing import List, Annotated
+from fastapi import APIRouter, UploadFile, File, Depends, HTTPException
 import uuid
 import fitz  # PyMuPDF
 import pytesseract
@@ -22,7 +14,9 @@ from dependencies.firebase_dependencies import (
     get_firebase_user_from_token,
 )
 
-from constants.utils import POPPLER_PATH
+from constants.utils import (
+    POPPLER_PATH
+)
 
 router = APIRouter()
 
