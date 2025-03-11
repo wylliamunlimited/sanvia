@@ -14,7 +14,7 @@ const Login: React.FC<LoginProps> = ({ onLoginSuccess }) => {
   const [error, setError] = useState<string>("");
   const navigate = useNavigate();
 
-  const { auth, db } = useFirebase();
+  const { auth } = useFirebase();
 
   const handleLogin = () => {
 
@@ -33,13 +33,15 @@ const Login: React.FC<LoginProps> = ({ onLoginSuccess }) => {
             console.log("Token is stored properly.");
           });
 
-          onLoginSuccess();
-          navigate("/");
+
         })
         .catch((error) => {
-          console.log("Sign In Failed.");
-          setError(error);
+          console.log(`Sign In Failed. ${error}`);
+          // setError(error);
+          navigate("/auth/login");
         });
+      onLoginSuccess();
+      navigate("/");
     } catch (e) {
       setError(`Error: ${e}`);
     }
