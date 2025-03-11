@@ -1,5 +1,12 @@
 from typing import List, Annotated
+import sys
+
+# caution: path[0] is reserved for script path (or '' in REPL)
+sys.path.insert(1, "../dependencies")
+sys.path.insert(2, "../constants")
+
 from fastapi import APIRouter, UploadFile, File, Depends, HTTPException
+from typing import List, Annotated
 import uuid
 import fitz  # PyMuPDF
 import pytesseract
@@ -12,27 +19,11 @@ from dependencies.firebase_dependencies import (
     get_firebase_user_from_token,
 )
 
+from constants.utils import POPPLER_PATH
+
 router = APIRouter()
 
-BUCKET_NAME = "sanvia-file-storage"  # Google Cloud Storage bucket
-
-
-def upload_to_gcs(file_bytes: io.BytesIO, destination_blob_name: str):
-    """Uploads a file to Google Cloud Storage and returns its URL."""
-    try:
-        storage_client = storage.Client()
-        bucket = storage_client.bucket(BUCKET_NAME)
-        blob = bucket.blob(destination_blob_name)
-
-        # Upload file from memory
-        blob.upload_from_file(file_bytes, content_type="application/pdf")
-
-        # Make the file publicly accessible (optional)
-        blob.make_public()
-
-        return blob.public_url
-    except Exception as e:
-        raise HTTPException(status_code=500, detail=f"Error uploading to GCS: {str(e)}")
+# POPPLER_PATH = r"C:\poppler-24.08.0\Library\bin"  # Change to your Poppler path
 
 
 def extract_text_with_ocr(file_bytes: io.BytesIO):
