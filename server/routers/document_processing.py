@@ -1,3 +1,9 @@
+import sys
+
+# caution: path[0] is reserved for script path (or '' in REPL)
+sys.path.insert(1, "../dependencies")
+sys.path.insert(2, "../constants")
+
 from fastapi import APIRouter, UploadFile, File, Depends, HTTPException
 from typing import List, Annotated
 import uuid
@@ -13,9 +19,13 @@ from dependencies.firebase_dependencies import (
     get_firebase_user_from_token,
 )
 
+from constants.utils import (
+    POPPLER_PATH
+)
+
 router = APIRouter()
 
-POPPLER_PATH = r"C:\poppler-24.08.0\Library\bin"  # Change to your Poppler path
+# POPPLER_PATH = r"C:\poppler-24.08.0\Library\bin"  # Change to your Poppler path
 
 
 def extract_text_with_ocr(file_bytes: io.BytesIO):
