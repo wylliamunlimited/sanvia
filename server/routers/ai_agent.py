@@ -6,17 +6,21 @@ sys.path.insert(1, "../dependencies")
 
 from fastapi import APIRouter, Depends, HTTPException
 from typing import Annotated, Dict
-from dependencies.firebase_dependencies import (
-    get_firebase_user_from_token
+from dependencies.firebase_dependencies import get_firebase_user_from_token
+from dependencies.ai_dependencies import (
+    get_llm,
+    initializeGraph,
+    trigger_response,
+    AIBrain,
 )
-from dependencies.ai_dependencies import get_llm, initializeGraph, trigger_response, AIBrain
 from pydantic import BaseModel
 from langgraph.graph import StateGraph
 
-import random ## TO BE REMOVED
+import random  ## TO BE REMOVED
 from datetime import datetime
 
 router = APIRouter()
+
 
 class PromptRequest(BaseModel):
     prompt: str
@@ -32,7 +36,6 @@ class PromptRequest(BaseModel):
 states = {}
 
 
-
 @router.get("/openai-health")
 async def health_check():
     """
@@ -45,7 +48,6 @@ async def health_check():
         raise HTTPException(
             status_code=500, detail=f"OpenAI connection issue: {str(e)}"
         )
-
 
 
 ## Chain of Prompts Example
@@ -75,61 +77,64 @@ async def health_check():
 #         "role": "assistant",
 #         "content": "Hello! How can I help with your health related questions?"
 #     }
-# ] 
+# ]
 @router.post("/ai-response")
 async def ai_response(
-                        request: PromptRequest, 
-                        user: Annotated[dict, Depends(get_firebase_user_from_token)]
-                    ):
+    request: PromptRequest, user: Annotated[dict, Depends(get_firebase_user_from_token)]
+):
     """
     Get AI response based on the provided prompt.
     """
-    
+
     if request is None or request.prompt is None:
         return {"error": "No prompt provided."}
-    
+
     ## AUTHENTICATION NEEDED HERE
     if user["uid"] not in states:
         ## make a graph for this user
-        thread_id = user['uid'] + datetime.now().strftime("%Y%m%d%H%M%S") + str(random.randint(0, 1000))
+        thread_id = (
+            user["uid"]
+            + datetime.now().strftime("%Y%m%d%H%M%S")
+            + str(random.randint(0, 1000))
+        )
         _graph, _state = initializeGraph()
         _state["thread_id"] = thread_id
         states[user["uid"]] = _state
     else:
         _graph = initializeGraph(with_state=False)
         _state = states[user["uid"]]
-        
+
     # print(f"OLD STATE: {_state}\n\n")
-    
+
     ## Include the new message
     _state["prompt_chain"].append({"role": "user", "content": request.prompt})
     states[user["uid"]] = _state
-    
+
     # print(f"NEW STATE: {_state}\n\n")
-    
+
     response = trigger_response(_graph, _state)
-    
+
     print(f"ALL STATES:\n{states}")
-    
+
     return {"chat": response["prompt_chain"]}
+
 
 @router.post("/destroy-chat-session")
 async def destroy_chat_session(
-                            user: Annotated[dict, Depends(get_firebase_user_from_token)]
-                        ):
+    user: Annotated[dict, Depends(get_firebase_user_from_token)],
+):
     try:
         states.pop(user["uid"])
-        
+
         print(f"ALL STATES:\n{states}")
-        
-        return {
-            "msg": "Session detroyed. User does not have any active chat session."
-        }
+
+        return {"msg": "Session detroyed. User does not have any active chat session."}
     except Exception as e:
         raise HTTPException(
-            status_code=400, detail=f"This user does not have a chat session. Error: {e}"
+            status_code=400,
+            detail=f"This user does not have a chat session. Error: {e}",
         )
-        
+
 
 # @router.post("/ai-response")
 # async def ai(request: PromptRequest):
