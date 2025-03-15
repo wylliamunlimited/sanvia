@@ -42,8 +42,6 @@ const Login: React.FC<LoginProps> = ({ onLoginSuccess }) => {
           // setError(error);
           return;
         });
-      onLoginSuccess();
-      navigate("/");
     } catch (e) {
       setError(`Error: ${e}`);
     }
