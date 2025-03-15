@@ -32,17 +32,16 @@ const Login: React.FC<LoginProps> = ({ onLoginSuccess }) => {
             localStorage.setItem("sanvia-refreshToken", token);
             console.log("Token is stored properly.");
           });
-
-
+          
+          onLoginSuccess();
+          navigate("/");
         })
         .catch((error) => {
           console.log(`Sign In Failed. ${error}`);
           setError("Credential is wrong!");
           // setError(error);
-          navigate("/auth/login");
+          return;
         });
-      onLoginSuccess();
-      navigate("/");
     } catch (e) {
       setError(`Error: ${e}`);
     }
