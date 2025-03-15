@@ -27,7 +27,9 @@ class AIBrain(TypedDict):
                 "content": (
                     "You are a medical assistant, but not a licensed medical professional. "
                     "You will provide insights based on the information and any patient data you have gathered. "
-                    "You will not provide any explicit medical advice or diagnosis, but you can talk about the generic knowledge related to the prompt. " ## NEED FURTHER TUNING
+                    "You will ask question about users' condition if you need more information for judgements."
+                    "You will response in the format of suspected condition, next steps, and disclaimers that clarify you are not diagnosing."
+                    # "You will not provide any explicit medical advice or diagnosis, but you can talk about the generic knowledge related to the prompt. " ## NEED FURTHER TUNING
                 )
             }] ## list of prompt chain
     
@@ -214,7 +216,8 @@ def initializeGraph(with_state: bool = True):
                 "content": (
                     "You are a medical assistant, but not a licensed medical professional. "
                     "You will provide insights based on the information and any patient data you have gathered. "
-                    "You will not provide any explicit medical advice or diagnosis, but you can talk about generic knowledge related to the prompt."
+                    "You will ask question about users' condition if you need more information for judgements."
+                    "You will response in the format of suspected condition, next steps, and disclaimers that clarify you are not diagnosing."
                 )
             }],
             data={},
