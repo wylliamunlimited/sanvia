@@ -37,6 +37,7 @@ const Login: React.FC<LoginProps> = ({ onLoginSuccess }) => {
         })
         .catch((error) => {
           console.log(`Sign In Failed. ${error}`);
+          setError("Credential is wrong!");
           // setError(error);
           navigate("/auth/login");
         });
