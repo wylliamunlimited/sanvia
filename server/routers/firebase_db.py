@@ -2,6 +2,7 @@ import sys
 
 # caution: path[0] is reserved for script path (or '' in REPL)
 sys.path.insert(1, "../dependencies")
+sys.path.insert(2, "../constants")
 
 
 from fastapi import APIRouter, Depends, HTTPException
@@ -13,6 +14,7 @@ from dependencies.firebase_dependencies import (
     update_survey_entry,
     get_firestore_client,
 )
+from constants.firestore_obj import Survey
 
 router = APIRouter()
 
@@ -22,7 +24,10 @@ async def submit_survey(
     user: Annotated[dict, Depends(get_firebase_user_from_token)], survey_data: dict
 ):
     """Submits or updates a user's survey entry in Firestore."""
-    update_survey_entry(user["uid"], survey_data)
+    update_survey_entry(user["uid"], Survey(
+        age=survey_data['age'], gender=survey_data['gender'], sex=survey_data['sex'], height=survey_data['height'], 
+        weight=survey_data['weight']
+    ))
     return {"msg": "Survey updated successfully"}
 
 
