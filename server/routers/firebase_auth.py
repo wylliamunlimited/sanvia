@@ -7,29 +7,17 @@ sys.path.insert(2, "../constants")
 from fastapi import APIRouter, Depends, HTTPException
 from typing import Annotated
 import requests
-from firebase_admin import auth
 from dependencies.firebase_dependencies import (
     get_firebase_user_from_token
+)
+from constants.request_obj import (
+    SignInRequest
 )
 from constants.url import firebase_rest
 from constants.credentials import JWT_HASH_KEY
 
-import jwt
+# import jwt
 from datetime import datetime, timedelta
-from pydantic import BaseModel
-
-class SignInRequest(BaseModel):
-    email: str
-    password: str
-    returnSecureToken: bool = True
-    
-    
-class SignUpRequest(BaseModel):
-    email: str
-    password: str
-    returnSecureToken: bool = True
-    firstname: str
-    lastname: str
     
 
 router = APIRouter()
