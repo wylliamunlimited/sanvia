@@ -2,26 +2,23 @@ import sys
 
 # caution: path[0] is reserved for script path (or '' in REPL)
 sys.path.insert(1, "../dependencies")
-
+sys.path.insert(2, "../constants")
 
 from fastapi import APIRouter, Depends, HTTPException
 from typing import Annotated, Dict
 from dependencies.firebase_dependencies import (
     get_firebase_user_from_token
 )
+from constants.request_obj import (
+    PromptRequest
+)
 from dependencies.ai_dependencies import get_llm, initializeGraph, trigger_response, AIBrain
-from pydantic import BaseModel
-from langgraph.graph import StateGraph
 
 import random ## TO BE REMOVED
 from datetime import datetime
+import json
 
 router = APIRouter()
-
-class PromptRequest(BaseModel):
-    prompt: str
-    # thread_id: str = None ## Temporary
-
 
 ## recording the graph for each user
 ## NEEDED FOR ISOLATION OF USER CHAT & DATA
@@ -109,18 +106,18 @@ async def ai_response(
     
     response = trigger_response(_graph, _state)
     
-    print(f"ALL STATES:\n{states}")
+    print(f"ALL STATES:\n{json.dumps(states, indent=4)}")
     
     return {"chat": response["prompt_chain"]}
 
-@router.post("/destroy-chat-session")
-async def destroy_chat_session(
+@router.post("/detach-chat-session")
+async def detach_chat_session(
                             user: Annotated[dict, Depends(get_firebase_user_from_token)]
                         ):
     try:
         states.pop(user["uid"])
         
-        print(f"ALL STATES:\n{states}")
+        print(f"ALL STATES:\n{json.dumps(states, indent=4)}")
         
         return {
             "msg": "Session detroyed. User does not have any active chat session."
