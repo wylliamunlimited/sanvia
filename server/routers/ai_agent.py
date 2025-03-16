@@ -7,7 +7,8 @@ sys.path.insert(2, "../constants")
 from fastapi import APIRouter, Depends, HTTPException
 from typing import Annotated, Dict
 from dependencies.firebase_dependencies import (
-    get_firebase_user_from_token
+    get_firebase_user_from_token,
+    update_chat_entry
 )
 from constants.request_obj import (
     PromptRequest
@@ -81,40 +82,50 @@ async def ai_response(
 
     if request is None or request.prompt is None:
         return {"error": "No prompt provided."}
-
-    ## AUTHENTICATION NEEDED HERE
-    if user["uid"] not in states:
-        ## make a graph for this user
-        thread_id = (
-            user["uid"]
-            + datetime.now().strftime("%Y%m%d%H%M%S")
-            + str(random.randint(0, 1000))
-        )
-        _graph, _state = initializeGraph()
-        _state["thread_id"] = thread_id
+    try:
+        ## AUTHENTICATION NEEDED HERE
+        if user["uid"] not in states:
+            ## make a graph for this user
+            thread_id = user['uid'] + datetime.now().strftime("%Y%m%d%H%M%S") + str(random.randint(0, 1000))
+            _graph, _state = initializeGraph()
+            _state["thread_id"] = thread_id
+            states[user["uid"]] = _state
+        else:
+            _graph = initializeGraph(with_state=False)
+            _state = states[user["uid"]]
+        
+        ## Include the new message
+        _state["prompt_chain"].append({"role": "user", "content": request.prompt})
         states[user["uid"]] = _state
-    else:
-        _graph = initializeGraph(with_state=False)
-        _state = states[user["uid"]]
-
-    # print(f"OLD STATE: {_state}\n\n")
-
-    ## Include the new message
-    _state["prompt_chain"].append({"role": "user", "content": request.prompt})
-    states[user["uid"]] = _state
-
-    # print(f"NEW STATE: {_state}\n\n")
-
-    response = trigger_response(_graph, _state)
-    
-    print(f"ALL STATES:\n{json.dumps(states, indent=4)}")
-    
-    return {"chat": response["prompt_chain"]}
+        
+        ## Call for AI response, reference ai_dependencies.py
+        response = trigger_response(_graph, _state)
+        
+        ## Uploading chat data onto Firestore 
+        ## ** THIS MUST FOLLOW THE TRIGGER RESPONSE TO INCLUDE THE AI RESPONSE!! **
+        update_chat_entry(user_id=user['uid'], thread_id=_state["thread_id"], chat_data={
+            "prompt_chain": _state["prompt_chain"],
+            "last_updated_at": datetime.now().strftime("%m/%d/%y %H:%M:%S")
+        })
+        
+        print(f"ALL STATES:\n{json.dumps(states, indent=4)}")
+        
+        return {"chat": response["prompt_chain"], "thread_id": _state["thread_id"]}
+    except Exception as e:
+        print(f"Error: {e}")
+        raise HTTPException(
+            status_code=400, detail=f'Error: {e}'
+        )
 
 @router.post("/detach-chat-session")
 async def detach_chat_session(
                             user: Annotated[dict, Depends(get_firebase_user_from_token)]
                         ):
+    
+    '''
+    Drop the chat session on the server side. The sesion becomes inactive and cannot be interacted with.
+    '''
+    
     try:
         states.pop(user["uid"])
         
@@ -125,11 +136,22 @@ async def detach_chat_session(
         }
     except Exception as e:
         raise HTTPException(
-            status_code=400,
-            detail=f"This user does not have a chat session. Error: {e}",
+            status_code=400, detail=f"Error: {e}"
         )
-
-
-# @router.post("/ai-response")
-# async def ai(request: PromptRequest):
-#     pass
+        
+@router.get('/chat')
+async def getChat(
+    thread_id: str,
+    user: Annotated[dict, Depends(get_firebase_user_from_token)]
+):
+    if thread_id is None or thread_id.strip() == "":
+        raise HTTPException(
+            status_code=400, detail=f"Error: thread_id is not provided."
+        )
+    
+    try:
+        pass
+    except Exception as e:
+        raise HTTPException(
+            status_code=400, detail=f"Error: {e}"
+        )
