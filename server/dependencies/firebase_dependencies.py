@@ -15,7 +15,9 @@ from firebase_admin.auth import verify_id_token
 from firebase_admin import credentials, firestore
 from datetime import datetime
 from constants.credentials import FIREBASE_ADMIN_API_KEY
-from .ai_dependencies import AIBrain
+from constants.langgraph_obj import (
+    AIBrain
+)
 
 
 def initialize_firebase():
@@ -41,6 +43,11 @@ def update_survey_entry(user_id: str, survey_data: dict):
     doc_ref.set(survey_data, merge=True)
 
 
+def update_chat_entry(user_id: str, thread_id: str, chat_data: dict):
+    """Update chat data of thread_id in Firestore"""
+    doc_ref = get_firestore_client().collection("chat-history").document(user_id).collection("threads").document(thread_id)
+    doc_ref.set(chat_data, merge=True)
+    
 # Authentication setup (Bearer Token)
 bearer_scheme = HTTPBearer(auto_error=False)
 
@@ -83,6 +90,3 @@ def get_firebase_user_from_token(
         )
         
         
-## NEED TO UPLOAD THE STATE OF LANGGRAPH ONTO FIRESTORE
-def update_langgraph_thread_state(state: AIBrain):
-    pass
