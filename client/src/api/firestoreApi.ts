@@ -39,7 +39,7 @@ api.interceptors.request.use((config) => {
 });
 
 export const firestoreApi = {
-    uploadSurvey: async (age: string, gender: string, sex: string, height: string, weight: string): Promise<any> => {
+    uploadProfile: async (age: string, gender: string, sex: string, height: string, weight: string): Promise<any> => {
         try {
             const response = await api.post<any>('/survey', { 
                 "age": age,
