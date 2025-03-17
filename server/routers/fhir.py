@@ -1,4 +1,4 @@
-from fastapi import APIRouter
+from fastapi import APIRouter, Depends, HTTPException
 
 router = APIRouter()
 
@@ -23,3 +23,18 @@ router = APIRouter()
 #             status_code=400, detail=f"Failed to fetch EHR data: {str(e)}"
 #         )
 
+
+
+@router.get("/fhir-epic-callback")
+async def fhir_epic_callback(
+    code: str, 
+    state: str
+):
+    try:
+        print(f"🏥🏥🏥 Authorization Code: {code}")
+        print(f"🏥🏥🏥 State: {state}")
+    except Exception as e:
+        raise HTTPException(
+            status_code=500, detail=f"EPIC FHIR Authorization Pipeline broken."
+        )
+    
