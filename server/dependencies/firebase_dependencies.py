@@ -15,7 +15,9 @@ from firebase_admin.auth import verify_id_token
 from firebase_admin import credentials, firestore
 from datetime import datetime
 from constants.credentials import FIREBASE_ADMIN_API_KEY
-from .ai_dependencies import AIBrain
+from constants.langgraph_obj import (
+    AIBrain
+)
 
 
 def initialize_firebase():
@@ -40,9 +42,19 @@ def update_survey_entry(user_id: str, survey_data: dict):
     doc_ref = get_firestore_client().collection("surveys").document(user_id)
     doc_ref.set(survey_data, merge=True)
 
-
+def update_chat_entry(user_id: str, thread_id: str, chat_data: dict):
+    """Update chat data of thread_id in Firestore"""
+    doc_ref = get_firestore_client().collection("chat-history").document(user_id).collection("threads").document(thread_id)
+    doc_ref.set(chat_data, merge=True)
+    
+def get_chat(user_id: str, thread_id: str):
+    """Retrieve chat data of user_id/thread_id From Firestore"""
+    doc_ref = get_firestore_client().collection("chat-history").document(user_id).collection("threads").document(thread_id)
+    return doc_ref.get()
+    
 # Authentication setup (Bearer Token)
 bearer_scheme = HTTPBearer(auto_error=False)
+
 
 class Settings(BaseSettings):
     """Main app settings."""
@@ -59,7 +71,7 @@ def get_settings() -> Settings:
 
 
 def get_firebase_user_from_token(
-    token: Annotated[HTTPAuthorizationCredentials | None, Depends(bearer_scheme)]
+    token: Annotated[HTTPAuthorizationCredentials | None, Depends(bearer_scheme)],
 ) -> dict | None:
     """Uses a bearer token to identify Firebase user.
 
@@ -81,8 +93,3 @@ def get_firebase_user_from_token(
             detail="Not logged in or Invalid credentials",
             headers={"WWW-Authenticate": "Bearer realm='Invalid Token'"},
         )
-        
-        
-## NEED TO UPLOAD THE STATE OF LANGGRAPH ONTO FIRESTORE
-def update_langgraph_thread_state(state: AIBrain):
-    pass
