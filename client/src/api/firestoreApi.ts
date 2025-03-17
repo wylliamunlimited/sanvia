@@ -50,7 +50,7 @@ export const firestoreApi = {
             });
             return response.data;
         } catch (error) {
-            console.error('Error sending message:', error);
+            console.error('Error uploading survey data:', error);
             throw error;
         }
     },
@@ -59,8 +59,21 @@ export const firestoreApi = {
             const response = await api.post<any>(`/store-names?first_name=${first_name}&last_name=${last_name}`, {});
             return response.data;
         } catch (error) {
-            console.error('Error sending message:', error);
+            console.error('Error uploading names:', error);
             throw error;
+        }
+    },
+
+
+
+
+    get_user_profile: async (): Promise<any> => {
+        try {
+            const response = await api.get<any>(`/get-profile`);
+            console.log(response.data);
+            return response.data;
+        } catch (error) {
+            console.error('Error retrieving profile data:', error);
         }
     }
 };
