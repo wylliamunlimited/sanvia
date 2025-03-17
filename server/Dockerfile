@@ -9,6 +9,7 @@ RUN apt-get update && apt-get install -y \
     libjpeg-dev \
     libpng-dev \
     zlib1g-dev \
+    libtesseract-dev \
     tesseract-ocr \
     poppler-utils \
     && rm -rf /var/lib/apt/lists/*

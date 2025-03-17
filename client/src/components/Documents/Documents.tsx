@@ -1,20 +1,30 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import './Documents.css'
 import Header from '../ui/Header'
+import documentApi, { DocumentMetadata } from '../../api/documentApi'
 
-type Document = {
-  id: number
-  name: string
-  uploadDate: Date
-  size: string
-  content?: string // For text files
-  url?: string    // For PDFs and other files
-}
+type Document = DocumentMetadata
 
 const Documents = () => {
   const [documents, setDocuments] = useState<Document[]>([])
   const [isDragging, setIsDragging] = useState(false)
   const [previewDoc, setPreviewDoc] = useState<Document | null>(null)
+  const [previewUrl, setPreviewUrl] = useState<string | null>(null)
+  const [error, setError] = useState<string | null>(null)
+
+  useEffect(() => {
+    const fetchDocuments = async () => {
+      try {
+        const response = await documentApi.getAllDocuments()
+        setDocuments(response.documents)
+      } catch (err) {
+        console.error('Error fetching documents:', err)
+        setError('Failed to load documents. Please refresh the page.')
+      }
+    }
+
+    fetchDocuments()
+  }, [])
 
   const handleDragOver = (e: React.DragEvent) => {
     e.preventDefault()
@@ -39,48 +49,38 @@ const Documents = () => {
   }
 
   const handleFiles = async (files: File[]) => {
-    const newDocuments = await Promise.all(files.map(async file => {
-      const doc: Document = {
-        id: Date.now(),
-        name: file.name,
-        uploadDate: new Date(),
-        size: formatFileSize(file.size)
-      }
+    setError(null)
 
-      // Create preview URL for PDFs
-      if (file.type === 'application/pdf') {
-        doc.url = URL.createObjectURL(file)
-      }
-      // Read text files
-      else if (file.type === 'text/plain') {
-        doc.content = await file.text()
-      }
+    try {
+      const newDocuments = await Promise.all(files.map(async file => {
+        try {
+          return await documentApi.uploadDocument(file)
+        } catch (err) {
+          console.error(`Error uploading ${file.name}:`, err)
+          throw new Error(`Failed to upload ${file.name}`)
+        }
+      }))
 
-      return doc
-    }))
-
-    setDocuments(prev => [...prev, ...newDocuments])
+      setDocuments(prev => [...prev, ...newDocuments])
+    } catch (err) {
+      console.error('Error handling files:', err)
+      setError('Failed to upload one or more files. Please try again.')
+    }
   }
 
-  const formatFileSize = (bytes: number) => {
-    if (bytes < 1024) 
-      return bytes + ' B'
-    else if (bytes < 1024 * 1024) 
-      return (bytes / 1024).toFixed(1) + ' KB'
-    else 
-      return (bytes / (1024 * 1024)).toFixed(1) + ' MB'
-  }
-
-  const handleDelete = (id: number) => {
-    setDocuments(prev => prev.filter(doc => doc.id !== id))
-  }
-
-  const handlePreview = (doc: Document) => {
-    setPreviewDoc(doc)
+  const handlePreview = async (doc: Document) => {
+    try {
+      const { signed_url } = await documentApi.getFreshSignedUrl(doc.document_id)
+      setPreviewUrl(signed_url)
+      setPreviewDoc(doc)
+    } catch {
+      setError('Failed to load document preview. Please try again.')
+    }
   }
 
   const closePreview = () => {
     setPreviewDoc(null)
+    setPreviewUrl(null)
   }
 
   return (
@@ -113,16 +113,22 @@ const Documents = () => {
               type="file" 
               multiple 
               onChange={handleFileInput}
-              accept=".pdf,.doc,.docx,.txt"
+              accept=".pdf"
             />
             Choose files
           </label>
         </div>
 
+        {error && (
+          <div className="error-message">
+            {error}
+          </div>
+        )}
+
         <div className="documents-list">
           {documents.map(doc => (
             <div 
-              key={doc.id} 
+              key={doc.document_id} 
               className="document-item"
               onClick={() => handlePreview(doc)}
             >
@@ -133,23 +139,11 @@ const Documents = () => {
                 </svg>
               </div>
               <div className="document-info">
-                <div className="document-name">{doc.name}</div>
+                <div className="document-name">{doc.filename}</div>
                 <div className="document-meta">
-                  {doc.size} • {doc.uploadDate.toLocaleDateString()}
+                  {new Date(doc.upload_date).toLocaleDateString()}
                 </div>
               </div>
-              <button 
-                className="delete-button"
-                onClick={(e) => {
-                  e.stopPropagation()
-                  handleDelete(doc.id)
-                }}
-                aria-label="Delete document"
-              >
-                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                  <path d="M18 6L6 18M6 6l12 12"/>
-                </svg>
-              </button>
             </div>
           ))}
         </div>
@@ -158,9 +152,9 @@ const Documents = () => {
           <div className="preview-modal">
             <div className="preview-content">
               <div className="preview-header">
-                <h3>{previewDoc.name}</h3>
+                <h3>{previewDoc.filename}</h3>
                 <button 
-                  className="close-button"
+                  className="preview-close-button"
                   onClick={closePreview}
                   aria-label="Close preview"
                 >
@@ -170,20 +164,12 @@ const Documents = () => {
                 </button>
               </div>
               <div className="preview-body">
-                {previewDoc.url ? (
-                  <iframe 
-                    src={previewDoc.url} 
-                    title={previewDoc.name}
-                    width="100%"
-                    height="100%"
-                  />
-                ) : previewDoc.content ? (
-                  <pre>{previewDoc.content}</pre>
-                ) : (
-                  <div className="preview-unsupported">
-                    This file type cannot be previewed
-                  </div>
-                )}
+                <iframe 
+                  src={previewUrl ?? ''} 
+                  title={previewDoc.filename}
+                  width="100%"
+                  height="100%"
+                />
               </div>
             </div>
           </div>
