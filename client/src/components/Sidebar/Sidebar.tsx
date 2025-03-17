@@ -62,7 +62,7 @@ const Sidebar = ({ activeSection, onSectionChange, onCollapse }: SidebarProps) =
     navigate('/auth/login');
   };
 
-  const userData = {
+  const [userData, setUserData] = useState({
     firstName: 'Yasemin',
     lastName: 'Nurluoglu',
     height: '165 cm',
@@ -70,7 +70,14 @@ const Sidebar = ({ activeSection, onSectionChange, onCollapse }: SidebarProps) =
     gender: 'Female',
     sex: 'Female',
     age: '20'
-  }
+  });
+
+
+  const handleSave = (updatedData: typeof userData) => {
+    console.log("Updated Profile:", updatedData);
+    setUserData(updatedData); 
+    setShowProfile(false); 
+  };
 
   const menuItems = [
     { 
@@ -191,6 +198,7 @@ const Sidebar = ({ activeSection, onSectionChange, onCollapse }: SidebarProps) =
           {console.log("Profile is open")}
           <Profile {...userData}
           onClose={() => setShowProfile(false)}
+          onSave={handleSave}
           />
         </>
 
