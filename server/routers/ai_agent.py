@@ -16,7 +16,7 @@ from constants.request_obj import (
 )
 from dependencies.ai_dependencies import get_llm, initializeGraph, trigger_response, AIBrain
 
-import random ## TO BE REMOVED
+import random  ## TO BE REMOVED
 from datetime import datetime
 import json
 
@@ -31,7 +31,6 @@ router = APIRouter()
 states = {}
 
 
-
 @router.get("/openai-health")
 async def health_check():
     """
@@ -44,7 +43,6 @@ async def health_check():
         raise HTTPException(
             status_code=500, detail=f"OpenAI connection issue: {str(e)}"
         )
-
 
 
 ## Chain of Prompts Example
@@ -74,16 +72,15 @@ async def health_check():
 #         "role": "assistant",
 #         "content": "Hello! How can I help with your health related questions?"
 #     }
-# ] 
+# ]
 @router.post("/ai-response")
 async def ai_response(
-                        request: PromptRequest, 
-                        user: Annotated[dict, Depends(get_firebase_user_from_token)]
-                    ):
+    request: PromptRequest, user: Annotated[dict, Depends(get_firebase_user_from_token)]
+):
     """
     Get AI response based on the provided prompt, limited to currently active session.
     """
-    
+
     if request is None or request.prompt is None:
         return {"error": "No prompt provided."}
     try:
