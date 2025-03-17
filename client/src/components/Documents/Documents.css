@@ -152,7 +152,7 @@
   color: #333;
 }
 
-.close-button {
+.preview-close-button {
   background: none;
   border: none;
   padding: 0.5rem;
@@ -162,7 +162,8 @@
   transition: color 0.2s;
 }
 
-.close-button:hover {
+.preview-close-button:hover {
+  background: none;
   color: #333;
 }
 
