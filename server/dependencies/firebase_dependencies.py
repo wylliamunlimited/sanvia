@@ -18,6 +18,7 @@ from constants.credentials import FIREBASE_ADMIN_API_KEY
 from constants.langgraph_obj import (
     AIBrain
 )
+from constants.firestore_obj import Survey
 
 
 def initialize_firebase():
@@ -37,10 +38,10 @@ def get_firestore_client():
 
 
 ## this function should be under utils for sign up or database operation script [will come back and check]
-def update_survey_entry(user_id: str, survey_data: dict):
+def update_survey_entry(user_id: str, survey_data: Survey):
     """Updates a user's survey entry in Firestore."""
     doc_ref = get_firestore_client().collection("surveys").document(user_id)
-    doc_ref.set(survey_data, merge=True)
+    doc_ref.set(survey_data.to_dict(), merge=True)
 
 def update_chat_entry(user_id: str, thread_id: str, chat_data: dict):
     """Update chat data of thread_id in Firestore"""
