@@ -2,6 +2,7 @@ import { useState } from 'react'
 import './Sidebar.css'
 import { useNavigate } from 'react-router-dom'
 import Profile from '../Profile/Profile.tsx'
+import { useAuth } from '../../provider/AuthContext.tsx'
 
 type NavItem = {
   id: string
