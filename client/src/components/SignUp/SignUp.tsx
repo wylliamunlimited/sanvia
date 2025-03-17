@@ -4,6 +4,7 @@ import "./SignUp.css"; // Import shared styles
 // import { useAuth } from "../../provider/AuthContext";
 import { auth } from "../../api/firebase";
 import { createUserWithEmailAndPassword } from "firebase/auth";
+import { firestoreApi } from "../../api/firestoreApi";
 
 interface SignUpProps {
   onSignUpSuccess: () => void;
@@ -20,7 +21,7 @@ const SignUp: React.FC<SignUpProps> = ({ onSignUpSuccess }) => {
 
   // const { user, loading, logout } = useAuth();
 
-  const handleSignUp = () => {
+  const handleSignUp = async () => {
     try {
       if (!email || !password || !confirmPassword || !name || !lastName) {
         setError("Please fill out all fields.");
@@ -38,8 +39,17 @@ const SignUp: React.FC<SignUpProps> = ({ onSignUpSuccess }) => {
           user.getIdToken(false).then((token) => {
             localStorage.setItem("sanvia-refreshToken", token);
             console.log("Token is stored properly.");
+          }).then(() => {
+            firestoreApi.uploadNames(name, lastName)
+            .then((data) => {
+              console.log(`Upload names onto Firestore, ${data}`);
+            })
+            .catch((error) => {
+              setError(error);
+            });
           });
 
+          
           onSignUpSuccess();
           navigate("/auth/survey");
         })
@@ -47,8 +57,6 @@ const SignUp: React.FC<SignUpProps> = ({ onSignUpSuccess }) => {
           console.log("Sign Up Failed.");
           setError(error);
         });
-
-      // Update information on firestore
 
       setError("");
       alert(`Signed up as ${email}`);
