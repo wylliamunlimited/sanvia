@@ -21,6 +21,7 @@ from dependencies.firebase_dependencies import (
     get_firestore_client,
     get_firebase_user_from_token,
 )
+from constants.credentials import FIREBASE_ADMIN_API_KEY
 
 from constants.utils import POPPLER_PATH
 
@@ -33,13 +34,13 @@ BUCKET_NAME = "sanvia-file-storage"  # Google Cloud Storage bucket
 def upload_to_gcs(file_bytes, destination_blob_name):
     """Uploads a file to Google Cloud Storage and returns a signed URL."""
     try:
-        credentials_path = os.getenv("GOOGLE_APPLICATION_CREDENTIALS")
+        # credentials_path = os.getenv("GOOGLE_APPLICATION_CREDENTIALS")
 
-        if not credentials_path:
-            raise ValueError("❌ GOOGLE_APPLICATION_CREDENTIALS is not set in .env!")
+        # if not credentials_path:
+        #     raise ValueError("❌ GOOGLE_APPLICATION_CREDENTIALS is not set in .env!")
 
-        credentials = service_account.Credentials.from_service_account_file(
-            credentials_path
+        credentials = service_account.Credentials.from_service_account_info(
+            FIREBASE_ADMIN_API_KEY
         )
 
         storage_client = storage.Client(credentials=credentials)
