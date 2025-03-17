@@ -8,7 +8,8 @@ from fastapi import APIRouter, Depends, HTTPException
 from typing import Annotated, Dict
 from dependencies.firebase_dependencies import (
     get_firebase_user_from_token,
-    update_chat_entry
+    update_chat_entry,
+    get_chat
 )
 from constants.request_obj import (
     PromptRequest
@@ -80,7 +81,7 @@ async def ai_response(
                         user: Annotated[dict, Depends(get_firebase_user_from_token)]
                     ):
     """
-    Get AI response based on the provided prompt.
+    Get AI response based on the provided prompt, limited to currently active session.
     """
     
     if request is None or request.prompt is None:
@@ -147,13 +148,32 @@ async def getChat(
     thread_id: str,
     user: Annotated[dict, Depends(get_firebase_user_from_token)]
 ):
+    """
+    Retrieve the chat data specified by thread_id, activating and replacing existing chat session (if any) with it.
+    """
     if thread_id is None or thread_id.strip() == "":
         raise HTTPException(
             status_code=400, detail=f"Error: thread_id is not provided."
         )
     
     try:
-        pass
+        
+        ## get thread data
+        thread = get_chat(user_id=user['uid'], thread_id=thread_id)
+        
+        ## check for session replacement
+        if user['uid'] in states.keys():
+            states.pop(user['uid'])
+            
+        ## reinitialize session states for LangGraph
+        _graph, _state = initializeGraph()
+        _state["thread_id"] = thread_id
+        _state["prompt_chain"] = thread.to_dict()["prompt_chain"] if thread.exists else _state["prompt_chain"]
+        states[user["uid"]] = _state
+        
+        print(f"ALL STATES:\n{json.dumps(states, indent=4)}")
+        
+        return {"chat": _state["prompt_chain"], "thread_id": _state["thread_id"]}
     except Exception as e:
         raise HTTPException(
             status_code=400, detail=f"Error: {e}"
