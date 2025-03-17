@@ -20,7 +20,6 @@ from constants.langgraph_obj import (
     AIBrain
 )
 
-
 def initialize_firebase():
     """Initialize Firebase Admin SDK if not already initialized."""
     if not firebase_admin._apps:
@@ -94,5 +93,3 @@ def get_firebase_user_from_token(
             detail="Not logged in or Invalid credentials",
             headers={"WWW-Authenticate": "Bearer realm='Invalid Token'"},
         )
-        
-        

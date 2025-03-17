@@ -18,8 +18,6 @@ from constants.credentials import JWT_HASH_KEY
 
 # import jwt
 from datetime import datetime, timedelta
-    
-
 router = APIRouter()
 
 
