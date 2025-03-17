@@ -1,5 +1,6 @@
 from typing import List, Annotated
 import sys
+import json
 
 # caution: path[0] is reserved for script path (or '' in REPL)
 sys.path.insert(1, "../dependencies")
@@ -21,7 +22,9 @@ from dependencies.firebase_dependencies import (
     get_firestore_client,
     get_firebase_user_from_token,
 )
-from constants.credentials import FIREBASE_ADMIN_API_KEY
+from constants.credentials import (
+    FIREBASE_ADMIN_API_KEY
+)
 
 from constants.utils import POPPLER_PATH
 
@@ -34,11 +37,11 @@ BUCKET_NAME = "sanvia-file-storage"  # Google Cloud Storage bucket
 def upload_to_gcs(file_bytes, destination_blob_name):
     """Uploads a file to Google Cloud Storage and returns a signed URL."""
     try:
-        # credentials_path = os.getenv("GOOGLE_APPLICATION_CREDENTIALS")
+        # credentials_json = os.getenv("GOOGLE_APPLICATION_CREDENTIALS")
 
-        # if not credentials_path:
+        # if not credentials_json:
         #     raise ValueError("❌ GOOGLE_APPLICATION_CREDENTIALS is not set in .env!")
-
+        
         credentials = service_account.Credentials.from_service_account_info(
             FIREBASE_ADMIN_API_KEY
         )
@@ -225,7 +228,18 @@ def generate_signed_url(gcs_path):
      Generate a signed URL for secure temporary access to the file in GCS.
      """
      try:
-         storage_client = storage.Client()
+        #  credentials_json = os.getenv("GOOGLE_APPLICATION_CREDENTIALS")
+
+        #  if not credentials_json:
+        #      raise ValueError("❌ GOOGLE_APPLICATION_CREDENTIALS is not set in .env!")
+
+        #  credentials_dict = json.loads(credentials_json)
+         
+         credentials = service_account.Credentials.from_service_account_info(
+            FIREBASE_ADMIN_API_KEY
+         )
+
+         storage_client = storage.Client(credentials=credentials)
          bucket = storage_client.bucket(BUCKET_NAME)
          blob = bucket.blob(gcs_path)
  
