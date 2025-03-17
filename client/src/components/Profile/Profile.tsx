@@ -56,8 +56,8 @@ const handleSave = () => {
     };
     
     console.log('Updated profile:', updatedProfile);
-    
-    onSave(updatedProfile); // Pass data to parent component
+    // Pass data to parent component
+    onSave(updatedProfile); 
     setIsEditing(false);
   };
 console.log("Sidebar is rendering");
@@ -80,6 +80,7 @@ console.log("Sidebar is rendering");
         </div>
 
         <div className="profile-content">
+        // editing the personal profile information
         {isEditing ? (
             <>
               <input 
