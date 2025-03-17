@@ -5,9 +5,6 @@
     background: #f5f5f5;
   }
   
-  .image {
-    width: 200%;
-  }
   .navbar {
     display: flex;
     justify-content: space-between;
