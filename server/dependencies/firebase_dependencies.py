@@ -42,11 +42,15 @@ def update_survey_entry(user_id: str, survey_data: dict):
     doc_ref = get_firestore_client().collection("surveys").document(user_id)
     doc_ref.set(survey_data, merge=True)
 
-
 def update_chat_entry(user_id: str, thread_id: str, chat_data: dict):
     """Update chat data of thread_id in Firestore"""
     doc_ref = get_firestore_client().collection("chat-history").document(user_id).collection("threads").document(thread_id)
     doc_ref.set(chat_data, merge=True)
+    
+def get_chat(user_id: str, thread_id: str):
+    """Retrieve chat data of user_id/thread_id From Firestore"""
+    doc_ref = get_firestore_client().collection("chat-history").document(user_id).collection("threads").document(thread_id)
+    return doc_ref.get()
     
 # Authentication setup (Bearer Token)
 bearer_scheme = HTTPBearer(auto_error=False)
