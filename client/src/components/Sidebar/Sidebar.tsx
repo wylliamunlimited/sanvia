@@ -3,7 +3,8 @@ import './Sidebar.css'
 import { useNavigate } from 'react-router-dom'
 import { firestoreApi } from '../../api/firestoreApi'
 import Profile from '../Profile/Profile.tsx'
-import { useAuth } from '../../provider/AuthContext.tsx'
+import { useAuth } from '../../provider/AuthContext'
+import { firestoreApi } from '../../api/firestoreApi'
 
 type NavItem = {
   id: string
@@ -58,6 +59,8 @@ const Sidebar = ({ activeSection, onSectionChange, onCollapse }: SidebarProps) =
   const [userName, setUserName] = useState("Anonymous");
   const { logout } = useAuth();
   const navigate = useNavigate();
+  
+  // const userInitials = 'YN'
   useEffect(() => {
     const fetchProfile = async () => {
       firestoreApi.get_user_profile().then((data) => {
@@ -150,13 +153,13 @@ const Sidebar = ({ activeSection, onSectionChange, onCollapse }: SidebarProps) =
       icon: (
         <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
           <circle cx="12" cy="7" r="4" />
-          <path d="M6 21v-2a4 4 0 0 1 4-4h4a4 4 0 0 1 4 4v2" />
+          <path d="M6 21v-2a4 4 0 0 1 4-4h4a4 4 0 0 1 4 4v2" /> 
         </svg>
       ),
       onClick: () => {
         console.log('Profile button clicked');
         setShowProfile(true);
-        setMenuOpen(false);
+        setMenuOpen(false); 
       }
     }
   ]
