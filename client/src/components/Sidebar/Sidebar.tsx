@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react'
 import './Sidebar.css'
 import { useNavigate } from 'react-router-dom'
+import { firestoreApi } from '../../api/firestoreApi'
 import Profile from '../Profile/Profile.tsx'
 import { useAuth } from '../../provider/AuthContext'
 import { firestoreApi } from '../../api/firestoreApi'
@@ -60,7 +61,6 @@ const Sidebar = ({ activeSection, onSectionChange, onCollapse }: SidebarProps) =
   const navigate = useNavigate();
   
   // const userInitials = 'YN'
-
   useEffect(() => {
     const fetchProfile = async () => {
       firestoreApi.get_user_profile().then((data) => {
