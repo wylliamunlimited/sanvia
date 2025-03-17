@@ -4,7 +4,6 @@ import { useNavigate } from 'react-router-dom'
 import { firestoreApi } from '../../api/firestoreApi'
 import Profile from '../Profile/Profile.tsx'
 import { useAuth } from '../../provider/AuthContext'
-import { firestoreApi } from '../../api/firestoreApi'
 
 type NavItem = {
   id: string
