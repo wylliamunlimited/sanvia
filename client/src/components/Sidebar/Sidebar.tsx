@@ -58,7 +58,6 @@ const Sidebar = ({ activeSection, onSectionChange, onCollapse }: SidebarProps) =
   const [userName, setUserName] = useState("Anonymous");
   const { logout } = useAuth();
   const navigate = useNavigate();
-  const [showProfile, setShowProfile] = useState(false)
   
   // const userInitials = 'YN'
 
@@ -77,6 +76,9 @@ const Sidebar = ({ activeSection, onSectionChange, onCollapse }: SidebarProps) =
 
   // const userInitials = 'JW'
   // userName = 'Justin Wang'
+  const [showProfile, setShowProfile] = useState(false)
+  
+  // const userInitials = 'YN'
   const handleLogout = () => {
     setMenuOpen(false);
     logout();
