@@ -13,6 +13,7 @@ from dependencies.firebase_dependencies import (
     get_firebase_user_from_token,
     update_survey_entry,
     get_firestore_client,
+    update_name_entry
 )
 from constants.firestore_obj import Survey
 
@@ -28,8 +29,17 @@ async def submit_survey(
         age=survey_data['age'], gender=survey_data['gender'], sex=survey_data['sex'], height=survey_data['height'], 
         weight=survey_data['weight']
     ))
+    print(user['uid'])
     return {"msg": "Survey updated successfully"}
 
+@router.post("/store-names")
+async def upload_names(
+    user: Annotated[dict, Depends(get_firebase_user_from_token)], first_name: str, last_name: str
+):
+    """Upload user's first & last name in Firestore."""
+    update_name_entry(user_id=user['uid'], first_name=first_name, last_name=last_name)
+    print(user['uid'])
+    return {"msg": "Names updated successfully"}
 
 @router.get("/firestore-health")
 async def health_check():

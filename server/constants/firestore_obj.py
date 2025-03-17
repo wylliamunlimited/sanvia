@@ -1,14 +1,14 @@
 from enum import Enum
 
 class Gender(Enum):
-    Men = 1
-    Women = 2
-    Nonbinary = 3
+    Men = "Men"
+    Women = "Women"
+    Nonbinary = "Nonbinary"
     
 class Sex(Enum):
-    Male = 1
-    Female = 2
-    Intersex = 3
+    Male = "Male"
+    Female = "Female"
+    Intersex = "Intersex"
 
 # FIRESTORE DATA OBJECTS
 
@@ -29,7 +29,7 @@ class Survey:
     @staticmethod
     def from_dict(source):
         try:
-            return Survey(age=source['Age'], gender=source['Gender'], sex=source['Sex'], height=source['Height'], weight=source['Weight'])
+            return Survey(age=int(source['Age']), gender=source['Gender'], sex=source['Sex'], height=float(source['Height']), weight=float(source['Weight']))
         except Exception as e:
             raise ValueError("Make sure all the fields are entered: age, gender, sex, height, weight")
     
