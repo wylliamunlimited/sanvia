@@ -1,4 +1,3 @@
-from typing import List, Annotated
 import sys
 
 # caution: path[0] is reserved for script path (or '' in REPL)
@@ -22,7 +21,9 @@ from dependencies.firebase_dependencies import (
     get_firebase_user_from_token,
 )
 
-from constants.utils import POPPLER_PATH
+from constants.utils import (
+    POPPLER_PATH
+)
 
 router = APIRouter()
 
@@ -201,3 +202,18 @@ async def get_document(
             "Content-Disposition": f'inline; filename="{document_data["filename"]}"'
         },
     )
+
+
+@router.get("/documents")
+async def list_documents(user: Annotated[dict, Depends(get_firebase_user_from_token)]):
+    """Fetches list of document names for the logged-in user."""
+    user_id = user["uid"]
+    db = get_firestore_client()
+    docs = db.collection("documents").document(user_id).collection("files").stream()
+
+    document_list = [
+        {"document_id": doc.id, "filename": doc.to_dict().get("filename")}
+        for doc in docs
+    ]
+
+    return {"documents": document_list}

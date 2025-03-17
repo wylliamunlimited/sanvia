@@ -56,6 +56,11 @@ def hello():
     """Server is running route to test if the app is running."""
     return {"msg": "Server is running"}
 
+@app.get("/health")
+def health_check():
+    """Health Check Endpoint to ensure server is running"""
+    return {"status": "healthy"}
+
 
 origins = ["*"]  # For development, allow all origins
 
