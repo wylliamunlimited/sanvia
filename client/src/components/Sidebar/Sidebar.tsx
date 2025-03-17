@@ -1,8 +1,9 @@
 import { useEffect, useState } from 'react'
 import './Sidebar.css'
 import { useNavigate } from 'react-router-dom'
-import { useAuth } from '../../provider/AuthContext'
 import { firestoreApi } from '../../api/firestoreApi'
+import Profile from '../Profile/Profile.tsx'
+import { useAuth } from '../../provider/AuthContext.tsx'
 
 type NavItem = {
   id: string
@@ -45,7 +46,9 @@ const navItems: NavItem[] = [
         <circle cx="12" cy="12" r="9" />
       </svg>
     )
-  }
+  },
+  
+
 ]
 
 
@@ -55,7 +58,6 @@ const Sidebar = ({ activeSection, onSectionChange, onCollapse }: SidebarProps) =
   const [userName, setUserName] = useState("Anonymous");
   const { logout } = useAuth();
   const navigate = useNavigate();
-
   useEffect(() => {
     const fetchProfile = async () => {
       firestoreApi.get_user_profile().then((data) => {
@@ -71,17 +73,31 @@ const Sidebar = ({ activeSection, onSectionChange, onCollapse }: SidebarProps) =
 
   // const userInitials = 'JW'
   // userName = 'Justin Wang'
+  const [showProfile, setShowProfile] = useState(false)
+  
+  const userInitials = 'YN'
   const handleLogout = () => {
     setMenuOpen(false);
     logout();
     navigate('/auth/login');
   };
 
-  //make these buttons that work
-  // <button id= "settings">Hello </button>;
-  // <button id= "feedback"></button>;
-  // <button id= "logout"></button>
+  const [userData, setUserData] = useState({
+    firstName: 'Yasemin',
+    lastName: 'Nurluoglu',
+    height: '165 cm',
+    weight: '60 kg',
+    gender: 'Female',
+    sex: 'Female',
+    age: '20'
+  });
 
+
+  const handleSave = (updatedData: typeof userData) => {
+    console.log("Updated Profile:", updatedData);
+    setUserData(updatedData); 
+    setShowProfile(false); 
+  };
 
   const menuItems = [
     {
@@ -93,7 +109,11 @@ const Sidebar = ({ activeSection, onSectionChange, onCollapse }: SidebarProps) =
           <path d="M12.22 2h-.44a2 2 0 0 0-2 2v.18a2 2 0 0 1-1 1.73l-.43.25a2 2 0 0 1-2 0l-.15-.08a2 2 0 0 0-2.73.73l-.22.38a2 2 0 0 0 .73 2.73l.15.1a2 2 0 0 1 1 1.72v.51a2 2 0 0 1-1 1.74l-.15.09a2 2 0 0 0-.73 2.73l.22.38a2 2 0 0 0 2.73.73l.15-.08a2 2 0 0 1 2 0l.43.25a2 2 0 0 1 1 1.73V20a2 2 0 0 0 2 2h.44a2 2 0 0 0 2-2v-.18a2 2 0 0 1 1-1.73l.43-.25a2 2 0 0 1 2 0l.15.08a2 2 0 0 0 2.73-.73l.22-.39a2 2 0 0 0-.73-2.73l-.15-.08a2 2 0 0 1-1-1.74v-.5a2 2 0 0 1 1-1.74l.15-.09a2 2 0 0 0 .73-2.73l-.22-.38a2 2 0 0 0-2.73-.73l-.15.08a2 2 0 0 1-2 0l-.43-.25a2 2 0 0 1-1-1.73V4a2 2 0 0 0-2-2z" />
           <circle cx="12" cy="12" r="3" />
         </svg>
-      )
+      ),
+      onClick: () => {
+        console.log('Settings clicked');
+        setMenuOpen(false);
+      }
     },
     {
       id: 'feedback',
@@ -102,7 +122,11 @@ const Sidebar = ({ activeSection, onSectionChange, onCollapse }: SidebarProps) =
         <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
           <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z" />
         </svg>
-      )
+      ),
+      onClick: () => {
+        console.log('Feedback clicked');
+        setMenuOpen(false);
+      }
     },
     {
       id: 'logout',
@@ -114,7 +138,26 @@ const Sidebar = ({ activeSection, onSectionChange, onCollapse }: SidebarProps) =
           <line x1="21" y1="12" x2="9" y2="12" />
         </svg>
       ),
-      onClick: () => handleLogout()
+      onClick: () => {
+        console.log('Logout clicked');
+        handleLogout();
+        setMenuOpen(false);
+      }
+    },
+    {
+      id: 'profile',
+      label: 'Profile',
+      icon: (
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+          <circle cx="12" cy="7" r="4" />
+          <path d="M6 21v-2a4 4 0 0 1 4-4h4a4 4 0 0 1 4 4v2" />
+        </svg>
+      ),
+      onClick: () => {
+        console.log('Profile button clicked');
+        setShowProfile(true);
+        setMenuOpen(false);
+      }
     }
   ]
   return (
@@ -178,6 +221,18 @@ const Sidebar = ({ activeSection, onSectionChange, onCollapse }: SidebarProps) =
           </div>
         )}
       </div>
+      {showProfile && (
+        <>
+          //changing the values in profile
+          {console.log("Profile is open")}
+          <Profile {...userData}
+          onClose={() => setShowProfile(false)}
+          onSave={handleSave}
+          />
+
+        </>
+
+      )}
     </div>
   )
 }
