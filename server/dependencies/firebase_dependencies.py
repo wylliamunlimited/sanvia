@@ -47,6 +47,11 @@ def update_name_entry(user_id: str, first_name: str, last_name: str):
     """Updates a user's first & last names in Firestore."""
     doc_ref = get_firestore_client().collection("profiles").document(user_id)
     doc_ref.set({"first-name": first_name, "last-name": last_name}, merge=True)
+    
+def get_profile(user_id: str):
+    """Retrieve User's Profile From Firestore"""
+    doc_ref = get_firestore_client().collection("profiles").document(user_id)
+    return doc_ref.get()
 
 def update_chat_entry(user_id: str, thread_id: str, chat_data: dict):
     """Update chat data of thread_id in Firestore"""
