@@ -1,6 +1,9 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import "./SignUp.css"; // Import shared styles
+// import { useAuth } from "../../provider/AuthContext";
+import { auth } from "../../api/firebase";
+import { createUserWithEmailAndPassword } from "firebase/auth";
 
 interface SignUpProps {
   onSignUpSuccess: () => void;
@@ -15,21 +18,43 @@ const SignUp: React.FC<SignUpProps> = ({ onSignUpSuccess }) => {
   const [error, setError] = useState<string>("");
   const navigate = useNavigate();
 
+  // const { user, loading, logout } = useAuth();
+
   const handleSignUp = () => {
-    if (!email || !password || !confirmPassword||!name||!lastName) {
-      setError("Please fill out all fields.");
-      return;
-    }
+    try {
+      if (!email || !password || !confirmPassword || !name || !lastName) {
+        setError("Please fill out all fields.");
+        return;
+      }
 
-    if (password !== confirmPassword) {
-      setError("Passwords do not match.");
-      return;
-    }
+      if (password !== confirmPassword) {
+        setError("Passwords do not match.");
+        return;
+      }
 
-    setError("");
-    alert(`Signed up as ${email}`);
-    onSignUpSuccess();
-    navigate("/auth/login");
+      createUserWithEmailAndPassword(auth, email, password)
+        .then((userCredential) => {
+          const user = userCredential.user;
+          user.getIdToken(false).then((token) => {
+            localStorage.setItem("sanvia-refreshToken", token);
+            console.log("Token is stored properly.");
+          });
+
+          onSignUpSuccess();
+          navigate("/auth/survey");
+        })
+        .catch((error) => {
+          console.log("Sign Up Failed.");
+          setError(error);
+        });
+
+      // Update information on firestore
+
+      setError("");
+      alert(`Signed up as ${email}`);
+    } catch (e) {
+      setError(`Error: ${e}`);
+    }
   };
 
   return (
@@ -79,7 +104,7 @@ const SignUp: React.FC<SignUpProps> = ({ onSignUpSuccess }) => {
 
         <p className="toggleText">
           Already have an account?{" "}
-          <span className="link" onClick={() => navigate("/auth/login")}>
+          <span className="link" onClick={() => navigate("/auth/survey")}>
             Login
           </span>
         </p>

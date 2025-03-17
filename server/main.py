@@ -14,17 +14,13 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 import firebase_admin
 from firebase_admin import credentials
-from routers import ( 
-                        firebase_auth, 
-                        firebase_db, 
-                        search,
-                        ai_agent
-                    )
+from routers import firebase_auth, firebase_db, search, ai_agent, document_processing
 from dependencies.firebase_dependencies import (
-                                                get_settings,
-                                                initialize_firebase,
-                                                get_firestore_client,
-                                            )
+    get_settings,
+    initialize_firebase,
+    get_firestore_client,
+)
+
 # = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = =
 
 # = = = = = = = = = = = = = = = = = = = Initialization  = = = = = = = = = = = = = = = = = = = = =
@@ -43,6 +39,7 @@ app.include_router(firebase_auth.router)
 app.include_router(firebase_db.router)
 app.include_router(search.router)
 app.include_router(ai_agent.router)
+app.include_router(document_processing.router)
 # = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = =
 
 
@@ -60,7 +57,7 @@ def hello():
     return {"msg": "Server is running"}
 
 
-origins = [get_settings().frontend_url]
+origins = ["*"]  # For development, allow all origins
 
 # CORS settings (if needed)
 app.add_middleware(
