@@ -1,4 +1,3 @@
-from typing import List, Annotated
 import sys
 
 # caution: path[0] is reserved for script path (or '' in REPL)
@@ -22,7 +21,9 @@ from dependencies.firebase_dependencies import (
     get_firebase_user_from_token,
 )
 
-from constants.utils import POPPLER_PATH
+from constants.utils import (
+    POPPLER_PATH
+)
 
 router = APIRouter()
 
