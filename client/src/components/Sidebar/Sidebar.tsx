@@ -75,7 +75,7 @@ const Sidebar = ({ activeSection, onSectionChange, onCollapse }: SidebarProps) =
   // userName = 'Justin Wang'
   const [showProfile, setShowProfile] = useState(false)
   
-  const userInitials = 'YN'
+  // const userInitials = 'YN'
   const handleLogout = () => {
     setMenuOpen(false);
     logout();
