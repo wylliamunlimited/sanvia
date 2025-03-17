@@ -80,7 +80,7 @@ console.log("Sidebar is rendering");
         </div>
 
         <div className="profile-content">
-        // editing the personal profile information
+        {/* editing the personal profile information */}
         {isEditing ? (
             <>
               <input 
