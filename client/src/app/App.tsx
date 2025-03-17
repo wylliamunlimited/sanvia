@@ -11,6 +11,7 @@ import Login from '../components/Login/Login'
 import { FirebaseProvider } from '../provider/FirebaseContext';
 import { AuthProvider, useAuth } from '../provider/AuthContext';
 import Survey from '../components/Survey/Survey';
+import Static from '../components/Static/Static';
 
 
 function App() {
@@ -69,6 +70,8 @@ function App() {
             ) 
           }
         />
+        <Route path="/*" element={<Static />} />
+
         
         {/* Survey Route */}
         <Route
@@ -88,7 +91,7 @@ function App() {
         />
         
         <Route
-          path="/*"
+          path="/home"
           element={user ? (
             <div className="app-container">
               {isSidebarOpen && (
