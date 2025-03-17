@@ -127,7 +127,7 @@ def summarize(thoughts: AIBrain) -> AIBrain:
     
     
 
-def initializeGraph(with_state: bool = True):
+def initializeGraph(with_state: bool = True, prompt_chain: list =[]):
     
     # init_state = AIBrain(
     #     prompt_chain=[{
@@ -156,7 +156,7 @@ def initializeGraph(with_state: bool = True):
                     "You will ask question about users' condition if you need more information for judgements."
                     "You will response in the format of suspected condition, next steps, and disclaimers that clarify you are not diagnosing."
                 )
-            }],
+            }] if prompt_chain == [] else prompt_chain,
             data={},
             risk_level=0,
             knowledge=[],
