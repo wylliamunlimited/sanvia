@@ -31,7 +31,12 @@ const navigate = useNavigate();
       <div className={styles['info-section']}>
         {/* We will add the final logo  */}
         <div className={styles.card}>
-          <div className={styles.icon}>S</div>
+            <div className="logo-section">
+                <div className="logo-container">
+                    <img src="/images/logo1.png" alt="Logo" />
+                <span className="logo-text">Sanvia</span>
+            </div>
+      </div>
         </div>
         <div className={styles.card}>
         {/* will be added once the final app logo is done */}

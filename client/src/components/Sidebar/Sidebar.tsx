@@ -47,8 +47,6 @@ const navItems: NavItem[] = [
       </svg>
     )
   },
-  
-
 ]
 
 
