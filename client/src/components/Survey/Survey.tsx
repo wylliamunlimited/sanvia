@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import './Survey.css';
+import { firestoreApi } from '../../api/firestoreApi';
 
 interface SurveyProps {
   onSurveyComplete: () => void;
@@ -20,19 +21,30 @@ const Survey: React.FC<SurveyProps> = ({ onSurveyComplete }) => {
 
   const handleNext = () => setStep(step + 1);
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    const formattedHeight = heightUnit === 'cm' 
-      ? `${height} cm` 
+    const formattedHeight = heightUnit === 'cm'
+      ? `${height} cm`
       : `${feet}'${inches}"`;
 
-    console.log({ 
-      age, 
-      gender, 
-      sex, 
-      height: formattedHeight, 
-      weight: `${weight} ${weightUnit}` 
+    console.log({
+      age,
+      gender,
+      sex,
+      height: formattedHeight,
+      weight: `${weight} ${weightUnit}`
     });
+
+    // Upload to Firestore
+    try {
+      const response = await firestoreApi.uploadSurvey(
+        age, gender, sex, height, weight
+      )  // Change to chatApi.sendMessage once auth is implemented
+      console.log(`Uploaded survey data onto Firestore, ${response}`);
+
+    } catch (err) {
+      console.error('Survey Upload Failed. Error uploading data:', err)
+    }
 
     // Redirect to main page after completing the survey
     onSurveyComplete();
@@ -52,7 +64,7 @@ const Survey: React.FC<SurveyProps> = ({ onSurveyComplete }) => {
       const totalInches = parseFloat(height) / 2.54;
       const feetValue = Math.floor(totalInches / 12);
       const inchesValue = Math.round(totalInches % 12);
-      
+
       setFeet(feetValue.toString());
       setInches(inchesValue.toString());
       setHeightUnit('feet');
@@ -101,9 +113,10 @@ const Survey: React.FC<SurveyProps> = ({ onSurveyComplete }) => {
             <label>Gender:</label>
             <div className="options-container">
               {['Men', 'Women', 'Nonbinary'].map((option) => (
-                <button 
+                <button
                   key={option}
                   type="button"
+                  style={{ "margin": "12px" }}
                   className={gender === option ? 'selected' : ''}
                   onClick={() => { setGender(option); handleNext(); }}
                 >
@@ -119,9 +132,10 @@ const Survey: React.FC<SurveyProps> = ({ onSurveyComplete }) => {
             <label>Sex:</label>
             <div className="options-container">
               {['Male', 'Female', 'Intersex'].map((option) => (
-                <button 
+                <button
                   key={option}
                   type="button"
+                  style={{ "margin": "12px" }}
                   className={sex === option ? 'selected' : ''}
                   onClick={() => { setSex(option); handleNext(); }}
                 >
