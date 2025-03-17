@@ -1,3 +1,4 @@
+from typing import List, Annotated
 import sys
 
 # caution: path[0] is reserved for script path (or '' in REPL)
@@ -21,9 +22,7 @@ from dependencies.firebase_dependencies import (
     get_firebase_user_from_token,
 )
 
-from constants.utils import (
-    POPPLER_PATH
-)
+from constants.utils import POPPLER_PATH
 
 router = APIRouter()
 
@@ -129,6 +128,7 @@ async def upload_document(
             "document_id": document_id,
             "user_id": user_id,
             "upload_date": upload_date,
+            "gcs_path": gcs_path,
             "gcs_url": gcs_url,
             "extracted_text": extracted_text,  # Store OCR text in Firestore
         }
@@ -187,10 +187,10 @@ async def get_document(
         raise HTTPException(status_code=404, detail="Document not found")
 
     document_data = doc.to_dict()
-    gcs_path = document_data.get("gcs_url")
+    gcs_path = document_data.get("gcs_path")
 
     if not gcs_path:
-        raise HTTPException(status_code=500, detail="File URL not found in Firestore")
+        raise HTTPException(status_code=500, detail="File path not found in Firestore")
 
     # Download PDF from GCS
     pdf_stream = download_from_gcs(gcs_path)
@@ -211,9 +211,63 @@ async def list_documents(user: Annotated[dict, Depends(get_firebase_user_from_to
     db = get_firestore_client()
     docs = db.collection("documents").document(user_id).collection("files").stream()
 
-    document_list = [
-        {"document_id": doc.id, "filename": doc.to_dict().get("filename")}
-        for doc in docs
-    ]
+    document_list = []
+    for doc in docs:
+        data = doc.to_dict()
+        data["document_id"] = doc.id  # Add document id to metadata
+        document_list.append(data)
 
     return {"documents": document_list}
+
+def generate_signed_url(gcs_path):
+     """
+     Generate a signed URL for secure temporary access to the file in GCS.
+     """
+     try:
+         storage_client = storage.Client()
+         bucket = storage_client.bucket(BUCKET_NAME)
+         blob = bucket.blob(gcs_path)
+ 
+         signed_url = blob.generate_signed_url(
+             version="v4",
+             expiration=timedelta(minutes=30),  # URL expires in 30 minutes
+             method="GET",
+         )
+         return signed_url
+     except Exception as e:
+         raise HTTPException(
+             status_code=500, detail=f"Error generating signed URL: {str(e)}"
+         )
+
+@router.get("/document/{document_id}/signed-url")
+async def get_fresh_signed_url(
+    user: Annotated[dict, Depends(get_firebase_user_from_token)], document_id: str
+):
+    """Generates a fresh signed URL for a document, allowing preview refresh."""
+    user_id = user["uid"]
+    db = get_firestore_client()
+    doc_ref = (
+        db.collection("documents")
+        .document(user_id)
+        .collection("files")
+        .document(document_id)
+    )
+    doc = doc_ref.get()
+
+    if not doc.exists:
+        raise HTTPException(status_code=404, detail="Document not found")
+
+    document_data = doc.to_dict()
+    gcs_path = document_data.get("gcs_path")
+
+    if not gcs_path:
+        raise HTTPException(status_code=500, detail="File path not found in Firestore")
+
+    # Generate a fresh signed URL
+    fresh_signed_url = generate_signed_url(gcs_path)
+
+    return {
+        "document_id": document_id,
+        "signed_url": fresh_signed_url,
+        "expires_in": 1800,  # 30 minutes in seconds
+    }
