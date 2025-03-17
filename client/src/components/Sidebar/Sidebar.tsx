@@ -195,11 +195,13 @@ const Sidebar = ({ activeSection, onSectionChange, onCollapse }: SidebarProps) =
       </div>
       {showProfile && (
         <>
+          //changing the values in profile
           {console.log("Profile is open")}
           <Profile {...userData}
           onClose={() => setShowProfile(false)}
           onSave={handleSave}
           />
+
         </>
 
       )}
