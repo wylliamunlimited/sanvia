@@ -1,7 +1,7 @@
 import { useState, useRef, useEffect } from 'react'
 import './Chat.css'
 import { getScrollbarWidth } from '../../utils/scrollbar'
-import chatApi, { ChatMessage } from '../../api/chatApi'
+import chatApi from '../../api/chatApi'
 import ReactMarkdown from 'react-markdown'
 import Header from '../ui/Header'
 

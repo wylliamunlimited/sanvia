@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import "./SignUp.css"; // Import shared styles
-import { useAuth } from "../../provider/AuthContext";
+// import { useAuth } from "../../provider/AuthContext";
 import { auth } from "../../api/firebase";
 import { createUserWithEmailAndPassword } from "firebase/auth";
 
