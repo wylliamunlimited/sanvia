@@ -55,6 +55,7 @@ def get_chat(user_id: str, thread_id: str):
 # Authentication setup (Bearer Token)
 bearer_scheme = HTTPBearer(auto_error=False)
 
+
 class Settings(BaseSettings):
     """Main app settings."""
 
@@ -70,7 +71,7 @@ def get_settings() -> Settings:
 
 
 def get_firebase_user_from_token(
-    token: Annotated[HTTPAuthorizationCredentials | None, Depends(bearer_scheme)]
+    token: Annotated[HTTPAuthorizationCredentials | None, Depends(bearer_scheme)],
 ) -> dict | None:
     """Uses a bearer token to identify Firebase user.
 
@@ -92,5 +93,3 @@ def get_firebase_user_from_token(
             detail="Not logged in or Invalid credentials",
             headers={"WWW-Authenticate": "Bearer realm='Invalid Token'"},
         )
-        
-        
