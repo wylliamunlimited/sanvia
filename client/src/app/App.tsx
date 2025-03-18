@@ -41,7 +41,7 @@ function App() {
           path="/auth/signup"
           element={
             isSignUp ? (
-              <Navigate to="/auth/survey" replace />
+              <Navigate to="/onboarding" replace />
             ) : (
               <SignUp
                 onSignUpSuccess={() => {
@@ -72,9 +72,9 @@ function App() {
         
         {/* Survey Route */}
         <Route
-          path="/auth/survey"
+          path="/onboarding"
           element={
-            user && isSignUp ? (
+            user ? (
               <Survey
                 onSurveyComplete={() => {
                   // setIsSurveyCompleted(true);
