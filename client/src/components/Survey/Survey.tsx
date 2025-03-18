@@ -37,7 +37,7 @@ const Survey: React.FC<SurveyProps> = ({ onSurveyComplete }) => {
 
     // Upload to Firestore
     try {
-      const response = await firestoreApi.uploadSurvey(
+      const response = await firestoreApi.uploadProfile(
         age, gender, sex, height, weight
       )  // Change to chatApi.sendMessage once auth is implemented
       console.log(`Uploaded survey data onto Firestore, ${response}`);

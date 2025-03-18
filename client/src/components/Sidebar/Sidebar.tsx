@@ -3,7 +3,7 @@ import './Sidebar.css'
 import { useNavigate } from 'react-router-dom'
 import { firestoreApi } from '../../api/firestoreApi'
 import Profile from '../Profile/Profile.tsx'
-import { useAuth } from '../../provider/AuthContext.tsx'
+import { useAuth } from '../../provider/AuthContext'
 
 type NavItem = {
   id: string
@@ -47,7 +47,7 @@ const navItems: NavItem[] = [
       </svg>
     )
   },
-  
+
 
 ]
 
@@ -58,13 +58,39 @@ const Sidebar = ({ activeSection, onSectionChange, onCollapse }: SidebarProps) =
   const [userName, setUserName] = useState("Anonymous");
   const { logout } = useAuth();
   const navigate = useNavigate();
+
+
+  const [userData, setUserData] = useState({
+    firstName: '',
+    lastName: '',
+    height: '',
+    weight: '',
+    gender: '',
+    sex: '',
+    age: ''
+  });
+
+  // const userInitials = 'YN'
   useEffect(() => {
     const fetchProfile = async () => {
       firestoreApi.get_user_profile().then((data) => {
         const fullName = `${data['first-name']} ${data['last-name']}`;
         setUserName(fullName);
+
+        // set user data for profile
+        setUserData({
+          firstName: data['first-name'],
+          lastName: data['last-name'],
+          height: data['Height'],
+          weight: data['Weight'],
+          gender: data['Gender'],
+          sex: data['Sex'],
+          age: data['Age']
+        });
+
         console.log("data:", data);
         console.log(`username: ${fullName}`);
+        console.log(`user data: ${userData}`);
       });
     };
 
@@ -74,7 +100,7 @@ const Sidebar = ({ activeSection, onSectionChange, onCollapse }: SidebarProps) =
   // const userInitials = 'JW'
   // userName = 'Justin Wang'
   const [showProfile, setShowProfile] = useState(false)
-  
+
   // const userInitials = 'YN'
   const handleLogout = () => {
     setMenuOpen(false);
@@ -82,21 +108,10 @@ const Sidebar = ({ activeSection, onSectionChange, onCollapse }: SidebarProps) =
     navigate('/auth/login');
   };
 
-  const [userData, setUserData] = useState({
-    firstName: 'Yasemin',
-    lastName: 'Nurluoglu',
-    height: '165 cm',
-    weight: '60 kg',
-    gender: 'Female',
-    sex: 'Female',
-    age: '20'
-  });
-
-
   const handleSave = (updatedData: typeof userData) => {
     console.log("Updated Profile:", updatedData);
-    setUserData(updatedData); 
-    setShowProfile(false); 
+    setUserData(updatedData);
+    setShowProfile(false);
   };
 
   const menuItems = [
@@ -223,11 +238,11 @@ const Sidebar = ({ activeSection, onSectionChange, onCollapse }: SidebarProps) =
       </div>
       {showProfile && (
         <>
-          //changing the values in profile
+          {/* changing the values in profile */}
           {console.log("Profile is open")}
           <Profile {...userData}
-          onClose={() => setShowProfile(false)}
-          onSave={handleSave}
+            onClose={() => setShowProfile(false)}
+            onSave={handleSave}
           />
 
         </>
