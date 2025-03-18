@@ -47,7 +47,7 @@ const SignUp: React.FC<SignUpProps> = ({ onSignUpSuccess }) => {
               console.log(`Upload names onto Firestore, ${data}`);
               setError("");
               onSignUpSuccess();
-              navigate("/auth/survey");
+              navigate("/onboarding");
             })
             .catch((error) => {
               setError(error);
@@ -135,7 +135,7 @@ const SignUp: React.FC<SignUpProps> = ({ onSignUpSuccess }) => {
       {error && <p className="error">{error}</p>}
       <p className="toggleText">
         Already have an account?{" "}
-        <span className="link" onClick={() => navigate("/auth/survey")}>
+        <span className="link" onClick={() => navigate("/onboarding")}>
           Login
         </span>
       </p>
