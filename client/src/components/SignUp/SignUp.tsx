@@ -43,23 +43,20 @@ const SignUp: React.FC<SignUpProps> = ({ onSignUpSuccess }) => {
             firestoreApi.uploadNames(name, lastName)
             .then((data) => {
               console.log(`Upload names onto Firestore, ${data}`);
+              setError("");
+              alert(`Signed up as ${email}`);
+              onSignUpSuccess();
+              navigate("/auth/survey");
             })
             .catch((error) => {
               setError(error);
             });
           });
-
-          
-          onSignUpSuccess();
-          navigate("/auth/survey");
         })
         .catch((error) => {
           console.log("Sign Up Failed.");
-          setError(error);
+          setError(error.message);
         });
-
-      setError("");
-      alert(`Signed up as ${email}`);
     } catch (e) {
       setError(`Error: ${e}`);
     }
@@ -69,7 +66,6 @@ const SignUp: React.FC<SignUpProps> = ({ onSignUpSuccess }) => {
     <div className="container">
       <div className="card">
         <h2 className="title">Sign Up</h2>
-        {error && <p className="error">{error}</p>}
         <input
           type="name"
           placeholder="Name"
@@ -109,6 +105,7 @@ const SignUp: React.FC<SignUpProps> = ({ onSignUpSuccess }) => {
         <button onClick={handleSignUp} className="button">
           Sign up
         </button>
+        {error && <p className="error">{error}</p>}
 
         <p className="toggleText">
           Already have an account?{" "}
