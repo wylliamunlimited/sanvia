@@ -116,7 +116,21 @@ const Sidebar = ({ activeSection, onSectionChange, onCollapse }: SidebarProps) =
 
   const menuItems = [
     {
-
+      id: 'profile',
+      label: 'Profile',
+      icon: (
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+          <circle cx="12" cy="7" r="4" />
+          <path d="M6 21v-2a4 4 0 0 1 4-4h4a4 4 0 0 1 4 4v2" />
+        </svg>
+      ),
+      onClick: () => {
+        console.log('Profile button clicked');
+        setShowProfile(true);
+        setMenuOpen(false);
+      }
+    },
+    {
       id: 'settings',
       label: 'Settings',
       icon: (
@@ -159,34 +173,19 @@ const Sidebar = ({ activeSection, onSectionChange, onCollapse }: SidebarProps) =
         setMenuOpen(false);
       }
     },
-    {
-      id: 'profile',
-      label: 'Profile',
-      icon: (
-        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-          <circle cx="12" cy="7" r="4" />
-          <path d="M6 21v-2a4 4 0 0 1 4-4h4a4 4 0 0 1 4 4v2" />
-        </svg>
-      ),
-      onClick: () => {
-        console.log('Profile button clicked');
-        setShowProfile(true);
-        setMenuOpen(false);
-      }
-    }
   ]
   return (
     <div className="sidebar">
+      <button
+        className="collapse-button"
+        onClick={onCollapse}
+        aria-label="Collapse sidebar"
+      >
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+          <polyline points="15 18 9 12 15 6" />
+        </svg>
+      </button>
       <div className="sidebar-header">
-        <button
-          className="collapse-button"
-          onClick={onCollapse}
-          aria-label="Collapse sidebar"
-        >
-          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-            <polyline points="15 18 9 12 15 6" />
-          </svg>
-        </button>
       </div>
       <div className="logo-section">
         <div className="logo-container">
@@ -237,16 +236,11 @@ const Sidebar = ({ activeSection, onSectionChange, onCollapse }: SidebarProps) =
         )}
       </div>
       {showProfile && (
-        <>
-          {/* changing the values in profile */}
-          {console.log("Profile is open")}
-          <Profile {...userData}
-            onClose={() => setShowProfile(false)}
-            onSave={handleSave}
-          />
-
-        </>
-
+        <Profile 
+          {...userData}
+          onClose={() => setShowProfile(false)}
+          onSave={handleSave}
+        />
       )}
     </div>
   )
