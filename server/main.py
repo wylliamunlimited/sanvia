@@ -14,7 +14,7 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 import firebase_admin
 from firebase_admin import credentials
-from routers import firebase_auth, firebase_db, search, ai_agent, document_processing
+from routers import firebase_auth, firebase_db, search, ai_agent, document_processing, fhir
 from dependencies.firebase_dependencies import (
     get_settings,
     initialize_firebase,
@@ -40,6 +40,7 @@ app.include_router(firebase_db.router)
 app.include_router(search.router)
 app.include_router(ai_agent.router)
 app.include_router(document_processing.router)
+app.include_router(fhir.router)  
 # = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = =
 
 
