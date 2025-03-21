@@ -6,12 +6,17 @@ from server.dependencies.tavily_dependencies import get_tavily_client
 
 # caution: path[0] is reserved for script path (or '' in REPL)
 sys.path.insert(1, "../dependencies")
-
+sys.path.insert(2, "../constants")
 
 from fastapi import APIRouter, Depends, HTTPException
 from typing import Annotated, Dict
 from dependencies.firebase_dependencies import (
     get_firebase_user_from_token,
+    update_chat_entry,
+    get_chat,
+)
+from constants.request_obj import (
+    PromptRequest,
     update_chat_entry,
     get_chat,
 )
@@ -26,13 +31,9 @@ from langchain_core.messages import HumanMessage  # ✅ Correct Import
 import random  ## TO BE REMOVED
 from datetime import datetime
 import json
+import json
 
 router = APIRouter()
-
-
-class PromptRequest(BaseModel):
-    prompt: str
-    # thread_id: str = None ## Temporary
 
 
 ## recording the graph for each user
@@ -85,6 +86,7 @@ async def health_check():
 #         "role": "assistant",
 #         "content": "Hello! How can I help with your health related questions?"
 #     }
+# ]
 # ]
 @router.post("/ai-response")
 async def ai_response(

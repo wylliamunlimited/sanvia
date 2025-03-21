@@ -1,5 +1,6 @@
-import { useState } from 'react'
-import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
+import { useState } from 'react';
+import { BrowserRouter as Router, Routes, Route, Navigate, useLocation, useNavigate } from 'react-router-dom';
+
 import './App.css'
 import Sidebar from '../components/Sidebar/Sidebar'
 import Chat from '../components/Chat/Chat'
@@ -7,35 +8,38 @@ import Documents from '../components/Documents/Documents'
 import History from '../components/History/History'
 import SignUp from '../components/SignUp/SignUp'
 import Login from '../components/Login/Login'
-
+import { FirebaseProvider } from '../provider/FirebaseContext';
+import { AuthProvider, useAuth } from '../provider/AuthContext';
+import Survey from '../components/Survey/Survey';
 
 function App() {
-  const [activeSection, setActiveSection] = useState('chat')
   const [isSidebarOpen, setSidebarOpen] = useState(true)
-  const [isLogged, setIsLogged] = useState(false);
-  const [isSignUp, setIsSignUp] = useState(false); 
+  const [isSignUp, setIsSignUp] = useState(false);
 
-  const getActiveComponent = () => {
-    if (activeSection === 'chat') {
-      return <Chat />
-    } else if (activeSection === 'documents') {
-      return <Documents />
-    } else if (activeSection === 'history') {
-      return <History />
-    } else {
-      return <Chat />
-    }
-  }
+  const AppRoutes = () => {
+    const { user, loading } = useAuth();
+    const location = useLocation();
+    const navigate = useNavigate();
 
-  return (
-    <Router>
+    if (loading) return <div>Loading...</div>;
+
+    const getActiveSection = () => {
+      const path = location.pathname;
+      if (path === '/chat' || path === '/') return 'chat';
+      if (path === '/documents') return 'documents';
+      if (path === '/history') return 'history';
+      if (path === '/settings') return 'settings';
+      return 'chat';
+    };
+
+    return (
       <Routes>
-        {/* Login/Register Route */}
+        {/* Sign-Up Route */}
         <Route
           path="/auth/signup"
           element={
-            isSignUp? (
-              <Navigate to="/auth/login" replace />
+            isSignUp ? (
+              <Navigate to="/onboarding" replace />
             ) : (
               <SignUp
                 onSignUpSuccess={() => {
@@ -43,54 +47,105 @@ function App() {
                   localStorage.setItem('isSignUp', 'true');
                 }}
               />
-            )
+            ) 
           }
         />
+
+        {/* Login Route */}
         <Route
           path="/auth/login"
           element={
-            isLogged ? (
-              <Navigate to="/" replace />
+            user ? (
+              <Navigate to="/chat" replace />
             ) : (
               <Login
                 onLoginSuccess={() => {
-                  setIsLogged(true);
                   localStorage.setItem('isLogged', 'true');
                 }}
               />
+            ) 
+          }
+        />
+        
+        {/* Survey Route */}
+        <Route
+          path="/onboarding"
+          element={
+            user ? (
+              <Survey
+                onSurveyComplete={() => {
+                  localStorage.setItem('isSurveyCompleted', 'true');
+                }}
+              />
+            ) : (
+              <Navigate to="/" replace />
             )
           }
         />
-        <Route 
-          path="/*" 
-          element={isLogged ? (
+        
+        {/* Main App Routes */}
+        <Route
+          path="/*"
+          element={user ? (
             <div className="app-container">
               {isSidebarOpen && (
-                <Sidebar 
-                  activeSection={activeSection} 
-                  onSectionChange={setActiveSection}
+                <Sidebar
+                  activeSection={getActiveSection()}
+                  onSectionChange={(section) => {
+                    navigate(`/${section}`);
+                  }}
                   onCollapse={() => setSidebarOpen(false)}
                 />
               )}
               <div className="main-section">
                 {!isSidebarOpen && (
-                  <button 
+                  <button
                     className="open-sidebar-button"
                     onClick={() => setSidebarOpen(true)}
                     aria-label="Open sidebar"
                   >
                     <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                      <polyline points="9 18 15 12 9 6"/>
+                      <polyline points="9 18 15 12 9 6" />
                     </svg>
                   </button>
                 )}
-                {getActiveComponent()}
+                <div className="main-section">
+                  {!isSidebarOpen && (
+                    <button 
+                      className="open-sidebar-button"
+                      onClick={() => setSidebarOpen(true)}
+                      aria-label="Open sidebar"
+                    >
+                      <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                        <polyline points="9 18 15 12 9 6"/>
+                      </svg>
+                    </button>
+                  )}
+                  <Routes>
+                    <Route path="/" element={<Navigate to="/chat" replace />} />
+                    <Route path="/chat" element={<Chat />} />
+                    <Route path="/documents" element={<Documents />} />
+                    <Route path="/history" element={<History />} />
+                    <Route path="/settings" element={<div>Settings Page</div>} />
+                    <Route path="*" element={<Navigate to="/chat" replace />} />
+                  </Routes>
+                </div>
               </div>
             </div>
-          ) : <Navigate to="/auth/login" replace/>}
+          ) : <Navigate to="/auth/login" replace />}
         />
       </Routes>
-    </Router>
+    );
+  };
+
+  return (
+    <FirebaseProvider>
+      <AuthProvider>
+        <Router>
+          <AppRoutes></AppRoutes>
+        </Router>
+      </AuthProvider>
+    </FirebaseProvider>
   );
 }
 

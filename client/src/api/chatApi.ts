@@ -22,10 +22,12 @@ const api = axios.create({
 
 // Add auth token to requests
 api.interceptors.request.use((config) => {
-  const token = localStorage.getItem('authToken');
+  const token = localStorage.getItem('sanvia-refreshToken');
   if (token) {
     config.headers['Authorization'] = `Bearer ${token}`;
   }
+  // console.log(`Token value: ${token}`);
+  // console.log('Request Headers Before Sending:', config.headers);
   return config;
 });
 
