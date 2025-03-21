@@ -13,8 +13,12 @@ from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
 import firebase_admin
 from firebase_admin.auth import verify_id_token
 from firebase_admin import credentials, firestore
+from datetime import datetime
 from constants.credentials import FIREBASE_ADMIN_API_KEY
-
+from constants.firestore_obj import Survey
+from constants.langgraph_obj import (
+    AIBrain
+)
 
 def initialize_firebase():
     """Initialize Firebase Admin SDK if not already initialized."""
@@ -33,12 +37,31 @@ def get_firestore_client():
 
 
 ## this function should be under utils for sign up or database operation script [will come back and check]
-def update_survey_entry(user_id: str, survey_data: dict):
+def update_survey_entry(user_id: str, survey_data: Survey):
     """Updates a user's survey entry in Firestore."""
-    doc_ref = get_firestore_client().collection("surveys").document(user_id)
-    doc_ref.set(survey_data, merge=True)
+    doc_ref = get_firestore_client().collection("profiles").document(user_id)
+    doc_ref.set(survey_data.to_dict(), merge=True)
 
+def update_name_entry(user_id: str, first_name: str, last_name: str):
+    """Updates a user's first & last names in Firestore."""
+    doc_ref = get_firestore_client().collection("profiles").document(user_id)
+    doc_ref.set({"first-name": first_name, "last-name": last_name}, merge=True)
+    
+def get_profile(user_id: str):
+    """Retrieve User's Profile From Firestore"""
+    doc_ref = get_firestore_client().collection("profiles").document(user_id)
+    return doc_ref.get()
 
+def update_chat_entry(user_id: str, thread_id: str, chat_data: dict):
+    """Update chat data of thread_id in Firestore"""
+    doc_ref = get_firestore_client().collection("chat-history").document(user_id).collection("threads").document(thread_id)
+    doc_ref.set(chat_data, merge=True)
+    
+def get_chat(user_id: str, thread_id: str):
+    """Retrieve chat data of user_id/thread_id From Firestore"""
+    doc_ref = get_firestore_client().collection("chat-history").document(user_id).collection("threads").document(thread_id)
+    return doc_ref.get()
+    
 # Authentication setup (Bearer Token)
 bearer_scheme = HTTPBearer(auto_error=False)
 
@@ -58,7 +81,7 @@ def get_settings() -> Settings:
 
 
 def get_firebase_user_from_token(
-    token: Annotated[HTTPAuthorizationCredentials | None, Depends(bearer_scheme)]
+    token: Annotated[HTTPAuthorizationCredentials | None, Depends(bearer_scheme)],
 ) -> dict | None:
     """Uses a bearer token to identify Firebase user.
 
@@ -72,7 +95,9 @@ def get_firebase_user_from_token(
                 detail="Token Required.",
                 headers={"WWW-Authenticate": "Bearer realm='Authentication Required'"},
             )
-        user = verify_id_token(token.credentials)
+        user = verify_id_token(token.credentials, check_revoked=True)
+        
+        # print("Decoded Firebase User:", user)
         return user
     except Exception:
         raise HTTPException(
