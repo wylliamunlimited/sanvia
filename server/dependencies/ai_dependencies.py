@@ -49,30 +49,16 @@ def assess_risk(thoughts: AIBrain) -> AIBrain:
     ## IF YES, APPEND RESPONSE TO PROMPT CHAIN
     return thoughts
 
-def print_prompt_chain(thoughts: AIBrain) -> AIBrain:
-    """RISK ASSESSMENT NODE
-
-    Parameters
-    ----------
-    thoughts : AIBrain
-        state of LangGraph Agent
-
-    Returns
-    -------
-    AIBrain
-        state of LangGraph Agent
-    """
-    for i in AIBrain["prompt_chain"]:
-        print(i["role"], i["content"])
-    return thoughts
-
 ## IMPORTANT: this data extraction is conditional, depending on what is in "data" and what the user is asking
 ## there is also foundational data needed, so another separate logic is to find out which foundational data 
 ##                                              is missing then call api to extract them
 ## if foundational data could not be retrieved, the status should also be noted in the data field, indicating 
 ##                                              LLM tried to retrieve but failed
 def data_extract(thoughts: AIBrain) -> AIBrain:
-    """RISK ASSESSMENT NODE
+    """DATA EXTRACTION NODE 
+    Description
+    -----------
+    This node is responsible for searching across various system for user's health data. 
 
     Parameters
     ----------
@@ -88,7 +74,11 @@ def data_extract(thoughts: AIBrain) -> AIBrain:
     return thoughts
 
 def information_gathering(thoughts: AIBrain) -> AIBrain:
-    """RISK ASSESSMENT NODE
+    """INFORMATION GATHERING NODE
+    
+    Description
+    -----------
+    This node is responsible for gathering information from the internet to enrich the LangGraph Agent's knowledge base.
 
     Parameters
     ----------
@@ -116,6 +106,8 @@ def summarize(thoughts: AIBrain) -> AIBrain:
     AIBrain
         state of LangGraph Agent
     """
+    
+    prompt =  thoughts["prompt_chain"]
     
     final_response = get_llm().invoke(thoughts["prompt_chain"])
     ## TODO: APPEND RESPONSE TO PROMPT CHAIN
@@ -166,7 +158,6 @@ def initializeGraph(with_state: bool = True, prompt_chain: list =[]):
     workflow = StateGraph(AIBrain)
     
     # workflow.add_node("risk_assessment")
-    # workflow.add_node("print_prompt_chain")
     # workflow.add_node("data_extract")
     # workflow.add_node("information_gathering")
     workflow.add_node("summarize", summarize)
