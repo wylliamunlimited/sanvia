@@ -2,7 +2,7 @@ import sys
 
 from openai import BaseModel
 
-from server.dependencies.tavily_dependencies import get_tavily_client
+from dependencies.tavily_dependencies import get_tavily_client, tavily_search_function
 
 # caution: path[0] is reserved for script path (or '' in REPL)
 sys.path.insert(1, "../dependencies")
@@ -31,7 +31,7 @@ from langchain_core.messages import HumanMessage  # ✅ Correct Import
 import random  ## TO BE REMOVED
 from datetime import datetime
 import json
-import json
+
 
 router = APIRouter()
 
@@ -92,11 +92,12 @@ async def health_check():
 async def ai_response(
     request: PromptRequest,
     user: Annotated[dict, Depends(get_firebase_user_from_token)],
+    category: str = "diagnosis",  # Default category
     complexity: str = "simple",  # User can choose "simple" or "complex"
     expand: bool = False,  # Toggle to show more/less
 ):
     """
-    Get AI response with an option for complexity and expandable summaries.
+    Get AI response with Tavily-powered research sources and response complexity.
     """
 
     if request is None or request.prompt is None:
@@ -126,27 +127,22 @@ async def ai_response(
         full_response = response["prompt_chain"][-1]["content"]  # Last AI response
 
         # Modify response based on complexity choice
-        if complexity == "simple":
-            simple_response = (
-                " ".join(full_response.split()[:30]) + "..."
-            )  # Trim response
-        else:
-            simple_response = full_response  # Full response
+        simple_response = (
+            " ".join(full_response.split()[:30]) + "..."
+        )  # Shortened summary
 
         # Apply "See More/Less" logic
         if expand:
             final_response = full_response  # Show full response
         else:
             final_response = (
-                " ".join(full_response.split()[:50]) + "..."
-            )  # Shortened preview
+                simple_response
+                if complexity == "simple"
+                else " ".join(full_response.split()[:50]) + "..."
+            )  # Short preview
 
-        # 🔍 Fetch relevant sources
-        search_results = get_tavily_client().search(request.prompt)
-        sources = [
-            {"title": r["title"], "url": r["url"]}
-            for r in search_results["results"][:3]
-        ]
+        # 🔍 Fetch research sources
+        sources = tavily_search_function(request.prompt, category)
 
         # Save chat to Firestore
         update_chat_entry(
@@ -163,6 +159,7 @@ async def ai_response(
             "chat": _state["prompt_chain"],
             "response": final_response,
             "full_response": full_response,  # Full text for "See More"
+            "simple_response": simple_response,  # Now correctly accessible
             "complexity": complexity,
             "expand": expand,
             "sources": sources,

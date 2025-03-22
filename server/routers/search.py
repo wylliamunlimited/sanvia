@@ -4,7 +4,8 @@ import sys
 sys.path.insert(1, "../dependencies")
 
 from fastapi import APIRouter, Depends, HTTPException, status, Query
-from dependencies.tavily_dependencies import get_tavily_client
+from dependencies.tavily_dependencies import get_tavily_client, tavily_search_function
+
 
 router = APIRouter()
 
@@ -43,16 +44,8 @@ async def tavily_search(
     Searches for medical information using Tavily AI, filtered by category.
     """
     try:
-        # Append category filter to search query
-        if category:
-            query += f" {SEARCH_CATEGORIES[category]}"
-
-        response = get_tavily_client().search(query)
-
-        # Extract relevant links
-        results = [{"title": r["title"], "url": r["url"]} for r in response["results"]]
-
+        results = tavily_search_function(query, category)
         return {"query": query, "category": category, "results": results}
 
     except Exception as e:
-        raise HTTPException(status_code=500, detail=f"Tavily search failed: {str(e)}")
+        raise HTTPException(status_code=500, detail=str(e))
