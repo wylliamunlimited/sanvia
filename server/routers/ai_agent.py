@@ -91,9 +91,6 @@ async def health_check():
 async def ai_response(
     request: PromptRequest,
     user: Annotated[dict, Depends(get_firebase_user_from_token)],
-    category: str = "diagnosis",  # Default category
-    complexity: str = "simple",  # User can choose "simple" or "complex"
-    expand: bool = False,  # Toggle to show more/less
 ):
     """
     Get AI response with Tavily-powered research sources and response complexity.
@@ -130,38 +127,23 @@ async def ai_response(
             " ".join(full_response.split()[:30]) + "..."
         )  # Shortened summary
 
-        # Apply "See More/Less" logic
-        if expand:
-            final_response = full_response  # Show full response
-        else:
-            final_response = (
-                simple_response
-                if complexity == "simple"
-                else " ".join(full_response.split()[:50]) + "..."
-            )  # Short preview
-
-        # 🔍 Fetch research sources
-        sources = tavily_search_function(request.prompt, category)
-
         # Save chat to Firestore
         update_chat_entry(
             user_id=user["uid"],
             thread_id=_state["thread_id"],
             chat_data={
                 "prompt_chain": _state["prompt_chain"],
-                "sources": sources,
+                "sources": _state["knowledge"],
                 "last_updated_at": datetime.now().strftime("%m/%d/%y %H:%M:%S"),
             },
         )
 
         return {
             "chat": _state["prompt_chain"],
-            "response": final_response,
             "full_response": full_response,  # Full text for "See More"
             "simple_response": simple_response,  # Now correctly accessible
-            "complexity": complexity,
-            "expand": expand,
-            "sources": sources,
+            "total_sources": _state.get("knowledge", []),  # All sources used in the chat
+            "sources": _state.get("shortterm_knowledge", []),  # Tavily search results
             "thread_id": _state["thread_id"],
         }
 

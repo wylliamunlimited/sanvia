@@ -10,7 +10,7 @@ from constants.credentials import TAVILY_API_KEY
 
 # Initialize Tavily client with domain restrictions
 def get_tavily_client():
-    return TavilyClient(api_key=TAVILY_API_KEY, allowed_domains=TRUSTED_SOURCES)
+    return TavilyClient(api_key=TAVILY_API_KEY)
 
 
 SEARCH_CATEGORIES = {
@@ -39,6 +39,9 @@ TRUSTED_SOURCES = {
     "ncbi.nlm.nih.gov/pmc": ["research_papers"],
     "europepmc.org": ["research_papers"],
     "uptodate.com": ["diagnosis", "next_steps"],
+    "mayoclinic.org": ["diagnosis", "next_steps"],
+    "healthline.com": ["diagnosis", "next_steps"],
+    "webmd.com": ["diagnosis", "next_steps"],
 }
 
 
@@ -77,6 +80,7 @@ def tavily_search_function(query: str, category: str = None):
 
 def tavily_intense_search(
     query: str,
+    search_category: str,
     topic: str = "general", ## general / news
     search_depth: str = "basic", ## basic / advanced
     chunks_per_source: int = 3, ## available only when 'search_depth' is advanced
@@ -87,8 +91,6 @@ def tavily_intense_search(
     include_raw_content: bool = False,
     include_images: bool = False,
     include_image_descriptions: bool = False,
-    include_domains: list = [],
-    exclude_domains: list = []
 ) -> dict:
     """
     Perform an intense Tavily AI search with advanced options.
@@ -96,6 +98,7 @@ def tavily_intense_search(
     Args:
         query (str): The search query.
         topic (str): The topic of the search (general / news).
+        search_category (str): The category to filter by (diagnosis, next_steps, research_papers).
         search_depth (str): The depth of the search (basic / advanced).
         chunks_per_source (int): Number of chunks to return per source.
         max_results (int): Maximum number of results to return.
@@ -105,8 +108,6 @@ def tavily_intense_search(
         include_raw_content (bool, optional): Whether to include raw content from sources (default False).
         include_images (bool, optional): Whether to include images from sources (default False).
         include_image_descriptions (bool, optional): Whether to include image descriptions from sources (default False).
-        include_domains (list, optional): List of domains to include in the search.
-        exclude_domains (list, optional): List of domains to exclude from the search.
         
     Returns:
         dict: A dictionary containing the search results and any additional information.
@@ -124,6 +125,13 @@ def tavily_intense_search(
             response_time: int
     """
     
+    include_domains = []
+    exclude_domains = []
+    if search_category:
+        include_domains = [domain for domain, categories in TRUSTED_SOURCES.items() if search_category in categories]
+    else:
+        include_domains = list(TRUSTED_SOURCES.keys())
+    
     try:
         
         response = get_tavily_client().search(
@@ -136,10 +144,10 @@ def tavily_intense_search(
             days=days,
             include_answer=include_answer,
             include_raw_content=include_raw_content,
-            include_images=include_images,
-            include_image_descriptions=include_image_descriptions,
+            # include_images=include_images,
+            # include_image_descriptions=include_image_descriptions,
             include_domains=include_domains,
-            exclude_domains=exclude_domains
+            # exclude_domains=exclude_domains
         )
 
         return response
