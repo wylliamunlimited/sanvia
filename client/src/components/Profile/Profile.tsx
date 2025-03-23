@@ -45,6 +45,7 @@ const Profile: React.FC<ProfileProps> = ({
   const [editedSex, setEditedSex] = useState(sex);
   const [editedAge, setEditedAge] = useState(age);
 
+
   const handleSave = async () => {
     const updatedProfile = {
       firstName: editedFirstName,
@@ -57,7 +58,7 @@ const Profile: React.FC<ProfileProps> = ({
     };
 
     console.log('Updated profile:', updatedProfile);
-    
+
     // Pass data to parent component
     try {
       const profile_response = await firestoreApi.uploadProfile(
@@ -75,7 +76,7 @@ const Profile: React.FC<ProfileProps> = ({
     } catch (e) {
       console.log(`Error: ${e}`);
     }
-    
+
     onSave(updatedProfile);
     setIsEditing(false);
   };

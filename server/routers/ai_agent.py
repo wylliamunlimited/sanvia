@@ -17,15 +17,14 @@ from dependencies.firebase_dependencies import (
 )
 from constants.request_obj import (
     PromptRequest,
-    update_chat_entry,
-    get_chat,
 )
-from constants.request_obj import PromptRequest
+from constants.langgraph_obj import (
+    AIBrain,
+)
 from dependencies.ai_dependencies import (
     get_llm,
     initializeGraph,
     trigger_response,
-    AIBrain,
 )
 from langchain_core.messages import HumanMessage  # ✅ Correct Import
 import random  ## TO BE REMOVED
