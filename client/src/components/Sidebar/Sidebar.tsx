@@ -56,7 +56,7 @@ const navItems: NavItem[] = [
 const Sidebar = ({ activeSection, onSectionChange, onCollapse }: SidebarProps) => {
   const [menuOpen, setMenuOpen] = useState(false)
   const [userName, setUserName] = useState("Anonymous");
-  const { logout } = useAuth();
+  const { user, loading, logout } = useAuth();
   const navigate = useNavigate();
 
 
@@ -71,13 +71,23 @@ const Sidebar = ({ activeSection, onSectionChange, onCollapse }: SidebarProps) =
   });
 
   // const userInitials = 'YN'
+  // Fetch profile only after the auth state is determined
   useEffect(() => {
+    // Wait until loading is finished and the user is available
+    if (loading) return;
+    if (!user) {
+      console.warn("No authenticated user found, skipping profile fetch.");
+      return;
+    }
+
     const fetchProfile = async () => {
-      firestoreApi.get_user_profile().then((data) => {
+      try {
+        const data = await firestoreApi.get_user_profile();
+        console.log(`Fetching user profile data: ${JSON.stringify(data)}...`);
+
         const fullName = `${data['first-name']} ${data['last-name']}`;
         setUserName(fullName);
 
-        // set user data for profile
         setUserData({
           firstName: data['first-name'],
           lastName: data['last-name'],
@@ -88,14 +98,14 @@ const Sidebar = ({ activeSection, onSectionChange, onCollapse }: SidebarProps) =
           age: data['Age']
         });
 
-        console.log("data:", data);
-        console.log(`username: ${fullName}`);
-        console.log(`user data: ${userData}`);
-      });
+        console.log("Profile data fetched:", data);
+      } catch (error) {
+        console.error("Error fetching profile:", error);
+      }
     };
 
     fetchProfile();
-  }, []);
+  }, [user, loading]);
 
   // const userInitials = 'JW'
   // userName = 'Justin Wang'
@@ -236,7 +246,7 @@ const Sidebar = ({ activeSection, onSectionChange, onCollapse }: SidebarProps) =
         )}
       </div>
       {showProfile && (
-        <Profile 
+        <Profile
           {...userData}
           onClose={() => setShowProfile(false)}
           onSave={handleSave}
