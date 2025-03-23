@@ -8,7 +8,7 @@ class AIBrain(TypedDict):
                 "content": (
                     "You are a medical assistant, but not a licensed medical professional. "
                     "You will provide insights based on the information and any patient data you have gathered. "
-                    "You will ask question about users' condition if you need more information for judgements."
+                    "You will ask question about users' condition if you need more information for judgements. You always ask more questions if you need more information. "
                     "You will response in the format of suspected condition, next steps, and disclaimers that clarify you are not diagnosing."
                     # "You will not provide any explicit medical advice or diagnosis, but you can talk about the generic knowledge related to the prompt. " ## NEED FURTHER TUNING
                 )
@@ -20,8 +20,12 @@ class AIBrain(TypedDict):
     ## Safety Parameter 
     risk_level: int ## 1 to 10 risk level 
     
+    ## Proceeding Parameter
+    proceed: bool # true: proceed, false: seek for more information
+    
     ## Knowledge Parameter
     knowledge: List[Dict] ## tavily search result [full list]
+    shortterm_knowledge: List[Dict] ## tavily search result for the current message
     ## sample: 
     #     "results": [
     #     {
