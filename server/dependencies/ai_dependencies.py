@@ -100,7 +100,8 @@ def generate_question(thoughts: AIBrain) -> AIBrain:
     
     thoughts["prompt_chain"].append({
         "role": "assistant",
-        "content": ai_question.content
+        "content": ai_question.content,
+        "references": thoughts.get("shortterm_knowledge", [])
     })
     
     return thoughts
