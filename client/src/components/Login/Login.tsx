@@ -12,12 +12,12 @@ const Login: React.FC<LoginProps> = ({ onLoginSuccess }) => {
   const [email, setEmail] = useState<string>("");
   const [password, setPassword] = useState<string>("");
   const [error, setError] = useState<string>("");
+  const [showPassword, setShowPassword] = useState<boolean>(false);
   const navigate = useNavigate();
 
   const { auth } = useFirebase();
 
   const handleLogin = () => {
-
     try {
       if (!email || !password) {
         setError("Please enter both email and password.");
@@ -38,8 +38,7 @@ const Login: React.FC<LoginProps> = ({ onLoginSuccess }) => {
         })
         .catch((error) => {
           console.log(`Sign In Failed. ${error}`);
-          setError("Credential is wrong!");
-          // setError(error);
+          setError(error.message);
           return;
         });
     } catch (e) {
@@ -50,8 +49,8 @@ const Login: React.FC<LoginProps> = ({ onLoginSuccess }) => {
   return (
     <div className="container">
       <div className="card">
-        <h2 className="title">Login</h2>
-        {error && <p className="error">{error}</p>}
+        <h2 className="title">Sign In</h2>
+        <p className="welcome-message">Welcome back to Sanvia!</p>
         <input
           type="text"
           placeholder="Email"
@@ -59,24 +58,35 @@ const Login: React.FC<LoginProps> = ({ onLoginSuccess }) => {
           value={email}
           onChange={(e) => setEmail(e.target.value)}
         />
-        <input
-          type="password"
-          placeholder="Password"
-          className="input"
-          value={password}
-          onChange={(e) => setPassword(e.target.value)}
-        />
-        <button onClick={handleLogin} className="button">
-          Login
+        <div className="password-container">
+          <input
+            type={showPassword ? "text" : "password"}
+            placeholder="Password"
+            className="password-input"
+            value={password}
+            onChange={(e) => setPassword(e.target.value)}
+          />
+          {password && (
+            <button
+              type="button"
+              className="toggle-password"
+              onClick={() => setShowPassword(!showPassword)}
+            >
+              {showPassword ? "Hide" : "Show"}
+            </button>
+          )}
+        </div>
+        <button className="button" onClick={handleLogin}>
+          Sign In
         </button>
-
-        <p className="toggleText">
-          Don't have an account?{" "}
-          <span className="link" onClick={() => navigate("/auth/signup")}>
-            Sign Up here
-          </span>
-        </p>
       </div>
+      {error && <p className="error">{error}</p>}
+      <p className="toggleText">
+        Don't have an account?{" "}
+        <span className="link" onClick={() => navigate("/auth/signup")}>
+          Sign Up
+        </span>
+      </p>
     </div>
   );
 };

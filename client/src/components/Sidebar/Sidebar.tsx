@@ -56,7 +56,7 @@ const navItems: NavItem[] = [
 const Sidebar = ({ activeSection, onSectionChange, onCollapse }: SidebarProps) => {
   const [menuOpen, setMenuOpen] = useState(false)
   const [userName, setUserName] = useState("Anonymous");
-  const { logout } = useAuth();
+  const { user, loading, logout } = useAuth();
   const navigate = useNavigate();
 
 
@@ -71,13 +71,23 @@ const Sidebar = ({ activeSection, onSectionChange, onCollapse }: SidebarProps) =
   });
 
   // const userInitials = 'YN'
+  // Fetch profile only after the auth state is determined
   useEffect(() => {
+    // Wait until loading is finished and the user is available
+    if (loading) return;
+    if (!user) {
+      console.warn("No authenticated user found, skipping profile fetch.");
+      return;
+    }
+
     const fetchProfile = async () => {
-      firestoreApi.get_user_profile().then((data) => {
+      try {
+        const data = await firestoreApi.get_user_profile();
+        console.log(`Fetching user profile data: ${JSON.stringify(data)}...`);
+
         const fullName = `${data['first-name']} ${data['last-name']}`;
         setUserName(fullName);
 
-        // set user data for profile
         setUserData({
           firstName: data['first-name'],
           lastName: data['last-name'],
@@ -88,14 +98,14 @@ const Sidebar = ({ activeSection, onSectionChange, onCollapse }: SidebarProps) =
           age: data['Age']
         });
 
-        console.log("data:", data);
-        console.log(`username: ${fullName}`);
-        console.log(`user data: ${userData}`);
-      });
+        console.log("Profile data fetched:", data);
+      } catch (error) {
+        console.error("Error fetching profile:", error);
+      }
     };
 
     fetchProfile();
-  }, []);
+  }, [user, loading]);
 
   // const userInitials = 'JW'
   // userName = 'Justin Wang'
@@ -116,7 +126,21 @@ const Sidebar = ({ activeSection, onSectionChange, onCollapse }: SidebarProps) =
 
   const menuItems = [
     {
-
+      id: 'profile',
+      label: 'Profile',
+      icon: (
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+          <circle cx="12" cy="7" r="4" />
+          <path d="M6 21v-2a4 4 0 0 1 4-4h4a4 4 0 0 1 4 4v2" />
+        </svg>
+      ),
+      onClick: () => {
+        console.log('Profile button clicked');
+        setShowProfile(true);
+        setMenuOpen(false);
+      }
+    },
+    {
       id: 'settings',
       label: 'Settings',
       icon: (
@@ -159,34 +183,19 @@ const Sidebar = ({ activeSection, onSectionChange, onCollapse }: SidebarProps) =
         setMenuOpen(false);
       }
     },
-    {
-      id: 'profile',
-      label: 'Profile',
-      icon: (
-        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-          <circle cx="12" cy="7" r="4" />
-          <path d="M6 21v-2a4 4 0 0 1 4-4h4a4 4 0 0 1 4 4v2" />
-        </svg>
-      ),
-      onClick: () => {
-        console.log('Profile button clicked');
-        setShowProfile(true);
-        setMenuOpen(false);
-      }
-    }
   ]
   return (
     <div className="sidebar">
+      <button
+        className="collapse-button"
+        onClick={onCollapse}
+        aria-label="Collapse sidebar"
+      >
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+          <polyline points="15 18 9 12 15 6" />
+        </svg>
+      </button>
       <div className="sidebar-header">
-        <button
-          className="collapse-button"
-          onClick={onCollapse}
-          aria-label="Collapse sidebar"
-        >
-          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-            <polyline points="15 18 9 12 15 6" />
-          </svg>
-        </button>
       </div>
       <div className="logo-section">
         <div className="logo-container">
@@ -237,16 +246,11 @@ const Sidebar = ({ activeSection, onSectionChange, onCollapse }: SidebarProps) =
         )}
       </div>
       {showProfile && (
-        <>
-          {/* changing the values in profile */}
-          {console.log("Profile is open")}
-          <Profile {...userData}
-            onClose={() => setShowProfile(false)}
-            onSave={handleSave}
-          />
-
-        </>
-
+        <Profile
+          {...userData}
+          onClose={() => setShowProfile(false)}
+          onSave={handleSave}
+        />
       )}
     </div>
   )

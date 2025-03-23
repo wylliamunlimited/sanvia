@@ -67,7 +67,7 @@
   width: 100%;
   max-width: 90rem;
   display: flex;
-  align-items: center;
+  align-items: flex-end;
   background-color: white;
   border: 1px solid #ddd;
   border-radius: 10px;
@@ -86,13 +86,16 @@
   overflow-y: auto;
   line-height: 1.5;
   font-family: inherit;
+  min-height: 40px;
 }
 
 .input-container button {
   background: #f2f5ff;
   border: none;
   padding: 0.3rem;
-  margin-right: 1rem;
+  width: 28px;
+  height: 28px;
+  margin-bottom: 6px;
   cursor: pointer;
   display: flex;
   align-items: center;
@@ -101,6 +104,7 @@
   transition: all 0.2s;
   flex-shrink: 0;
   border-radius: 4px;
+  margin-right: 1rem;
 }
 
 .input-container button:hover:not(:disabled) {

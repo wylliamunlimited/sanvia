@@ -35,6 +35,9 @@ export const chatApi = {
   sendMessage: async (prompt: string): Promise<ChatResponse> => {
     try {
       const response = await api.post<ChatResponse>('/ai-response', { prompt });
+
+      console.log("response data: ", response.data);
+
       return response.data;
     } catch (error) {
       console.error('Error sending message:', error);
