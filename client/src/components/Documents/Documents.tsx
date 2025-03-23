@@ -13,7 +13,7 @@ const Documents = () => {
   const [previewUrl, setPreviewUrl] = useState<string | null>(null)
   const [error, setError] = useState<string | null>(null)
   const [isUploading, setIsUploading] = useState(false)
-  const [isPreviewLoading, setIsPreviewLoading] = useState(false)
+  // const [isPreviewLoading, setIsPreviewLoading] = useState(false)
   const [isIframeLoaded, setIsIframeLoaded] = useState(false)
 
   useEffect(() => {
@@ -81,7 +81,7 @@ const Documents = () => {
 
   const handlePreview = async (doc: Document) => {
     try {
-      setIsPreviewLoading(true)
+      // setIsPreviewLoading(true)
       setIsIframeLoaded(false)
       setPreviewDoc(doc)
       const { signed_url } = await documentApi.getFreshSignedUrl(doc.document_id)
@@ -96,7 +96,7 @@ const Documents = () => {
   const handleIframeLoad = () => {
     setTimeout(() => {
       setIsIframeLoaded(true)
-      setIsPreviewLoading(false)
+      // setIsPreviewLoading(false)
     }, 500)
   }
 
