@@ -143,14 +143,14 @@
   bottom: 100%;
   left: 0;
   right: 0;
-  margin: 0.125rem 2rem;
   background-color: white;
   border-radius: 8px;
   overflow: hidden;
   display: flex;
   flex-direction: column;
   gap: 0.5rem;
-  padding: 0.5rem;
+  padding: 0.5rem 2rem;
+  margin: 0.125rem 0;
 }
 
 .menu-item {
