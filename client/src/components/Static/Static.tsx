@@ -7,24 +7,23 @@ const Static: React.FC = () => {
 
   useEffect(() => {
     // Apply the amber gradient background
-    document.body.style.background = "linear-gradient(to top right, #4c8ddd, #f5f5f5 60%)";
+    document.body.style.background = "linear-gradient(to top right, #4c8ddd,rgb(239, 228, 228) 60%)";
     document.body.style.height = "100vh";
     document.body.style.margin = "0";
-    document.body.style.overflow = "hidden"; // Prevents scrolling issues
+    document.body.style.overflow = "hidden"; 
 
-    const numCircles = 10; // Number of circles to generate
+    const numCircles = 10;
     const container = document.body;
 
     // Remove existing circles before adding new ones
     let circlesData = localStorage.getItem("circlesData");
 
     if (!circlesData) {
-      // If no circle data exists, create fixed random placements
       const fixedCircleData = Array.from({ length: numCircles }).map(() => ({
-        width: Math.random() * 100 + 20, // Random size (20px - 120px)
-        left: Math.random() * 100, // Random horizontal position (percentage of viewport width)
-        top: Math.random() * 100, // Random vertical position (percentage of viewport height)
-        opacity: Math.random() * 0.5 + 0.5, // Random opacity (0.5 - 1)
+        width: Math.random() * 100 + 20, 
+        left: Math.random() * 100, 
+        top: Math.random() * 100, 
+        opacity: Math.random() * 0.5 + 0.5, 
       }));
       
       // Save the generated positions to localStorage
@@ -36,17 +35,17 @@ const Static: React.FC = () => {
 
     // Remove any existing circles before adding new ones
     document.querySelectorAll(".random-circle").forEach(circle => circle.remove());
-
+    //creating new circles
     parsedCircles.forEach((circleData, index) => {
       const circle = document.createElement("img");
-      circle.src = "/images/Ellipse.png"; // Ensure this path is correct
-      circle.classList.add("random-circle"); // Add class for easy cleanup
+      circle.src = "/images/Ellipse.png"; 
+      circle.classList.add("random-circle"); 
       circle.style.position = "absolute";
-      circle.style.width = `${circleData.width}px`; // Set size from stored data
-      circle.style.left = `${circleData.left}vw`; // Set position from stored data
-      circle.style.top = `${circleData.top}vh`; // Set position from stored data
-      circle.style.opacity = `${circleData.opacity}`; // Set opacity from stored data
-      circle.style.zIndex = "-1"; // Keeps circles behind all other elements
+      circle.style.width = `${circleData.width}px`; 
+      circle.style.left = `${circleData.left}vw`; 
+      circle.style.top = `${circleData.top}vh`; 
+      circle.style.opacity = `${circleData.opacity}`;
+      circle.style.zIndex = "-1"; 
 
       container.appendChild(circle);
     });
@@ -54,6 +53,7 @@ const Static: React.FC = () => {
 
   return (
     <div className={styles.home}>
+      {/* Top navigation */}
       <nav className={styles.navbar}>
         <div className={styles["nav-left"]}>
           <a href="#home">HOME</a>
@@ -65,6 +65,7 @@ const Static: React.FC = () => {
       </nav>
 
       <div className={styles.content}>
+        {/* Brand intro  */}
         <div id = "header">
           <h1>
             welcome to 
@@ -77,11 +78,11 @@ const Static: React.FC = () => {
       </div>
 
       <div className={styles["info-section"]}>
+        {/* individual 3 squares for the middle */}
         <div className={styles.card}>
-          <div className="logo-section">
-            <div className="logo-container">
+          <div className="logo-static-section">
+            <div className="logo-static-container">
               <img src="/images/logo1.png" alt="Logo" />
-              <span className="logo-text">Sanvia</span>
             </div>
           </div>
         </div>

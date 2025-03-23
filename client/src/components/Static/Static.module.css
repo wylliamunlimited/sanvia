@@ -27,6 +27,7 @@
     font-weight: bold;
   }
   
+
   .content {
     display: flex;
     text-align: center;
@@ -48,7 +49,7 @@
   .highlight {
     font-size: 80px;
     font-weight: 700;
-    color: #c0d4ff;
+    color: white;
   }
   
   .get-started {
@@ -84,7 +85,6 @@
     margin-left: 20px;
     margin-right: 20px;
 
-
   }
   
   .card {
@@ -99,7 +99,23 @@
     box-shadow: 0 4px 16px rgba(0,0,0,0.1);
     overflow: hidden;
   }
-  
+
+  .logo-static-container {
+    width: 80%; 
+    height: 80%; 
+    display: flex;
+    justify-content: center;
+    align-items: center;
+  }
+
+  .logo-static-container img {
+    max-width: 20%; 
+    max-height: 20%; 
+    width: auto; 
+    height: auto;
+    object-fit: contain;
+  }
+
   .icon {
     font-size: 80px;
     font-weight: bold;
