@@ -1,19 +1,65 @@
-import react from "react";
-import styles from './Static.module.css';
+import React, { useEffect } from "react";
+import styles from "./Static.module.css";
 import { useNavigate } from "react-router-dom";
 
 const Static: React.FC = () => {
-const navigate = useNavigate();
+  const navigate = useNavigate();
+
+  useEffect(() => {
+    // Apply the amber gradient background
+    document.body.style.background = "linear-gradient(to top right, #4c8ddd, #f5f5f5 60%)";
+    document.body.style.height = "100vh";
+    document.body.style.margin = "0";
+    document.body.style.overflow = "hidden"; // Prevents scrolling issues
+
+    const numCircles = 10; // Number of circles to generate
+    const container = document.body;
+
+    // Remove existing circles before adding new ones
+    let circlesData = localStorage.getItem("circlesData");
+
+    if (!circlesData) {
+      // If no circle data exists, create fixed random placements
+      const fixedCircleData = Array.from({ length: numCircles }).map(() => ({
+        width: Math.random() * 100 + 20, // Random size (20px - 120px)
+        left: Math.random() * 100, // Random horizontal position (percentage of viewport width)
+        top: Math.random() * 100, // Random vertical position (percentage of viewport height)
+        opacity: Math.random() * 0.5 + 0.5, // Random opacity (0.5 - 1)
+      }));
+      
+      // Save the generated positions to localStorage
+      localStorage.setItem("circlesData", JSON.stringify(fixedCircleData));
+      circlesData = JSON.stringify(fixedCircleData); // Use newly created data
+    }
+
+    const parsedCircles = JSON.parse(circlesData);
+
+    // Remove any existing circles before adding new ones
+    document.querySelectorAll(".random-circle").forEach(circle => circle.remove());
+
+    parsedCircles.forEach((circleData, index) => {
+      const circle = document.createElement("img");
+      circle.src = "/images/Ellipse.png"; // Ensure this path is correct
+      circle.classList.add("random-circle"); // Add class for easy cleanup
+      circle.style.position = "absolute";
+      circle.style.width = `${circleData.width}px`; // Set size from stored data
+      circle.style.left = `${circleData.left}vw`; // Set position from stored data
+      circle.style.top = `${circleData.top}vh`; // Set position from stored data
+      circle.style.opacity = `${circleData.opacity}`; // Set opacity from stored data
+      circle.style.zIndex = "-1"; // Keeps circles behind all other elements
+
+      container.appendChild(circle);
+    });
+  }, []);
+
   return (
     <div className={styles.home}>
       <nav className={styles.navbar}>
-        <div className={styles['nav-left']}>
-        {/* nothing in here yet bc we havent decided what to write */}
+        <div className={styles["nav-left"]}>
           <a href="#home">HOME</a>
           <a href="#about">ABOUT</a>
         </div>
-        <div className={styles['nav-right']}>
-        {/* sends the user to login to start using the app */}
+        <div className={styles["nav-right"]}>
           <a onClick={() => navigate("/auth/login")}>CHAT NOW</a>
         </div>
       </nav>
@@ -22,37 +68,29 @@ const navigate = useNavigate();
         <h1>
           welcome to <span className={styles.highlight}>sanvia</span>
         </h1>
-        {/* sends the user to sign up to create an account to use the app */}
-        <button className={styles['get-started']} onClick={() => navigate("/auth/signup")}>
+        <button className={styles["get-started"]} onClick={() => navigate("/auth/signup")}>
           ↗ get started
         </button>
       </div>
 
-      <div className={styles['info-section']}>
-        {/* We will add the final logo  */}
+      <div className={styles["info-section"]}>
         <div className={styles.card}>
-            <div className="logo-section">
-                <div className="logo-container">
-                    <img src="/images/logo1.png" alt="Logo" />
-                <span className="logo-text">Sanvia</span>
+          <div className="logo-section">
+            <div className="logo-container">
+              <img src="/images/logo1.png" alt="Logo" />
+              <span className="logo-text">Sanvia</span>
             </div>
-      </div>
+          </div>
         </div>
         <div className={styles.card}>
-        {/* will be added once the final app logo is done */}
-          <img src="path-to-sanvia-app-ogo" alt="app logo" />
+          <img src="path-to-sanvia-app-logo" alt="app logo" />
         </div>
         <div className={styles.card}>
           <div className={styles.promise}>
             <h3>OUR MISSION</h3>
-            <p>
-              Our main goal is to make health information accesible via our ai web application etc 
-            </p>
-            <p>
-                Some more info bla bla bla
-            </p>
-            {/* Nothing here yet either need to decide what to write */}
-            <a href="#read-more" className={styles['read-more']}>
+            <p>Our main goal is to make health information accessible via our AI web application etc</p>
+            <p>Some more info bla bla bla</p>
+            <a href="#read-more" className={styles["read-more"]}>
               Read more ↗
             </a>
           </div>
