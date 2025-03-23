@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react'
 import './Documents.css'
 import Header from '../ui/Header'
 import documentApi, { DocumentMetadata } from '../../api/documentApi'
+import { getScrollbarWidth } from '../../utils/scrollbar'
 
 type Document = DocumentMetadata
 
@@ -11,6 +12,13 @@ const Documents = () => {
   const [previewDoc, setPreviewDoc] = useState<Document | null>(null)
   const [previewUrl, setPreviewUrl] = useState<string | null>(null)
   const [error, setError] = useState<string | null>(null)
+  const [isUploading, setIsUploading] = useState(false)
+  const [isPreviewLoading, setIsPreviewLoading] = useState(false)
+  const [isIframeLoaded, setIsIframeLoaded] = useState(false)
+
+  useEffect(() => {
+    document.documentElement.style.setProperty('--scrollbar-width', `${getScrollbarWidth()}px`)
+  }, [])
 
   useEffect(() => {
     const fetchDocuments = async () => {
@@ -50,6 +58,7 @@ const Documents = () => {
 
   const handleFiles = async (files: File[]) => {
     setError(null)
+    setIsUploading(true)
 
     try {
       const newDocuments = await Promise.all(files.map(async file => {
@@ -65,22 +74,36 @@ const Documents = () => {
     } catch (err) {
       console.error('Error handling files:', err)
       setError('Failed to upload one or more files. Please try again.')
+    } finally {
+      setIsUploading(false)
     }
   }
 
   const handlePreview = async (doc: Document) => {
     try {
+      setIsPreviewLoading(true)
+      setIsIframeLoaded(false)
+      setPreviewDoc(doc)
       const { signed_url } = await documentApi.getFreshSignedUrl(doc.document_id)
       setPreviewUrl(signed_url)
-      setPreviewDoc(doc)
     } catch {
       setError('Failed to load document preview. Please try again.')
+      setPreviewDoc(null)
+      setPreviewUrl(null)
     }
+  }
+
+  const handleIframeLoad = () => {
+    setTimeout(() => {
+      setIsIframeLoaded(true)
+      setIsPreviewLoading(false)
+    }, 500)
   }
 
   const closePreview = () => {
     setPreviewDoc(null)
     setPreviewUrl(null)
+    setIsIframeLoaded(false)
   }
 
   return (
@@ -97,26 +120,38 @@ const Documents = () => {
 
       <div className="documents-area">
         <div 
-          className={`upload-zone ${isDragging ? 'dragging' : ''}`}
+          className={`upload-zone ${isDragging ? 'dragging' : ''} ${isUploading ? 'uploading' : ''}`}
           onDragOver={handleDragOver}
           onDragLeave={handleDragLeave}
           onDrop={handleDrop}
         >
-          <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-            <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
-            <polyline points="17 8 12 3 7 8"/>
-            <line x1="12" y1="3" x2="12" y2="15"/>
-          </svg>
-          <p>Drag and drop files here or</p>
-          <label className="upload-button">
-            <input 
-              type="file" 
-              multiple 
-              onChange={handleFileInput}
-              accept=".pdf"
-            />
-            Choose files
-          </label>
+          {isUploading ? (
+            <>
+              <svg className="spinner" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <path d="M21 12a9 9 0 1 1-6.219-8.56"/>
+              </svg>
+              <p>Uploading files...</p>
+            </>
+          ) : (
+            <>
+              <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+                <polyline points="17 8 12 3 7 8"/>
+                <line x1="12" y1="3" x2="12" y2="15"/>
+              </svg>
+              <p>Drag and drop files here or</p>
+              <label className="upload-button">
+                <input 
+                  type="file" 
+                  multiple 
+                  onChange={handleFileInput}
+                  accept=".pdf"
+                  disabled={isUploading}
+                />
+                Choose files
+              </label>
+            </>
+          )}
         </div>
 
         {error && (
@@ -164,11 +199,19 @@ const Documents = () => {
                 </button>
               </div>
               <div className="preview-body">
+                <div className={`preview-loading ${isIframeLoaded ? 'hidden' : ''}`}>
+                  <svg className="spinner" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                    <path d="M21 12a9 9 0 1 1-6.219-8.56"/>
+                  </svg>
+                  <p>Loading preview...</p>
+                </div>
                 <iframe 
                   src={previewUrl ?? ''} 
                   title={previewDoc.filename}
                   width="100%"
                   height="100%"
+                  className={isIframeLoaded ? 'loaded' : ''}
+                  onLoad={handleIframeLoad}
                 />
               </div>
             </div>
