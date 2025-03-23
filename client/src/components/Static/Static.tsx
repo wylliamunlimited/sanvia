@@ -65,9 +65,12 @@ const Static: React.FC = () => {
       </nav>
 
       <div className={styles.content}>
-        <h1>
-          welcome to <span className={styles.highlight}>sanvia</span>
-        </h1>
+        <div id = "header">
+          <h1>
+            welcome to 
+          </h1>
+          <h1><span className={styles.highlight}>sanvia</span></h1> 
+        </div>
         <button className={styles["get-started"]} onClick={() => navigate("/auth/signup")}>
           ↗ get started
         </button>

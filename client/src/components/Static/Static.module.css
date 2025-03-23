@@ -28,9 +28,17 @@
   }
   
   .content {
+    display: flex;
     text-align: center;
-    margin: 50px 0;
+    justify-content: center;
+    margin: 50px 20px;
+    gap: 5vw;
   }
+  
+  .button {
+    max-height: 10px;
+  }
+
   
   h1 {
     font-size: 48px;
@@ -51,11 +59,17 @@
     border-radius: 8px;
     font-size: 16px;
     cursor: pointer;
-    margin-top: 20px;
+    margin-top: 10vh;
     display: inline-flex;
     align-items: center;
     gap: 8px;
     transition: background-color 0.3s ease;
+  }
+
+  #header {
+    display: flex;
+    padding: 100px;
+
   }
   
   .get-started:hover {
