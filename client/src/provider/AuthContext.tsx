@@ -18,6 +18,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     const unsubscribe = onAuthStateChanged(auth, (currentUser) => {
         if (currentUser) {
             console.log("User detected. Sign in automatically happens.");
+            console.log("User:", currentUser.email);
         }
         
         setUser(currentUser);
