@@ -182,6 +182,10 @@ const Chat = () => {
           </button>
         </div>
       </form>
+      
+      <div className="disclaimer">
+        For informational purposes only. Not a substitute for professional medical advice.
+      </div>
     </div>
   )
 }
