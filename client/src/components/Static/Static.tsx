@@ -1,12 +1,13 @@
-import React, { useEffect } from "react";
+import React, { useEffect, useState } from "react";
 import styles from "./Static.module.css";
 import { useNavigate } from "react-router-dom";
 
 const Static: React.FC = () => {
   const navigate = useNavigate();
+  const [showAbout, setShowAbout] = useState(false);
 
   useEffect(() => {
-    // Apply the amber gradient background
+    // the amber gradient background
     document.body.style.background = "linear-gradient(to top right, #4c8ddd,rgb(239, 228, 228) 60%)";
     document.body.style.height = "100vh";
     document.body.style.margin = "0";
@@ -28,7 +29,7 @@ const Static: React.FC = () => {
       
       // Save the generated positions to localStorage
       localStorage.setItem("circlesData", JSON.stringify(fixedCircleData));
-      circlesData = JSON.stringify(fixedCircleData); // Use newly created data
+      circlesData = JSON.stringify(fixedCircleData); 
     }
 
     const parsedCircles = JSON.parse(circlesData);
@@ -56,47 +57,80 @@ const Static: React.FC = () => {
       {/* Top navigation */}
       <nav className={styles.navbar}>
         <div className={styles["nav-left"]}>
-          <a href="#home">HOME</a>
-          <a href="#about">ABOUT</a>
+          <a href="" onClick={() => setShowAbout(false)}>HOME</a>
+          <a href="#about" onClick={() => setShowAbout(true)}>ABOUT</a>
         </div>
         <div className={styles["nav-right"]}>
           <a onClick={() => navigate("/auth/login")}>CHAT NOW</a>
         </div>
       </nav>
 
-      <div className={styles.content}>
-        {/* Brand intro  */}
-        <div id = "header">
-          <h1>
-            welcome to 
-          </h1>
-          <h1><span className={styles.highlight}>sanvia</span></h1> 
+      {/* about page information */}
+      {showAbout && (
+        <div className={styles["about-page"]}>
+          <h2>Sanvia Mission Statement</h2>
+          <br></br>
+          <p>At Sanvia, we believe that access to reliable, understandable, and personalized 
+            health information is a fundamental right. Our AI-integrated web application is 
+            designed to bridge the gap between complex medical knowledge and everyday users, 
+            empowering individuals to make informed decisions about their health. 
+          </p>
+          <p>Sanvia leverages advanced AI technology to provide clear, concise, and personalized 
+            insights based on trusted medical sources. Whether you're looking to understand symptoms, 
+            explore treatment options, or gain knowledge about a medical condition, our platform 
+            ensures that accurate information is always within reach. 
+          </p>
+          <p>
+            Our mission is to eliminate barriers to health literacy by offering an intuitive, user-friendly 
+            experience tailored to diverse needs. By combining cutting-edge AI with a human-centered 
+            approach, we strive to make healthcare information more transparent, accessible, and 
+            actionable for everyone.
+          </p>
+            <p>At Sanvia, we are not just creating a tool—we are fostering a future where knowledge leads to better health outcomes.
+            </p>
         </div>
-        <button className={styles["get-started"]} onClick={() => navigate("/auth/signup")}>
-          ↗ get started
-        </button>
-      </div>
+      )}
 
-      <div className={styles["info-section"]}>
-        {/* individual 3 squares for the middle */}
-        <div className={styles.card}>
-          <div className="logo-static-section">
-            <div className="logo-static-container">
-              <img src="/images/logo1.png" alt="Logo" />
+      <div style={{ display: showAbout ? "none" : "block" }}>
+        {/* Brand intro */}
+        <div className={styles.content} >
+          <div id="header">
+            <h1>Welcome to</h1>
+            <h1> <span className={styles.highlight}>sanvia</span></h1>
+          </div>
+          <button className={styles["get-started"]} onClick={() => navigate("/auth/signup")}>
+            ↗ get started
+          </button>
+        </div>
+      
+        {/* Cards */}
+        <div className={styles["info-section"]}>
+          {/* individual 3 squares for the middle */}
+          <div className={styles.card}>
+            <div className="logo-static-section">
+              <div className="logo-static-container">
+                <img id="logo-static" src="/images/logo1.png" alt="Logo" />
+              </div>
             </div>
           </div>
-        </div>
-        <div className={styles.card}>
-          <img src="path-to-sanvia-app-logo" alt="app logo" />
-        </div>
-        <div className={styles.card}>
-          <div className={styles.promise}>
-            <h3>OUR MISSION</h3>
-            <p>Our main goal is to make health information accessible via our AI web application etc</p>
-            <p>Some more info bla bla bla</p>
-            <a href="#read-more" className={styles["read-more"]}>
-              Read more ↗
-            </a>
+          <div className={styles.card}>
+            <img src="/images/static2.png" alt="app logo" />
+          </div>
+          <div className={styles.card}>
+            <div className={styles.promise}>
+              <h3>OUR MISSION</h3>
+              <p>
+                Our mission is to make reliable health information accessible to
+                everyone through our AI-powered web application. Sanvia simplifies
+                complex medical knowledge, providing clear, personalized insights
+                from trusted sources. We aim to bridge the gap between healthcare
+                and everyday users, ensuring informed decision-making and better
+                health outcomes.
+              </p>
+              <a href="#read-more" className={styles["read-more"]}>
+                Read more ↗
+              </a>
+              </div>
           </div>
         </div>
       </div>
