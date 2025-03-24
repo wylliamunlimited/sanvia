@@ -229,8 +229,7 @@ def summarize(thoughts: AIBrain) -> AIBrain:
                 "Reference the information here: [BEGIN OF KNOWLEDGE] " + "\n\n".join([search_["content"] + " Title: " + search_["title"] for search_ in thoughts["knowledge"]]) + ". [END OF KNOWLEDGE]\n\n"
                 # "Please exclusively check which information is relevant to the user's condition and summarize them, with clear indication 'according to [insert source title]'. "
                 "Summarize the information and use phrases like 'according to [insert source title]' to indicate the source of the information. "
-                "Respond in sections: risk level (high, medium, low), suspected condition, next steps, and any disclaimers"
-                "that you are not an official medical diagnosis."
+                "Respond in sections: risk level (high, medium, low), suspected condition, next steps, and side notes (if any)."
             )
         }]
         

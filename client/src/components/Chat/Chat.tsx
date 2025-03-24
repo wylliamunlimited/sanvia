@@ -1,14 +1,16 @@
 import { useState, useRef, useEffect } from 'react'
 import './Chat.css'
 import { getScrollbarWidth } from '../../utils/scrollbar'
-import chatApi from '../../api/chatApi'
-import ReactMarkdown from 'react-markdown'
+import chatApi, { SourceItem } from '../../api/chatApi'
 import Header from '../ui/Header'
+import SourcesSidebar from './SourcesSidebar'
+import Message from './Message'
 
 type Message = {
   id: number
   text: string
   isUser: boolean
+  sources?: SourceItem[]
 }
 
 const Chat = () => {
@@ -17,9 +19,13 @@ const Chat = () => {
   const [isThinking, setIsThinking] = useState(false)
   const [shouldAutoScroll, setShouldAutoScroll] = useState(true)
   const [error, setError] = useState<string | null>(null)
+  const [selectedMessageId, setSelectedMessageId] = useState<number | null>(null)
+  const [isSourcesSidebarOpen, setIsSourcesSidebarOpen] = useState(false)
+  const [showAllSources, setShowAllSources] = useState(false)
   
   const textareaRef = useRef<HTMLTextAreaElement>(null)
   const messageAreaRef = useRef<HTMLDivElement>(null)
+  const prevMessageCountRef = useRef(0)
 
   // Load initial greeting message
   useEffect(() => {
@@ -38,15 +44,31 @@ const Chat = () => {
     }
   }, [inputText])
 
-  // Auto-scroll to bottom when new messages are added
+  // Auto-scroll when new messages are added
   useEffect(() => {
-    if (shouldAutoScroll && messageAreaRef.current) {
-      messageAreaRef.current.scrollTo({
-        top: messageAreaRef.current.scrollHeight,
-        behavior: messages.length ? 'smooth' : 'auto'
-      })
+    const hasNewMessage = messages.length > prevMessageCountRef.current;
+    prevMessageCountRef.current = messages.length;
+    
+    // Only scroll when new message and auto-scroll enabled
+    if (hasNewMessage && shouldAutoScroll && messageAreaRef.current) {
+      setTimeout(() => {
+        // Find last user message
+        const userMessages = messages.filter(msg => msg.isUser);
+        const lastUserMessage = userMessages[userMessages.length - 1];
+        
+        // Scroll to user message
+        if (lastUserMessage) {
+          const userElement = document.querySelector(`.message.user[data-message-id="${lastUserMessage.id}"]`);
+          if (userElement) {
+            userElement.scrollIntoView({ 
+              behavior: 'smooth', 
+              block: 'start' 
+            });
+          }
+        }
+      }, 150);
     }
-  }, [messages, isThinking, shouldAutoScroll])
+  }, [messages.length, shouldAutoScroll]);
 
   // Set scrollbar width for consistent scrollbar width
   useEffect(() => {
@@ -74,7 +96,7 @@ const Chat = () => {
     setShouldAutoScroll(true)
 
     try {
-      const response = await chatApi.sendMessage(inputText.trim())  // Change to chatApi.sendMessage once auth is implemented
+      const response = await chatApi.sendMessage(inputText.trim())
       // Find last assistant message in chat history
       const assistantMessages = response.chat.filter(msg => msg.role === 'assistant')
       if (assistantMessages.length > 0) {
@@ -84,7 +106,8 @@ const Chat = () => {
         setMessages(prev => [...prev, {
           id: Date.now(),
           text: lastAssistantMessage.content,
-          isUser: false
+          isUser: false,
+          sources: lastAssistantMessage.references
         }])
       }
     } catch (err) {
@@ -104,28 +127,51 @@ const Chat = () => {
 
   const handleScroll = () => {
     if (messageAreaRef.current) {
-      const { scrollTop, scrollHeight, clientHeight } = messageAreaRef.current
-      setShouldAutoScroll(scrollHeight - (scrollTop + clientHeight) < 100)
+      const { scrollTop, scrollHeight, clientHeight } = messageAreaRef.current;
+      const isAtBottom = Math.abs(scrollHeight - scrollTop - clientHeight) < 10;
+      
+      // Only update if value actually changed
+      if (shouldAutoScroll !== isAtBottom) {
+        setShouldAutoScroll(isAtBottom);
+      }
     }
   }
 
-  // Render message content with Markdown
-  const renderMessageContent = (text: string, isUser: boolean) => {
-    if (isUser) {
-      // Don't apply Markdown to user messages
-      return <div className="message-text">{text}</div>
+  const handleSourcesClick = (messageId: number) => {
+    if (selectedMessageId === messageId && isSourcesSidebarOpen && !showAllSources) {
+      setIsSourcesSidebarOpen(false);
+    } else {
+      setSelectedMessageId(messageId);
+      setShowAllSources(false);
+      setIsSourcesSidebarOpen(true);
     }
-    
-    // Apply Markdown to AI responses
-    return (
-      <div className="message-text markdown-content">
-        <ReactMarkdown>{text}</ReactMarkdown>
-      </div>
-    )
   }
+
+  const handleAllSourcesClick = () => {
+    if (isSourcesSidebarOpen && showAllSources) {
+      setIsSourcesSidebarOpen(false);
+    } else {
+      setShowAllSources(true);
+      setIsSourcesSidebarOpen(true);
+    }
+  }
+
+  const closeSidebar = () => {
+    setIsSourcesSidebarOpen(false);
+  }
+
+  // Get sources based on current mode
+  const selectedMessageSources = showAllSources
+    ? messages
+        .flatMap(msg => msg.sources || [])
+        // Remove duplicate sources
+        .filter((source, index, self) => 
+          index === self.findIndex(s => s.url === source.url)
+        )
+    : messages.find(msg => msg.id === selectedMessageId)?.sources || [];
 
   return (
-    <div className="chat-content">
+    <div className={`chat-content ${isSourcesSidebarOpen ? 'sidebar-open' : ''}`}>
       <Header 
         icon={
           <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
@@ -141,12 +187,14 @@ const Chat = () => {
         onScroll={handleScroll}
       >
         {messages.map(message => (
-          <div 
-            key={message.id} 
-            className={`message ${message.isUser ? 'user' : 'ai'}`}
-          >
-            {renderMessageContent(message.text, message.isUser)}
-          </div>
+          <Message
+            key={message.id}
+            id={message.id}
+            text={message.text}
+            isUser={message.isUser}
+            sources={message.sources}
+            onSourcesClick={handleSourcesClick}
+          />
         ))}
         {isThinking && (
           <div className="thinking-indicator">
@@ -175,6 +223,17 @@ const Chat = () => {
             placeholder="Message Sanvia"
             rows={1}
           />
+          <button 
+            type="button" 
+            className="sources-all-button"
+            onClick={handleAllSourcesClick}
+            aria-label="Show all sources"
+            style={{ display: messages.some(msg => msg.sources && msg.sources.length > 0) ? 'flex' : 'none' }}
+          >
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+              <path d="M4 19.5v-15A2.5 2.5 0 0 1 6.5 2H20v20H6.5a2.5 2.5 0 0 1 0-5H20" />
+            </svg>
+          </button>
           <button type="submit" disabled={isThinking}>
             <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
               <path d="M12 2L12 20M12 2L5 9M12 2L19 9" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
@@ -182,6 +241,17 @@ const Chat = () => {
           </button>
         </div>
       </form>
+      
+      <div className="disclaimer">
+        For informational purposes only. Not a substitute for professional medical advice.
+      </div>
+
+      <SourcesSidebar 
+        isOpen={isSourcesSidebarOpen}
+        sources={selectedMessageSources}
+        onClose={closeSidebar}
+        showAllSources={showAllSources}
+      />
     </div>
   )
 }

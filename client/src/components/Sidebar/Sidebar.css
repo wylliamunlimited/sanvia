@@ -1,8 +1,8 @@
 @import url('https://fonts.googleapis.com/css2?family=Unbounded:wght@400&display=swap');
 
 .sidebar {
-  width: 289px;
-  min-width: 289px;
+  width: 260px;
+  min-width: 260px;
   flex-shrink: 0;
   background-color: white;
   display: flex;
@@ -143,14 +143,14 @@
   bottom: 100%;
   left: 0;
   right: 0;
-  margin: 0.125rem 2rem;
   background-color: white;
   border-radius: 8px;
   overflow: hidden;
   display: flex;
   flex-direction: column;
   gap: 0.5rem;
-  padding: 0.5rem;
+  padding: 0.5rem 2rem;
+  margin: 0.125rem 0;
 }
 
 .menu-item {
@@ -201,6 +201,11 @@
   align-items: center;
   justify-content: center;
   z-index: 10;
+  opacity: 0;
+}
+
+.sidebar:hover .collapse-button {
+  opacity: 1;
 }
 
 .collapse-button:hover {
