@@ -35,6 +35,105 @@ def get_llm():
         max_retries=3,
     )
     
+def determine_relevance(thoughts: AIBrain) -> AIBrain:
+    """DECISION POINT FOR RELEVANCE
+    
+    Description
+    -----------
+    This node is responsible for determining if user's query is regarding to health.
+
+    Parameters
+    ----------
+    thoughts : AIBrain
+        state of LangGraph Agent
+
+    Returns
+    -------
+    AIBrain
+        state of LangGraph Agent
+    """
+    
+    session_history = thoughts["prompt_chain"]
+        
+    reconstructed_prompt = session_history + [{
+        "role": "user",
+        "content": ("Is the last message relevant to health? "
+                    "Only answer strictly as a decimal value ranging 0 to 1."
+                    "0 means not relevant at all, and 1 means very relevant."
+                    "Consider the context of the conversation and the user's intent."
+                    "Phatic expression, like 'hi', 'sorry', 'thank you', 'how are you', has to be given -1, but as only edge case.")
+    }]
+    
+    decision = get_llm().invoke(reconstructed_prompt)
+    
+    print(f"🧠 AGENT: DECISION POINT - Relevance score: {decision.content} 🧠")
+    
+    thoughts["relevance"] = float(decision.content)
+    
+    return thoughts
+
+def respond_manner(thoughts: AIBrain) -> AIBrain:
+    """DECISION POINT FOR RESPONDING MANNER
+    
+    Description
+    -----------
+    This node is responsible for responding to polite message, like thank you or greetings.
+    
+    Parameters
+    ----------
+    thoughts : AIBrain
+        state of LangGraph Agent
+
+    Returns
+    -------
+    AIBrain
+        state of LangGraph Agent
+    """
+    
+    print(f"🧠 AGENT: DECISION POINT - Responding to polite message 🧠")
+    
+    tmp_prompt = thoughts["prompt_chain"] + [{
+        "role": "user",
+        "content": ("Ask me what I need, but consider the context and health focus.")
+    }]
+    
+    ai_question = get_llm().invoke(tmp_prompt)
+    
+    thoughts["prompt_chain"].append({
+        "role": "assistant",
+        "content": ai_question.content,
+        "references": thoughts.get("shortterm_knowledge", [])
+    })
+    
+    return thoughts
+    
+    
+
+def refocus_medicine(thoughts: AIBrain) -> AIBrain:
+    """REFOCUS NODE
+    Description
+    -----------
+    This node is responsible for refocusing the LangGraph Agent to ask user to be more relevant to medicine.
+    
+    Parameters
+    ----------
+    thoughts : AIBrain
+        state of LangGraph Agent
+    Returns
+    -------
+    AIBrain
+        state of LangGraph Agent
+    """
+    thoughts["prompt_chain"].append({
+        "role": "assistant",
+        "content": "Let's circle back to medicine. What specific health-related question do you have?",
+        "references": []
+    })
+    
+    return thoughts
+    
+    
+    
 def enough_info_dec_pt(thoughts: AIBrain) -> AIBrain:
     """Decision Point for determining if there is enough information to proceed with the next steps.
 
@@ -290,6 +389,7 @@ def initializeGraph(with_state: bool = True, prompt_chain: list =[]):
             data={},
             risk_level=0,
             knowledge=[],
+            relevance=0,
             proceed=False,
             shortterm_knowledge=[],
             category_focus=None
@@ -300,23 +400,39 @@ def initializeGraph(with_state: bool = True, prompt_chain: list =[]):
     # workflow.add_node("risk_assessment")
     # workflow.add_node("data_extract")
     # workflow.add_node("information_gathering")
+    workflow.add_node("determine_relevance", determine_relevance)
+    workflow.add_node("refocus_medicine", refocus_medicine)
     workflow.add_node("summarize", summarize)
     workflow.add_node("enough_info_dec_pt", enough_info_dec_pt)
     workflow.add_node("generate_question", generate_question)
     workflow.add_node("information_gathering", information_gathering)
+    workflow.add_node("respond_manner", respond_manner)
     
-    def conditional_edge(thoughts: AIBrain) -> str:
+    def enough_information_conditional(thoughts: AIBrain) -> str:
         """Decision Point for determining if there is enough information to proceed with the next steps."""
         return "generate_question" if not thoughts["proceed"] else "information_gathering"
     
-    workflow.add_edge(START, "enough_info_dec_pt")  # Start with the decision point
+    def discussion_relevance_conditional(thoughts: AIBrain) -> str:
+        """Decision Point for determining if the discussion is relevant to medicine."""
+        if thoughts["relevance"] == -1.0:
+            return "respond_manner"  # Handle greetings or thank you messages
+        elif thoughts["relevance"] < 0.5: 
+            return "refocus_medicine"
+        else:
+            return "enough_info_dec_pt"  # Proceed to check for enough information
+    
+    workflow.add_edge(START, "determine_relevance")  # Start with the relevance check
     workflow.add_conditional_edges(
         "enough_info_dec_pt",
-        conditional_edge,
+        enough_information_conditional,
         ["generate_question", "information_gathering"]  # if enough info, go to summarize, else generate question
     )
     workflow.add_edge("information_gathering", "summarize")  # After gathering info, go to summarize
-    
+    workflow.add_conditional_edges(
+        "determine_relevance",
+        discussion_relevance_conditional,
+        ["refocus_medicine", "enough_info_dec_pt", "respond_manner"]  # if not relevant, refocus, else check for enough info
+    )
     
     # workflow.set_entry_point("summarize")
     
