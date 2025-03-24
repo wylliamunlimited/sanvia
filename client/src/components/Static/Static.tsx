@@ -107,14 +107,12 @@ const Static: React.FC = () => {
         <div className={styles["info-section"]}>
           {/* individual 3 squares for the middle */}
           <div className={styles.card}>
-            <div className="logo-static-section">
-              <div className="logo-static-container">
-                <img id="logo-static" src="/images/logo1.png" alt="Logo" />
-              </div>
-            </div>
+          <img src="/images/logo1.png" 
+            alt="Description" 
+            style={{height:"35vh", paddingTop: "5px"}}/>
           </div>
-          <div className={styles.card}>
-            <img src="/images/static2.png" alt="app logo" />
+          <div id = "card2" className={styles.card}>
+            <img id= "extra" src="/images/static2.png" alt="app logo" />
           </div>
           <div className={styles.card}>
             <div className={styles.promise}>
