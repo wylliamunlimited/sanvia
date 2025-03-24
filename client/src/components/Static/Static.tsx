@@ -60,6 +60,7 @@ const Static: React.FC = () => {
           <a href="" onClick={() => setShowAbout(false)}>HOME</a>
           <a href="#about" onClick={() => setShowAbout(true)}>ABOUT</a>
         </div>
+        <hr className={styles.separator} />
         <div className={styles["nav-right"]}>
           <a onClick={() => navigate("/auth/login")}>CHAT NOW</a>
         </div>
@@ -107,11 +108,11 @@ const Static: React.FC = () => {
         <div className={styles["info-section"]}>
           {/* individual 3 squares for the middle */}
           <div className={styles.card}>
-          <img src="/images/logo1.png" 
-            alt="Description" 
-            style={{height:"35vh", paddingTop: "5px"}}/>
+          <img src="/images/static1.png" 
+            alt="logo" 
+            style={{height:"30vh", paddingTop: "5px"}}/>
           </div>
-          <div id = "card2" className={styles.card}>
+          <div className={styles.card}>
             <img id= "extra" src="/images/static2.png" alt="app logo" />
           </div>
           <div className={styles.card}>
