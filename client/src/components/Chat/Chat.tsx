@@ -21,6 +21,7 @@ const Chat = () => {
   const [error, setError] = useState<string | null>(null)
   const [selectedMessageId, setSelectedMessageId] = useState<number | null>(null)
   const [isSourcesSidebarOpen, setIsSourcesSidebarOpen] = useState(false)
+  const [showAllSources, setShowAllSources] = useState(false)
   
   const textareaRef = useRef<HTMLTextAreaElement>(null)
   const messageAreaRef = useRef<HTMLDivElement>(null)
@@ -137,10 +138,20 @@ const Chat = () => {
   }
 
   const handleSourcesClick = (messageId: number) => {
-    if (selectedMessageId === messageId && isSourcesSidebarOpen) {
+    if (selectedMessageId === messageId && isSourcesSidebarOpen && !showAllSources) {
       setIsSourcesSidebarOpen(false);
     } else {
       setSelectedMessageId(messageId);
+      setShowAllSources(false);
+      setIsSourcesSidebarOpen(true);
+    }
+  }
+
+  const handleAllSourcesClick = () => {
+    if (isSourcesSidebarOpen && showAllSources) {
+      setIsSourcesSidebarOpen(false);
+    } else {
+      setShowAllSources(true);
       setIsSourcesSidebarOpen(true);
     }
   }
@@ -149,8 +160,15 @@ const Chat = () => {
     setIsSourcesSidebarOpen(false);
   }
 
-  // Find selected message sources
-  const selectedMessageSources = messages.find(msg => msg.id === selectedMessageId)?.sources || [];
+  // Get sources based on current mode
+  const selectedMessageSources = showAllSources
+    ? messages
+        .flatMap(msg => msg.sources || [])
+        // Remove duplicate sources
+        .filter((source, index, self) => 
+          index === self.findIndex(s => s.url === source.url)
+        )
+    : messages.find(msg => msg.id === selectedMessageId)?.sources || [];
 
   return (
     <div className={`chat-content ${isSourcesSidebarOpen ? 'sidebar-open' : ''}`}>
@@ -205,6 +223,17 @@ const Chat = () => {
             placeholder="Message Sanvia"
             rows={1}
           />
+          <button 
+            type="button" 
+            className="sources-all-button"
+            onClick={handleAllSourcesClick}
+            aria-label="Show all sources"
+            style={{ display: messages.some(msg => msg.sources && msg.sources.length > 0) ? 'flex' : 'none' }}
+          >
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+              <path d="M4 19.5v-15A2.5 2.5 0 0 1 6.5 2H20v20H6.5a2.5 2.5 0 0 1 0-5H20" />
+            </svg>
+          </button>
           <button type="submit" disabled={isThinking}>
             <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
               <path d="M12 2L12 20M12 2L5 9M12 2L19 9" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
@@ -221,6 +250,7 @@ const Chat = () => {
         isOpen={isSourcesSidebarOpen}
         sources={selectedMessageSources}
         onClose={closeSidebar}
+        showAllSources={showAllSources}
       />
     </div>
   )

@@ -201,6 +201,11 @@
   align-items: center;
   justify-content: center;
   z-index: 10;
+  opacity: 0;
+}
+
+.sidebar:hover .collapse-button {
+  opacity: 1;
 }
 
 .collapse-button:hover {

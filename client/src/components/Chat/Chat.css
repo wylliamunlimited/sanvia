@@ -113,6 +113,20 @@
   margin-right: 1rem;
 }
 
+.input-container button:last-child {
+  margin-right: 1rem;
+}
+
+.input-container .sources-all-button {
+  margin-right: 0.5rem;
+  background: transparent;
+  color: #3b5eda;
+}
+
+.input-container .sources-all-button:hover {
+  background: rgba(226, 232, 255, 0.5);
+}
+
 .input-container button:hover:not(:disabled) {
   background: #e2e8ff;
 }
