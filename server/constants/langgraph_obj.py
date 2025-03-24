@@ -23,6 +23,9 @@ class AIBrain(TypedDict):
     ## Proceeding Parameter
     proceed: bool # true: proceed, false: seek for more information
     
+    ## Latest Message Relevance
+    relevance: float ## 0 to 1 relevance score for the latest message
+    
     ## Knowledge Parameter
     knowledge: List[Dict] ## tavily search result [full list]
     shortterm_knowledge: List[Dict] ## tavily search result for the current message
