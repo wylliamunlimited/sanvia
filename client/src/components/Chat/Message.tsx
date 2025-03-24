@@ -26,7 +26,7 @@ const Message: React.FC<MessageProps> = ({ id, text, isUser, sources, onSourcesC
   }
 
   return (
-    <div className={`message ${isUser ? 'user' : 'ai'}`}>
+    <div className={`message ${isUser ? 'user' : 'ai'}`} data-message-id={id}>
       {renderMessageContent()}
       {!isUser && sources && sources.length > 0 && (
         <div className="message-sources">
