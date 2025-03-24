@@ -1,15 +1,28 @@
 import axios from 'axios';
 
 const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:8000';
-const TEST_AUTH_TOKEN = import.meta.env.VITE_TEST_AUTH_TOKEN;  // Testing
 
 export interface ChatMessage {
   role: string;
   content: string;
+  references?: SourceItem[];
+}
+
+export interface SourceItem {
+  title: string;
+  url: string;
+  content?: string;
+  score?: number;
+  categories?: string[];
 }
 
 export interface ChatResponse {
   chat: ChatMessage[];
+  full_response?: string;
+  simple_response?: string;
+  total_sources?: SourceItem[];
+  sources?: SourceItem[];
+  thread_id?: string;
 }
 
 // Create axios instance
@@ -41,25 +54,6 @@ export const chatApi = {
       return response.data;
     } catch (error) {
       console.error('Error sending message:', error);
-      throw error;
-    }
-  },
-
-  // Testing with hardcoded auth token
-  testSendMessage: async (prompt: string): Promise<ChatResponse> => {
-    try {
-      const response = await axios.post<ChatResponse>(`${API_URL}/ai-response`, 
-        { prompt },
-        {
-          headers: {
-            'Content-Type': 'application/json',
-            'Authorization': `Bearer ${TEST_AUTH_TOKEN}`
-          }
-        }
-      );
-      return response.data;
-    } catch (error) {
-      console.error('Error sending test message:', error);
       throw error;
     }
   },

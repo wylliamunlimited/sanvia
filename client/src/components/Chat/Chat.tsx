@@ -1,14 +1,16 @@
 import { useState, useRef, useEffect } from 'react'
 import './Chat.css'
 import { getScrollbarWidth } from '../../utils/scrollbar'
-import chatApi from '../../api/chatApi'
-import ReactMarkdown from 'react-markdown'
+import chatApi, { SourceItem } from '../../api/chatApi'
 import Header from '../ui/Header'
+import SourcesSidebar from './SourcesSidebar'
+import Message from './Message'
 
 type Message = {
   id: number
   text: string
   isUser: boolean
+  sources?: SourceItem[]
 }
 
 const Chat = () => {
@@ -17,6 +19,8 @@ const Chat = () => {
   const [isThinking, setIsThinking] = useState(false)
   const [shouldAutoScroll, setShouldAutoScroll] = useState(true)
   const [error, setError] = useState<string | null>(null)
+  const [selectedMessageId, setSelectedMessageId] = useState<number | null>(null)
+  const [isSourcesSidebarOpen, setIsSourcesSidebarOpen] = useState(false)
   
   const textareaRef = useRef<HTMLTextAreaElement>(null)
   const messageAreaRef = useRef<HTMLDivElement>(null)
@@ -74,7 +78,7 @@ const Chat = () => {
     setShouldAutoScroll(true)
 
     try {
-      const response = await chatApi.sendMessage(inputText.trim())  // Change to chatApi.sendMessage once auth is implemented
+      const response = await chatApi.sendMessage(inputText.trim())
       // Find last assistant message in chat history
       const assistantMessages = response.chat.filter(msg => msg.role === 'assistant')
       if (assistantMessages.length > 0) {
@@ -84,7 +88,8 @@ const Chat = () => {
         setMessages(prev => [...prev, {
           id: Date.now(),
           text: lastAssistantMessage.content,
-          isUser: false
+          isUser: false,
+          sources: lastAssistantMessage.references
         }])
       }
     } catch (err) {
@@ -109,23 +114,24 @@ const Chat = () => {
     }
   }
 
-  // Render message content with Markdown
-  const renderMessageContent = (text: string, isUser: boolean) => {
-    if (isUser) {
-      // Don't apply Markdown to user messages
-      return <div className="message-text">{text}</div>
+  const handleSourcesClick = (messageId: number) => {
+    if (selectedMessageId === messageId && isSourcesSidebarOpen) {
+      setIsSourcesSidebarOpen(false);
+    } else {
+      setSelectedMessageId(messageId);
+      setIsSourcesSidebarOpen(true);
     }
-    
-    // Apply Markdown to AI responses
-    return (
-      <div className="message-text markdown-content">
-        <ReactMarkdown>{text}</ReactMarkdown>
-      </div>
-    )
   }
 
+  const closeSidebar = () => {
+    setIsSourcesSidebarOpen(false);
+  }
+
+  // Find selected message sources
+  const selectedMessageSources = messages.find(msg => msg.id === selectedMessageId)?.sources || [];
+
   return (
-    <div className="chat-content">
+    <div className={`chat-content ${isSourcesSidebarOpen ? 'sidebar-open' : ''}`}>
       <Header 
         icon={
           <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
@@ -141,12 +147,14 @@ const Chat = () => {
         onScroll={handleScroll}
       >
         {messages.map(message => (
-          <div 
-            key={message.id} 
-            className={`message ${message.isUser ? 'user' : 'ai'}`}
-          >
-            {renderMessageContent(message.text, message.isUser)}
-          </div>
+          <Message
+            key={message.id}
+            id={message.id}
+            text={message.text}
+            isUser={message.isUser}
+            sources={message.sources}
+            onSourcesClick={handleSourcesClick}
+          />
         ))}
         {isThinking && (
           <div className="thinking-indicator">
@@ -186,6 +194,12 @@ const Chat = () => {
       <div className="disclaimer">
         For informational purposes only. Not a substitute for professional medical advice.
       </div>
+
+      <SourcesSidebar 
+        isOpen={isSourcesSidebarOpen}
+        sources={selectedMessageSources}
+        onClose={closeSidebar}
+      />
     </div>
   )
 }
