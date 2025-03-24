@@ -127,7 +127,7 @@ const Static: React.FC = () => {
                 and everyday users, ensuring informed decision-making and better
                 health outcomes.
               </p>
-              <a href="#read-more" className={styles["read-more"]}>
+              <a href="#about" onClick={() => setShowAbout(true)} className={styles["read-more"]}>
                 Read more ↗
               </a>
               </div>
