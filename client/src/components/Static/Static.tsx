@@ -8,7 +8,7 @@ const Static: React.FC = () => {
 
   useEffect(() => {
     // the amber gradient background
-    document.body.style.background = "linear-gradient(to top right, #4c8ddd,rgb(239, 228, 228) 60%)";
+    document.body.style.background = "linear-gradient(to top right, #4c8ddd,#F5F5F5 60%)";
     document.body.style.height = "100vh";
     document.body.style.margin = "0";
     document.body.style.overflow = "hidden"; 
@@ -113,7 +113,7 @@ const Static: React.FC = () => {
             style={{height:"30vh", paddingTop: "5px"}}/>
           </div>
           <div className={styles.card}>
-            <img id= "extra" src="/images/static2.png" alt="app logo" />
+            <img id= "extra" src="/images/static3.png" alt="app logo" />
           </div>
           <div className={styles.card}>
             <div className={styles.promise}>
