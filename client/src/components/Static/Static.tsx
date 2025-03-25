@@ -60,9 +60,8 @@ const Static: React.FC = () => {
           <a href="" onClick={() => setShowAbout(false)}>HOME</a>
           <a href="#about" onClick={() => setShowAbout(true)}>ABOUT</a>
         </div>
-        <hr className={styles.separator} />
         <div className={styles["nav-right"]}>
-          <a onClick={() => navigate("/auth/login")}>CHAT NOW</a>
+          <a onClick={() => navigate("/auth/login")}>LOG IN</a>
         </div>
       </nav>
 
