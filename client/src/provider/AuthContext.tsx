@@ -1,6 +1,5 @@
-
 import { createContext, useContext, useEffect, useState, ReactNode } from "react";
-import { onAuthStateChanged, signOut, User } from "firebase/auth";
+import { onAuthStateChanged, signOut, User, onIdTokenChanged } from "firebase/auth";
 import { auth } from "../api/firebase";
 
 const AuthContext = createContext<{ user: User | null; loading: boolean, logout: () => void }>({
@@ -26,7 +25,46 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     });
 
     return () => unsubscribe(); // Cleanup listener on unmount
-  }, [auth]);
+  }, []);
+
+  // Add token refresh listener
+  useEffect(() => {
+    const tokenRefreshUnsubscribe = onIdTokenChanged(auth, async (currentUser) => {
+      if (currentUser) {
+        // Get fresh token when ID token changes
+        try {
+          const token = await currentUser.getIdToken();
+          localStorage.setItem("sanvia-refreshToken", token);
+          console.log("Token refreshed and stored");
+        } catch (error) {
+          console.error("Error refreshing token:", error);
+        }
+      } else {
+        // Clear token when user not available
+        localStorage.removeItem("sanvia-refreshToken");
+      }
+    });
+
+    // Force token refresh every 55 minutes (before 60-minute expiration)
+    const tokenRefreshInterval = setInterval(async () => {
+      const currentUser = auth.currentUser;
+      if (currentUser) {
+        try {
+          // Force refresh token
+          const token = await currentUser.getIdToken(true);
+          localStorage.setItem("sanvia-refreshToken", token);
+          console.log("Token refreshed proactively");
+        } catch (error) {
+          console.error("Error during scheduled token refresh:", error);
+        }
+      }
+    }, 55 * 60 * 1000);
+
+    return () => {
+      tokenRefreshUnsubscribe();
+      clearInterval(tokenRefreshInterval);
+    };
+  }, []);
 
   const logout = async () => {
     try {

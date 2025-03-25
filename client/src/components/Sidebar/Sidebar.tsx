@@ -4,6 +4,7 @@ import { useNavigate } from 'react-router-dom'
 import { firestoreApi } from '../../api/firestoreApi'
 import Profile from '../Profile/Profile.tsx'
 import { useAuth } from '../../provider/AuthContext'
+import Banner from './Banner'
 
 type NavItem = {
   id: string
@@ -55,9 +56,10 @@ const navItems: NavItem[] = [
 
 const Sidebar = ({ activeSection, onSectionChange, onCollapse }: SidebarProps) => {
   const [menuOpen, setMenuOpen] = useState(false)
-  const [userName, setUserName] = useState("Anonymous");
+  const [userName, setUserName] = useState("");
   const { user, loading, logout } = useAuth();
   const navigate = useNavigate();
+  const [onboardingComplete, setOnboardingComplete] = useState<boolean>(true);
 
 
   const [userData, setUserData] = useState({
@@ -97,6 +99,13 @@ const Sidebar = ({ activeSection, onSectionChange, onCollapse }: SidebarProps) =
           sex: data['Sex'],
           age: data['Age']
         });
+
+        // Set onboarding status
+        if (data['onboarding'] === "complete") {
+          setOnboardingComplete(true);
+        } else {
+          setOnboardingComplete(false);
+        }
 
         console.log("Profile data fetched:", data);
       } catch (error) {
@@ -196,8 +205,6 @@ const Sidebar = ({ activeSection, onSectionChange, onCollapse }: SidebarProps) =
         </svg>
       </button>
       <div className="sidebar-header">
-      </div>
-      <div className="logo-section">
         <div className="logo-container">
           <img src="/images/logo.png" alt="Logo" />
           <span className="logo-text">Sanvia</span>
@@ -205,6 +212,13 @@ const Sidebar = ({ activeSection, onSectionChange, onCollapse }: SidebarProps) =
       </div>
       <div className="sidebar-content">
         <nav className="sidebar-nav">
+          <button className="new-chat-button">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+              <line x1="12" y1="5" x2="12" y2="19"></line>
+              <line x1="5" y1="12" x2="19" y2="12"></line>
+            </svg>
+            New Chat
+          </button>
           {navItems.map((item) => (
             <button
               key={item.id}
@@ -217,6 +231,9 @@ const Sidebar = ({ activeSection, onSectionChange, onCollapse }: SidebarProps) =
           ))}
         </nav>
       </div>
+      
+      <Banner isVisible={!onboardingComplete} />
+      
       <div className="profile-menu">
         <button
           className="profile-section"
@@ -228,7 +245,7 @@ const Sidebar = ({ activeSection, onSectionChange, onCollapse }: SidebarProps) =
               <circle cx="12" cy="7" r="4" />
             </svg>
           </div>
-          <span className="user-name">{userName}</span>
+          {userName && <span className="user-name">{userName}</span>}
         </button>
         {menuOpen && (
           <div className="menu-dropdown">

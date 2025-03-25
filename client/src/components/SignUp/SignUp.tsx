@@ -38,7 +38,7 @@ const SignUp: React.FC<SignUpProps> = ({ onSignUpSuccess }) => {
       createUserWithEmailAndPassword(auth, email, password)
         .then((userCredential) => {
           const user = userCredential.user;
-          user.getIdToken(false).then((token) => {
+          user.getIdToken(true).then((token) => {
             localStorage.setItem("sanvia-refreshToken", token);
             console.log("Token is stored properly.");
           }).then(() => {
