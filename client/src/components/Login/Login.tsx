@@ -28,7 +28,7 @@ const Login: React.FC<LoginProps> = ({ onLoginSuccess }) => {
         .then((userCredential) => {
           // Save token to cookie
           const user = userCredential.user;
-          user.getIdToken(false).then((token) => {
+          user.getIdToken(true).then((token) => {
             localStorage.setItem("sanvia-refreshToken", token);
             console.log("Token is stored properly.");
           });
