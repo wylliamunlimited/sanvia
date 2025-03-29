@@ -1,18 +1,45 @@
-from typing import TypedDict, List, Dict
+from typing import TypedDict, List, Dict, Optional, Literal
+from pydantic import BaseModel, HttpUrl
 
+class ReferenceDetail(BaseModel):
+    source: str
+    url: HttpUrl
+    explanation: str
+    date: str
+    
+class Reference(BaseModel):
+    segment: str
+    start: int
+    end: int
+    reference: ReferenceDetail
+    
+class Annotation(BaseModel):
+    segment: str
+    start: int
+    end: int
+    explanation: str
+    
+class ChatMessage(BaseModel):
+    role: Literal["user", "assistant", "system"] 
+    content: str
+    references: Optional[List[Reference]] = []
+    annotations: Optional[List[Annotation]] = []
 
 class AIBrain(TypedDict):
     thread_id: str ## thread id for the current conversation
-    prompt_chain: List[Dict[str, str]] = [{
-                "role": "system",
-                "content": (
+    
+    prompt_chain: List[Dict] = [
+        ChatMessage(
+            role="system",
+            content=(
                     "You are a medical assistant, but not a licensed medical professional. "
                     "You will provide insights based on the information and any patient data you have gathered. "
                     "You will ask question about users' condition if you need more information for judgements. You always ask more questions if you need more information. "
                     "You will response in the format of suspected condition, next steps, and disclaimers that clarify you are not diagnosing."
                     # "You will not provide any explicit medical advice or diagnosis, but you can talk about the generic knowledge related to the prompt. " ## NEED FURTHER TUNING
-                )
-            }] ## list of prompt chain
+                ),
+        ).dict()
+    ] ## list of prompt chain
     
     ## Personal Data
     data: Dict[str, Dict] ## user data

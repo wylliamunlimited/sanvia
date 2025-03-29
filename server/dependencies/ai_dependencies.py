@@ -49,11 +49,13 @@ import sys
 sys.path.insert(1, "../dependencies")
 sys.path.insert(2, "../constants")
 
+from typing import List
 import json
 from langchain_openai import ChatOpenAI
 from constants.credentials import OPENAI_API_KEY
 from constants.langgraph_obj import (
-    AIBrain
+    AIBrain,
+    ChatMessage
 )
 
 from dependencies.tavily_dependencies import (
@@ -147,7 +149,8 @@ def respond_manner(thoughts: AIBrain) -> AIBrain:
     thoughts["prompt_chain"].append({
         "role": "assistant",
         "content": ai_question.content,
-        "references": thoughts.get("shortterm_knowledge", [])
+        "references": thoughts.get("shortterm_knowledge", []),
+        "annotations": []
     })
     
     return thoughts    
@@ -167,10 +170,12 @@ def refocus_medicine(thoughts: AIBrain) -> AIBrain:
     AIBrain
         state of LangGraph Agent
     """
+    
     thoughts["prompt_chain"].append({
         "role": "assistant",
         "content": "Let's circle back to health discussion. What specific health-related question do you have?",
-        "references": []
+        "references": [],
+        "annotations": []
     })
     
     return thoughts
@@ -399,7 +404,7 @@ def summarize(thoughts: AIBrain) -> AIBrain:
     
     
 
-def initializeGraph(with_state: bool = True, prompt_chain: list =[]):
+def initializeGraph(with_state: bool = True, prompt_chain: List[ChatMessage] = []):
     
     # init_state = AIBrain(
     #     prompt_chain=[{
