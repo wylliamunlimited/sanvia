@@ -10,6 +10,7 @@ interface ProfileProps {
   gender: string;
   sex: string;
   age: string;
+  isOpen: boolean;
   onClose: () => void;
   onSave: (data: {
     firstName: string;
@@ -30,6 +31,7 @@ const Profile: React.FC<ProfileProps> = ({
   gender,
   sex,
   age,
+  isOpen,
   onClose,
   onSave
 }) => {
@@ -81,15 +83,14 @@ const Profile: React.FC<ProfileProps> = ({
     setIsEditing(false);
   };
   console.log("Sidebar is rendering");
+  
+  if (!isOpen) return null;
 
   return (
     <div className="overlay" onClick={onClose}>
       <div className="card" onClick={(e) => e.stopPropagation()}>
         <button
-          onClick={() => {
-            console.log('Close button clicked');
-            onClose();
-          }}
+          onClick={onClose}
           className="close-button"
         >
           ✕

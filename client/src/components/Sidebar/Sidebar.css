@@ -8,7 +8,57 @@
   display: flex;
   flex-direction: column;
   justify-content: space-between;
-  position: relative;
+  position: fixed;
+  left: 0;
+  top: 0;
+  bottom: 0;
+  transition: all 0.3s ease;
+}
+
+body.sidebar-collapsed .sidebar {
+  width: 80px;
+  min-width: 80px;
+}
+
+body.sidebar-collapsed .logo-text,
+body.sidebar-collapsed .nav-item-text,
+body.sidebar-collapsed .user-name,
+body.sidebar-collapsed .new-chat-button span:not(.nav-item-icon),
+body.sidebar-collapsed .banner {
+  display: none;
+}
+
+body.sidebar-collapsed .logo-container {
+  padding: 1.25rem 0.5rem 0 0.5rem;
+  justify-content: center;
+}
+
+body.sidebar-collapsed .nav-item,
+body.sidebar-collapsed .new-chat-button {
+  padding: 0.5rem;
+  justify-content: center;
+}
+
+body.sidebar-collapsed .profile-section {
+  padding: 0.5rem;
+  justify-content: center;
+}
+
+body.sidebar-collapsed .profile-icon {
+  margin-right: 0;
+}
+
+body.sidebar-collapsed .collapse-button {
+  transform: translateY(-50%) rotate(180deg);
+}
+
+body.sidebar-collapsed .menu-item {
+  padding: 0.5rem;
+  justify-content: center;
+}
+
+body.sidebar-collapsed .menu-item-icon {
+  margin-right: 0;
 }
 
 .sidebar-header {
@@ -204,7 +254,7 @@
 .collapse-button {
   position: absolute;
   right: -12.5px;
-  top: 50%;
+  top: 50vh;
   transform: translateY(-50%);
   background: white;
   border: 1px solid #e5e7eb;
