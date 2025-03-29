@@ -1,3 +1,48 @@
+# 
+#
+# AI Response Tagging
+# ----
+# References:
+            # {
+            #   "response": "The mitochondria is the powerhouse of the cell and plays a role in cellular respiration.",
+            #   "references": [
+            #       {
+            #           "phrase": "powerhouse of the cell",
+            #           "start": 24,
+            #           "end": 46,
+            #           "reference": {
+            #               "source": "Wikipedia",
+            #               "url": "https://en.wikipedia.org/wiki/Mitochondr,
+            #               "explanation": "The mitochondria is the powerhouse of the cell.",
+            #               "date": "2022-10-10"
+            #          }    
+            #       }
+            #   ]
+            # }
+#
+# Dictionary:
+            # {
+            #   "response": "The mitochondria is the powerhouse of the cell and plays a role in cellular respiration.",
+            #   "annotations": [
+            #       {
+            #           "phrase": "mitochondria",
+            #           "start": 4,
+            #           "end": 16,
+            #           "explanation": "An organelle in cells that generates energy."
+            #       },
+            #       {
+            #           "phrase": "cellular respiration",
+            #           "start": 64,
+            #           "end": 84,
+            #           "explanation": "The process by which cells convert nutrients into energy."
+            #       }
+            #   ]
+            # }
+#
+#
+#
+
+
 import sys
 
 # caution: path[0] is reserved for script path (or '' in REPL)
@@ -105,9 +150,7 @@ def respond_manner(thoughts: AIBrain) -> AIBrain:
         "references": thoughts.get("shortterm_knowledge", [])
     })
     
-    return thoughts
-    
-    
+    return thoughts    
 
 def refocus_medicine(thoughts: AIBrain) -> AIBrain:
     """REFOCUS NODE
@@ -126,7 +169,7 @@ def refocus_medicine(thoughts: AIBrain) -> AIBrain:
     """
     thoughts["prompt_chain"].append({
         "role": "assistant",
-        "content": "Let's circle back to medicine. What specific health-related question do you have?",
+        "content": "Let's circle back to health discussion. What specific health-related question do you have?",
         "references": []
     })
     
