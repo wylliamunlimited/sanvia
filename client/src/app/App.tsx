@@ -10,6 +10,7 @@ import SignUp from '../components/SignUp/SignUp'
 import Login from '../components/Login/Login'
 import { FirebaseProvider } from '../provider/FirebaseContext';
 import { AuthProvider, useAuth } from '../provider/AuthContext';
+import { ProfileProvider } from '../provider/ProfileContext';
 import Survey from '../components/Survey/Survey';
 
 function App() {
@@ -21,7 +22,7 @@ function App() {
     const location = useLocation();
     const navigate = useNavigate();
 
-    if (loading) return <div>Loading...</div>;
+    if (loading) return null;
 
     const getActiveSection = () => {
       const path = location.pathname;
@@ -109,27 +110,14 @@ function App() {
                     </svg>
                   </button>
                 )}
-                <div className="main-section">
-                  {!isSidebarOpen && (
-                    <button 
-                      className="open-sidebar-button"
-                      onClick={() => setSidebarOpen(true)}
-                      aria-label="Open sidebar"
-                    >
-                      <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                        <polyline points="9 18 15 12 9 6"/>
-                      </svg>
-                    </button>
-                  )}
-                  <Routes>
-                    <Route path="/" element={<Navigate to="/chat" replace />} />
-                    <Route path="/chat" element={<Chat />} />
-                    <Route path="/documents" element={<Documents />} />
-                    <Route path="/history" element={<History />} />
-                    <Route path="/settings" element={<div>Settings Page</div>} />
-                    <Route path="*" element={<Navigate to="/chat" replace />} />
-                  </Routes>
-                </div>
+                <Routes>
+                  <Route path="/" element={<Navigate to="/chat" replace />} />
+                  <Route path="/chat" element={<Chat />} />
+                  <Route path="/documents" element={<Documents />} />
+                  <Route path="/history" element={<History />} />
+                  <Route path="/settings" element={<div>Settings Page</div>} />
+                  <Route path="*" element={<Navigate to="/chat" replace />} />
+                </Routes>
               </div>
             </div>
           ) : <Navigate to="/auth/login" replace />}
@@ -141,9 +129,11 @@ function App() {
   return (
     <FirebaseProvider>
       <AuthProvider>
-        <Router>
-          <AppRoutes></AppRoutes>
-        </Router>
+        <ProfileProvider>
+          <Router>
+            <AppRoutes></AppRoutes>
+          </Router>
+        </ProfileProvider>
       </AuthProvider>
     </FirebaseProvider>
   );

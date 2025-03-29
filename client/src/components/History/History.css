@@ -1,8 +1,22 @@
+:root {
+  --scrollbar-width: 0px; /* Will be set by JS */
+}
+
 .history-content {
   flex: 1;
   display: flex;
   flex-direction: column;
   height: 100vh;
+  position: relative;
+  transition: padding-right 0.3s ease;
+  width: 100%;
+  max-width: 100%;
+  box-sizing: border-box;
+  padding: 0;
+}
+
+.history-content.sidebar-open {
+  padding-right: 399px;
 }
 
 .search-section {
@@ -11,13 +25,15 @@
 
 .history-area {
   flex: 1;
-  padding: 1rem calc(max(1rem, (100% - 768px) / 2)) 2rem;
-  padding-right: calc(max(1rem, (100% - 768px) / 2) - var(--scrollbar-width));
   overflow-y: auto;
+  padding: 2rem calc(max(1rem, (100% - 768px) / 2));
+  padding-right: calc(max(1rem, (100% - 768px) / 2) - var(--scrollbar-width));
   display: flex;
   flex-direction: column;
-  gap: 1.5rem;
+  max-width: 100%;
+  box-sizing: border-box;
   scrollbar-gutter: stable;
+  width: 100%;
 }
 
 .history-area::-webkit-scrollbar {
