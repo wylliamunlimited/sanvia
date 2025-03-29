@@ -2,7 +2,8 @@
   font-family: Impact, Haettenschweiler, 'Arial Narrow Bold', sans-serif;
   margin: 0;
   padding: 0;
-  height: 100vw;
+  height: 100vh;
+  overflow-y: auto;
 }
 
 .navbar {
