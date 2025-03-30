@@ -4,6 +4,7 @@ import { BrowserRouter as Router, Routes, Route, Navigate, useLocation, useNavig
 import './App.css'
 import Sidebar from '../components/Sidebar/Sidebar'
 import Chat from '../components/Chat/Chat'
+import NewChat from '../components/Chat/NewChat'
 import Documents from '../components/Documents/Documents'
 import History from '../components/History/History'
 import SignUp from '../components/SignUp/SignUp'
@@ -26,10 +27,12 @@ function App() {
 
     const getActiveSection = () => {
       const path = location.pathname;
-      if (path === '/chat' || path === '/') return 'chat';
+      if (path.match(/^\/chat\/[^/]+$/)) return 'chat';
+      if (path === '/') return 'chat';
       if (path === '/documents') return 'documents';
       if (path === '/history') return 'history';
       if (path === '/settings') return 'settings';
+      if (path === '/chat') return '';
       return 'chat';
     };
 
@@ -112,7 +115,8 @@ function App() {
                 )}
                 <Routes>
                   <Route path="/" element={<Navigate to="/chat" replace />} />
-                  <Route path="/chat" element={<Chat />} />
+                  <Route path="/chat" element={<NewChat />} />
+                  <Route path="/chat/:threadId" element={<Chat />} />
                   <Route path="/documents" element={<Documents />} />
                   <Route path="/history" element={<History />} />
                   <Route path="/settings" element={<div>Settings Page</div>} />

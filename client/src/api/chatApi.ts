@@ -25,6 +25,12 @@ export interface ChatResponse {
   thread_id?: string;
 }
 
+export interface ChatThread {
+  thread_id: string;
+  title: string;
+  last_updated_at: string;
+}
+
 // Create axios instance
 const api = axios.create({
   baseURL: API_URL,
@@ -45,15 +51,42 @@ api.interceptors.request.use((config) => {
 });
 
 export const chatApi = {
-  sendMessage: async (prompt: string): Promise<ChatResponse> => {
+  createChat: async (): Promise<{ msg: string, thread_id: string }> => {
     try {
-      const response = await api.post<ChatResponse>('/ai-response', { prompt });
-
-      console.log("response data: ", response.data);
-
+      const response = await api.post<{ msg: string, thread_id: string }>('/create-chat');
       return response.data;
     } catch (error) {
-      console.error('Error sending message:', error);
+      console.error('Error creating chat:', error);
+      throw error;
+    }
+  },
+  
+  sendMessageToThread: async (threadId: string, prompt: string): Promise<ChatResponse> => {
+    try {
+      const response = await api.post<ChatResponse>(`/sanvia-chat/${threadId}`, { prompt });
+      return response.data;
+    } catch (error) {
+      console.error('Error sending message to thread:', error);
+      throw error;
+    }
+  },
+  
+  getChatByThreadId: async (threadId: string): Promise<ChatResponse> => {
+    try {
+      const response = await api.get<ChatResponse>(`/chat/${threadId}`);
+      return response.data;
+    } catch (error) {
+      console.error('Error retrieving chat:', error);
+      throw error;
+    }
+  },
+
+  getAllChatThreads: async (): Promise<ChatThread[]> => {
+    try {
+      const response = await api.get<{ threads: ChatThread[] }>('/chats');
+      return response.data.threads;
+    } catch (error) {
+      console.error('Error fetching chat threads:', error);
       throw error;
     }
   },

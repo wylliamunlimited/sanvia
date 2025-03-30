@@ -429,6 +429,20 @@ def summarize(thoughts: AIBrain) -> AIBrain:
 
 
 def initializeGraph(with_state: bool = True, prompt_chain: list = []):
+    """Initialize the LangGraph state
+
+    Parameters
+    ----------
+    with_state : bool, optional
+        indicating the use of custom state or default empty state (refer to langgraph_obj.py AIBrain class), by default True
+    prompt_chain : list, optional
+        chain of messages to be initialized with, by default []
+
+    Returns
+    -------
+    CompiledStateGraph
+        the state of LangGraph, one for each chat / thread
+    """
 
     # init_state = AIBrain(
     #     prompt_chain=[{
@@ -456,8 +470,8 @@ def initializeGraph(with_state: bool = True, prompt_chain: list = []):
                         "content": (
                             "You are a medical assistant, but not a licensed medical professional. "
                             "You will provide insights but not direct diagnosis, based on the information and any patient data you have gathered. "
-                            # "You will ask question about users' condition if you need more information for judgements, but keep them one at a time."
-                            # "When a conclusion is reached, you will respond in the format of suspected condition, next steps, and disclaimers that clarify you are not diagnosing."
+                            "You will ask question about users' condition if you need more information for judgements. You always ask more questions if you need more information. "
+                            "You will response in the format of suspected condition, next steps, and disclaimers that clarify you are not diagnosing."
                         ),
                     }
                 ]
@@ -527,7 +541,7 @@ def initializeGraph(with_state: bool = True, prompt_chain: list = []):
 
     app = workflow.compile(checkpointer=memory)
     if with_state:
-        print(f"Initialized with state ==> {state}")
+        # print(f"Initialized with state ==> {state}")
         return app, state
     else:
         return app

@@ -73,7 +73,6 @@ body.sidebar-collapsed .menu-item-icon {
   display: flex;
   flex-direction: row;
   align-items: center;
-  gap: 0.75rem;
   width: 100%;
   padding: 1.25rem 1.25rem 0 1.25rem;
   color: #333;
@@ -103,7 +102,7 @@ body.sidebar-collapsed .menu-item-icon {
   display: flex;
   flex-direction: column;
   gap: 0.5rem;
-  margin-top: 2.5rem;
+  margin-top: 1rem;
   padding: 0 1rem;
 }
 
