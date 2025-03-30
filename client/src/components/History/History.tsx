@@ -1,6 +1,8 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
+import { useNavigate } from 'react-router-dom'
 import './History.css'
 import Header from '../ui/Header'
+import chatApi, { ChatThread } from '../../api/chatApi'
 
 type ChatSession = {
   id: string;
@@ -9,39 +11,43 @@ type ChatSession = {
 }
 
 const History = () => {
+  const navigate = useNavigate()
   const [searchQuery, setSearchQuery] = useState('')
-  const [chatSessions] = useState<ChatSession[]>([
-    {
-      id: '1',
-      title: 'Sleep pattern analysis',
-      timestamp: new Date('2024-12-15T14:20:00')
-    },
-    {
-      id: '2',
-      title: 'Mental health check-in',
-      timestamp: new Date('2025-01-10T09:30:00')
-    },
-    {
-      id: '3',
-      title: 'Nutrition consultation',
-      timestamp: new Date('2025-01-19T15:45:00')
-    },
-    {
-      id: '4',
-      title: 'Discussion about health and wellness',
-      timestamp: new Date('2025-02-07T10:30:00')
-    },
-    {
-      id: '5',
-      title: 'Exercise routine review',
-      timestamp: new Date('2025-03-01T11:10:00')
-    },
-    {
-      id: '6',
-      title: 'Symptoms check-in',
-      timestamp: new Date('2025-03-04T11:10:00')
+  const [chatSessions, setChatSessions] = useState<ChatSession[]>([])
+  const [isLoading, setIsLoading] = useState(false)
+  const [error, setError] = useState<string | null>(null)
+
+  // Fetch chat threads on component mount
+  useEffect(() => {
+    const fetchChatThreads = async () => {
+      setIsLoading(true)
+      setError(null)
+      
+      try {
+        const threads = await chatApi.getAllChatThreads()
+        
+        const sessions = threads.map(thread => ({
+          id: thread.thread_id,
+          title: thread.title || 'Untitled Chat',
+          timestamp: new Date(thread.last_updated_at)
+        }))
+        
+        setChatSessions(sessions)
+      } catch (err) {
+        console.error('Error fetching chat history:', err)
+        setError('Failed to load chat history.')
+      } finally {
+        setIsLoading(false)
+      }
     }
-  ])
+    
+    fetchChatThreads()
+  }, [])
+
+  // Handle navigation to chat thread
+  const handleChatItemClick = (chatId: string) => {
+    navigate(`/chat/${chatId}`)
+  }
 
   const formatHistoryTime = (timestamp: Date) => {
     const now = new Date()
@@ -123,15 +129,12 @@ const History = () => {
 
   return (
     <div className="history-content">
-      <Header 
-        icon={
-          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-            <path d="M12 8v4l3 3"/>
-            <circle cx="12" cy="12" r="9"/>
-          </svg>
-        }
-        title="History"
+      <Header
+        icon={<></>}
+        title=""
       />
+
+      <h2 className="history-subheader">Your chat history</h2>
 
       <div className="search-section">
         <div className="search-row">
@@ -163,29 +166,38 @@ const History = () => {
       </div>
 
       <div className="history-area">
-        <div className="history-timeline">
-          {Object.entries(groupedSessions).length > 0 ? (
-            Object.entries(groupedSessions).map(([dateGroup, sessions]) => (
-              <div key={dateGroup} className="history-group">
-                <div className="history-date-header">
-                  {dateGroup}
-                </div>
-                {sessions.map(session => (
-                  <div key={session.id} className="history-item">
-                    <div>
-                      <div className="history-text">{session.title}</div>
-                      <div className="history-time">{formatHistoryTime(session.timestamp)}</div>
-                    </div>
+        {error && (
+          <div className="error-message">{error}</div>
+        )}
+        {!isLoading && !error && (
+          <div className="history-timeline">
+            {Object.entries(groupedSessions).length > 0 ? (
+              Object.entries(groupedSessions).map(([dateGroup, sessions]) => (
+                <div key={dateGroup} className="history-group">
+                  <div className="history-date-header">
+                    {dateGroup}
                   </div>
-                ))}
+                  {sessions.map(session => (
+                    <div 
+                      key={session.id} 
+                      className="history-item"
+                      onClick={() => handleChatItemClick(session.id)}
+                    >
+                      <div>
+                        <div className="history-text">{session.title}</div>
+                        <div className="history-time">{formatHistoryTime(session.timestamp)}</div>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              ))
+            ) : (
+              <div className="no-results">
+                {searchQuery ? 'There are no chats matching "' + searchQuery + '"' : 'You have no previous chats with Sanvia'}
               </div>
-            ))
-          ) : (
-            <div className="no-results">
-              {searchQuery ? 'No matching chat sessions found' : 'No chat sessions yet'}
-            </div>
-          )}
-        </div>
+            )}
+          </div>
+        )}
       </div>
     </div>
   )

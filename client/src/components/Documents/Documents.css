@@ -19,10 +19,18 @@
   padding-right: 399px;
 }
 
+.documents-subheader {
+  font-size: 1.5rem;
+  font-weight: 600;
+  margin: 1rem 0 0.5rem;
+  padding: 0 calc(max(1rem, (100% - 768px) / 2));
+  color: #333;
+}
+
 .documents-area {
   flex: 1;
   overflow-y: auto;
-  padding: 2rem calc(max(1rem, (100% - 768px) / 2));
+  padding: 1rem calc(max(1rem, (100% - 768px) / 2));
   padding-right: calc(max(1rem, (100% - 768px) / 2) - var(--scrollbar-width));
   display: flex;
   flex-direction: column;

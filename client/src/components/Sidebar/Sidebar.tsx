@@ -62,6 +62,16 @@ const Sidebar: React.FC<SidebarProps> = ({
   const navigate = useNavigate();
   const [onboardingComplete, setOnboardingComplete] = useState<boolean>(true);
 
+  const handleChatNavigation = () => {
+    // Check if chat ID in localStorage
+    const lastChatId = localStorage.getItem('lastChatId');
+    if (lastChatId) {
+      navigate(`/chat/${lastChatId}`);
+    } else {
+      navigate('/chat');
+    }
+  };
+
   // Fetch profile only after the auth state is determined
   useEffect(() => {
     // Wait until loading is finished and the user is available
@@ -190,7 +200,10 @@ const Sidebar: React.FC<SidebarProps> = ({
       </div>
       <div className="sidebar-content">
         <nav className="sidebar-nav">
-          <button className="new-chat-button">
+          <button 
+            className="new-chat-button"
+            onClick={() => navigate('/chat')}
+          >
             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
               <line x1="12" y1="5" x2="12" y2="19"></line>
               <line x1="5" y1="12" x2="19" y2="12"></line>
@@ -201,7 +214,13 @@ const Sidebar: React.FC<SidebarProps> = ({
             <button
               key={item.id}
               className={`nav-item ${activeSection === item.id ? 'active' : ''}`}
-              onClick={() => onSectionChange(item.id)}
+              onClick={() => {
+                if (item.id === 'chat') {
+                  handleChatNavigation();
+                } else {
+                  onSectionChange(item.id);
+                }
+              }}
             >
               <span className="nav-item-icon">{item.icon}</span>
               <span className="nav-item-text">{item.label}</span>
