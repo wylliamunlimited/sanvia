@@ -14,6 +14,7 @@ from dependencies.firebase_dependencies import (
     get_firebase_user_from_token,
     update_chat_entry,
     get_chat,
+    get_all_chat_threads,
 )
 from constants.request_obj import (
     PromptRequest,
@@ -212,7 +213,8 @@ async def destroy_chat_session(
     """
     
     try:
-        states.pop(user["uid"])
+        if user["uid"] in states:
+            states.pop(user["uid"])
 
         print(f"ALL STATES:\n{json.dumps(states, indent=4)}")
 
@@ -276,7 +278,7 @@ async def sanvia_chat(
         #       else
         #           get the state of the chat
         userid = user["uid"]
-        if userid not in states.keys() or thread_id != states[userid]["thread_id"]:
+        if userid not in states or "thread_id" not in states[userid] or thread_id != states[userid]["thread_id"]:
             raise HTTPException(status_code=404, detail=f"Chat was not found.")
         
         _state = states[user["uid"]]
@@ -365,9 +367,11 @@ async def create_chat_session(
         thread_id, _graph, _state = create_new_thread(user=user)
         
         if user['uid'] not in states:
-            states[user["uid"]] = {}
+            states[user["uid"]] = _state
+        else:
+            states[user["uid"]] = _state
         
-        states[user["uid"]][thread_id] = _state
+        states[user["uid"]]["thread_id"] = thread_id
         
         # 2) Upload thread onto Firestore
         
@@ -389,8 +393,8 @@ async def create_chat_session(
     except Exception as e:
         
         ## Clean up
-        if user["uid"] in states and thread_id in states[user["uid"]]:
-            del states[user["uid"]][thread_id]
+        if user["uid"] in states:
+            states.pop(user["uid"])
         
         raise HTTPException(status=400, detail=f"Chat Creation Failed, error: {e}")
 
@@ -464,5 +468,41 @@ async def getChat(
         # print(f"ALL STATES:\n{json.dumps(states, indent=4)}")
 
         return {"chat": _state["prompt_chain"], "thread_id": _state["thread_id"]}
+    except Exception as e:
+        raise HTTPException(status_code=400, detail=f"Error: {e}")
+
+@router.get("/chats")
+async def getAllChats(
+    user: Annotated[dict, Depends(get_firebase_user_from_token)]
+):
+    try:
+        threads = get_all_chat_threads(user_id=user["uid"])
+        
+        thread_list = []
+        for thread in threads:
+            thread_data = thread.to_dict()
+            thread_info = {
+                "thread_id": thread.id,
+                "last_updated_at": thread_data.get("last_updated_at", ""),
+                "title": "",  # Default empty title
+            }
+            
+            # Extract title from first user message
+            prompt_chain = thread_data.get("prompt_chain", [])
+            if prompt_chain:
+                for message in prompt_chain:
+                    if message.get("role") == "user":
+                        # Use first few words as title
+                        content = message.get("content", "")
+                        thread_info["title"] = (content[:30] + "...") if len(content) > 30 else content
+                        break
+            
+            thread_list.append(thread_info)
+            
+        # Sort by last updated (newest first)
+        thread_list.sort(key=lambda x: x.get("last_updated_at", ""), reverse=True)
+            
+        return {"threads": thread_list}
+    
     except Exception as e:
         raise HTTPException(status_code=400, detail=f"Error: {e}")
