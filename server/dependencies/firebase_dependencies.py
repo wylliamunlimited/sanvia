@@ -61,6 +61,11 @@ def get_chat(user_id: str, thread_id: str):
     """Retrieve chat data of user_id/thread_id From Firestore"""
     doc_ref = get_firestore_client().collection("chat-history").document(user_id).collection("threads").document(thread_id)
     return doc_ref.get()
+
+def get_all_chat_threads(user_id: str):
+    """Retrieve all chat threads for a user from Firestore"""
+    collection_ref = get_firestore_client().collection("chat-history").document(user_id).collection("threads")
+    return collection_ref.stream()
     
 # Authentication setup (Bearer Token)
 bearer_scheme = HTTPBearer(auto_error=False)
