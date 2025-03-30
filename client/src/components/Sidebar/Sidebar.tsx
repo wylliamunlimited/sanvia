@@ -53,7 +53,7 @@ const navItems: NavItem[] = [
 const Sidebar: React.FC<SidebarProps> = ({
   activeSection,
   onSectionChange,
-  onCollapse,
+  // onCollapse,
 }) => {
   const [menuOpen, setMenuOpen] = useState(false)
   const [userName, setUserName] = useState("");
