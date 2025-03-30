@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
 import './History.css'
 import Header from '../ui/Header'
-import chatApi, { ChatThread } from '../../api/chatApi'
+import chatApi from '../../api/chatApi'
 
 type ChatSession = {
   id: string;
