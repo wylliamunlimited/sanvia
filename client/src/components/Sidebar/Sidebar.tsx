@@ -2,8 +2,9 @@ import { useEffect, useState } from 'react'
 import './Sidebar.css'
 import { useNavigate } from 'react-router-dom'
 import { firestoreApi } from '../../api/firestoreApi'
-import Profile from '../Profile/Profile.tsx'
 import { useAuth } from '../../provider/AuthContext'
+import { useProfile } from '../../provider/ProfileContext'
+import Banner from './Banner'
 
 type NavItem = {
   id: string
@@ -11,10 +12,10 @@ type NavItem = {
   icon: React.ReactNode
 }
 
-type SidebarProps = {
-  activeSection: string
-  onSectionChange: (section: string) => void
-  onCollapse: () => void
+interface SidebarProps {
+  activeSection: string;
+  onSectionChange: (section: string) => void;
+  onCollapse: () => void;
 }
 
 const navItems: NavItem[] = [
@@ -47,30 +48,30 @@ const navItems: NavItem[] = [
       </svg>
     )
   },
-
-
 ]
 
-
-
-const Sidebar = ({ activeSection, onSectionChange, onCollapse }: SidebarProps) => {
+const Sidebar: React.FC<SidebarProps> = ({
+  activeSection,
+  onSectionChange,
+  onCollapse,
+}) => {
   const [menuOpen, setMenuOpen] = useState(false)
-  const [userName, setUserName] = useState("Anonymous");
+  const [userName, setUserName] = useState("");
   const { user, loading, logout } = useAuth();
+  const { openProfile, setUserData } = useProfile();
   const navigate = useNavigate();
+  const [onboardingComplete, setOnboardingComplete] = useState<boolean>(true);
 
+  const handleChatNavigation = () => {
+    // Check if chat ID in localStorage
+    const lastChatId = localStorage.getItem('lastChatId');
+    if (lastChatId) {
+      navigate(`/chat/${lastChatId}`);
+    } else {
+      navigate('/chat');
+    }
+  };
 
-  const [userData, setUserData] = useState({
-    firstName: '',
-    lastName: '',
-    height: '',
-    weight: '',
-    gender: '',
-    sex: '',
-    age: ''
-  });
-
-  // const userInitials = 'YN'
   // Fetch profile only after the auth state is determined
   useEffect(() => {
     // Wait until loading is finished and the user is available
@@ -98,6 +99,13 @@ const Sidebar = ({ activeSection, onSectionChange, onCollapse }: SidebarProps) =
           age: data['Age']
         });
 
+        // Set onboarding status
+        if (data['onboarding'] === "complete") {
+          setOnboardingComplete(true);
+        } else {
+          setOnboardingComplete(false);
+        }
+
         console.log("Profile data fetched:", data);
       } catch (error) {
         console.error("Error fetching profile:", error);
@@ -105,23 +113,12 @@ const Sidebar = ({ activeSection, onSectionChange, onCollapse }: SidebarProps) =
     };
 
     fetchProfile();
-  }, [user, loading]);
+  }, [user, loading, setUserData]);
 
-  // const userInitials = 'JW'
-  // userName = 'Justin Wang'
-  const [showProfile, setShowProfile] = useState(false)
-
-  // const userInitials = 'YN'
   const handleLogout = () => {
     setMenuOpen(false);
     logout();
     navigate('/auth/login');
-  };
-
-  const handleSave = (updatedData: typeof userData) => {
-    console.log("Updated Profile:", updatedData);
-    setUserData(updatedData);
-    setShowProfile(false);
   };
 
   const menuItems = [
@@ -136,8 +133,7 @@ const Sidebar = ({ activeSection, onSectionChange, onCollapse }: SidebarProps) =
       ),
       onClick: () => {
         console.log('Profile button clicked');
-        setShowProfile(true);
-        setMenuOpen(false);
+        openProfile();
       }
     },
     {
@@ -184,39 +180,57 @@ const Sidebar = ({ activeSection, onSectionChange, onCollapse }: SidebarProps) =
       }
     },
   ]
+
   return (
     <div className="sidebar">
-      <button
-        className="collapse-button"
-        onClick={onCollapse}
-        aria-label="Collapse sidebar"
-      >
-        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-          <polyline points="15 18 9 12 15 6" />
-        </svg>
-      </button>
       <div className="sidebar-header">
-      </div>
-      <div className="logo-section">
         <div className="logo-container">
           <img src="/images/logo.png" alt="Logo" />
           <span className="logo-text">Sanvia</span>
         </div>
+        <button 
+          className="collapse-button"
+          onClick={() => document.body.classList.toggle('sidebar-collapsed')}
+          aria-label="Toggle sidebar"
+        >
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+            <polyline points="15 18 9 12 15 6" />
+          </svg>
+        </button>
       </div>
       <div className="sidebar-content">
         <nav className="sidebar-nav">
+          <button 
+            className="new-chat-button"
+            onClick={() => navigate('/chat')}
+          >
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+              <line x1="12" y1="5" x2="12" y2="19"></line>
+              <line x1="5" y1="12" x2="19" y2="12"></line>
+            </svg>
+            <span className="nav-item-text">New Chat</span>
+          </button>
           {navItems.map((item) => (
             <button
               key={item.id}
               className={`nav-item ${activeSection === item.id ? 'active' : ''}`}
-              onClick={() => onSectionChange(item.id)}
+              onClick={() => {
+                if (item.id === 'chat') {
+                  handleChatNavigation();
+                } else {
+                  onSectionChange(item.id);
+                }
+              }}
             >
               <span className="nav-item-icon">{item.icon}</span>
-              {item.label}
+              <span className="nav-item-text">{item.label}</span>
             </button>
           ))}
         </nav>
       </div>
+      
+      <Banner isVisible={!onboardingComplete} />
+      
       <div className="profile-menu">
         <button
           className="profile-section"
@@ -228,7 +242,7 @@ const Sidebar = ({ activeSection, onSectionChange, onCollapse }: SidebarProps) =
               <circle cx="12" cy="7" r="4" />
             </svg>
           </div>
-          <span className="user-name">{userName}</span>
+          {userName && <span className="user-name">{userName}</span>}
         </button>
         {menuOpen && (
           <div className="menu-dropdown">
@@ -239,19 +253,12 @@ const Sidebar = ({ activeSection, onSectionChange, onCollapse }: SidebarProps) =
                 onClick={item.onClick}
               >
                 <span className="menu-item-icon">{item.icon}</span>
-                {item.label}
+                <span className="nav-item-text">{item.label}</span>
               </button>
             ))}
           </div>
         )}
       </div>
-      {showProfile && (
-        <Profile
-          {...userData}
-          onClose={() => setShowProfile(false)}
-          onSave={handleSave}
-        />
-      )}
     </div>
   )
 }

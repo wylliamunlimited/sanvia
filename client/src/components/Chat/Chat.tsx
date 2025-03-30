@@ -1,4 +1,5 @@
 import { useState, useRef, useEffect } from 'react'
+import { useParams, useNavigate } from 'react-router-dom'
 import './Chat.css'
 import { getScrollbarWidth } from '../../utils/scrollbar'
 import chatApi, { SourceItem } from '../../api/chatApi'
@@ -14,9 +15,13 @@ type Message = {
 }
 
 const Chat = () => {
+  const { threadId } = useParams<{ threadId: string }>()
+  const navigate = useNavigate()
+  
   const [messages, setMessages] = useState<Message[]>([])
   const [inputText, setInputText] = useState('')
   const [isThinking, setIsThinking] = useState(false)
+  const [isLoading, setIsLoading] = useState(false)
   const [shouldAutoScroll, setShouldAutoScroll] = useState(true)
   const [error, setError] = useState<string | null>(null)
   const [selectedMessageId, setSelectedMessageId] = useState<number | null>(null)
@@ -27,14 +32,47 @@ const Chat = () => {
   const messageAreaRef = useRef<HTMLDivElement>(null)
   const prevMessageCountRef = useRef(0)
 
-  // Load initial greeting message
+  // Store threadId in localStorage whenever it changes
   useEffect(() => {
-    setMessages([{
-      id: Date.now(),
-      text: "Hello! How can I help with your health related questions?",
-      isUser: false
-    }])
-  }, [])
+    if (threadId) {
+      localStorage.setItem('lastChatId', threadId);
+    }
+  }, [threadId]);
+
+  // Get chat by threadId
+  useEffect(() => {
+    const loadChat = async () => {
+      if (threadId) {
+        try {
+          setIsLoading(true);
+          const chatData = await chatApi.getChatByThreadId(threadId);
+          
+          if (chatData.chat && chatData.chat.length > 0) {
+            // Filter out system messages
+            const filteredMessages = chatData.chat.filter(msg => msg.role !== 'system');
+            
+            const convertedMessages = filteredMessages.map((msg, index) => ({
+              id: Date.now() + index,
+              text: msg.content,
+              isUser: msg.role === 'user',
+              sources: msg.role === 'assistant' ? msg.references : undefined
+            }));
+            
+            setMessages(convertedMessages);
+          }
+        } catch (err) {
+          console.error('Error loading chat:', err);
+          setError('Failed to load chat history.');
+        } finally {
+          setIsLoading(false);
+        }
+      } else {
+        setMessages([]);
+      }
+    };
+    
+    loadChat();
+  }, [threadId]);
 
   // Auto-adjust textarea height based on content
   useEffect(() => {
@@ -96,19 +134,43 @@ const Chat = () => {
     setShouldAutoScroll(true)
 
     try {
-      const response = await chatApi.sendMessage(inputText.trim())
-      // Find last assistant message in chat history
-      const assistantMessages = response.chat.filter(msg => msg.role === 'assistant')
-      if (assistantMessages.length > 0) {
-        const lastAssistantMessage = assistantMessages[assistantMessages.length - 1]
+      if (!threadId) {
+        // Create new thread on generic /chat route
+        const createResponse = await chatApi.createChat()
+        const newThreadId = createResponse.thread_id
         
-        // Add AI response to chat
-        setMessages(prev => [...prev, {
-          id: Date.now(),
-          text: lastAssistantMessage.content,
-          isUser: false,
-          sources: lastAssistantMessage.references
-        }])
+        // Send message to new thread
+        const response = await chatApi.sendMessageToThread(newThreadId, inputText.trim())
+        
+        // Update URL to new thread
+        navigate(`/chat/${newThreadId}`, { replace: true })
+        
+        // Filter and add AI response to chat
+        const assistantMessages = response.chat.filter(msg => msg.role === 'assistant')
+        if (assistantMessages.length > 0) {
+          const lastAssistantMessage = assistantMessages[assistantMessages.length - 1]
+          setMessages(prev => [...prev, {
+            id: Date.now(),
+            text: lastAssistantMessage.content,
+            isUser: false,
+            sources: lastAssistantMessage.references
+          }])
+        }
+      } else {
+        // Send message to existing thread
+        const response = await chatApi.sendMessageToThread(threadId, inputText.trim())
+        
+        // Filter and add AI response to chat
+        const assistantMessages = response.chat.filter(msg => msg.role === 'assistant')
+        if (assistantMessages.length > 0) {
+          const lastAssistantMessage = assistantMessages[assistantMessages.length - 1]
+          setMessages(prev => [...prev, {
+            id: Date.now(),
+            text: lastAssistantMessage.content,
+            isUser: false,
+            sources: lastAssistantMessage.references
+          }])
+        }
       }
     } catch (err) {
       console.error('Error sending message:', err)
@@ -186,7 +248,7 @@ const Chat = () => {
         className="message-area"
         onScroll={handleScroll}
       >
-        {messages.map(message => (
+        {!isLoading && messages.map(message => (
           <Message
             key={message.id}
             id={message.id}
@@ -217,11 +279,12 @@ const Chat = () => {
             onKeyDown={e => {
               if (e.key === 'Enter' && !e.shiftKey) {
                 e.preventDefault()
-                if (!isThinking) handleSubmit(e)
+                if (!isThinking && !isLoading) handleSubmit(e)
               }
             }}
-            placeholder="Message Sanvia"
+            placeholder="Reply to Sanvia..."
             rows={1}
+            disabled={isLoading}
           />
           <button 
             type="button" 
@@ -234,7 +297,7 @@ const Chat = () => {
               <path d="M4 19.5v-15A2.5 2.5 0 0 1 6.5 2H20v20H6.5a2.5 2.5 0 0 1 0-5H20" />
             </svg>
           </button>
-          <button type="submit" disabled={isThinking}>
+          <button type="submit" disabled={isThinking || isLoading}>
             <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
               <path d="M12 2L12 20M12 2L5 9M12 2L19 9" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
             </svg>
