@@ -1,10 +1,10 @@
 import { useState, useRef, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
 import './NewChat.css'
-import { getScrollbarWidth } from '../../utils/scrollbar'
-import chatApi from '../../api/chatApi'
-import Header from '../ui/Header'
-import { useProfile } from '../../provider/ProfileContext'
+import { getScrollbarWidth } from '../utils/scrollbar'
+import chatApi from '../../../api/chatApi'
+import Header from '../../../shared/components/Header'
+import { useProfile } from '../../../context/ProfileContext'
 
 const NewChat = () => {
   const navigate = useNavigate()

@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import './Survey.css';
-import { firestoreApi } from '../../api/firestoreApi';
+import { firestoreApi } from '../../../api/firestoreApi';
 
 interface SurveyProps {
   onSurveyComplete: () => void;

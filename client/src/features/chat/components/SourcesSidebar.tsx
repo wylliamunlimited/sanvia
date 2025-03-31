@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { SourceItem } from '../../api/chatApi';
+import { SourceItem } from '../../../api/chatApi';
 
 interface SourcesSidebarProps {
   isOpen: boolean;

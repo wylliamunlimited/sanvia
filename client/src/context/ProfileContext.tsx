@@ -1,6 +1,6 @@
 import React, { createContext, useState, useContext, ReactNode } from 'react';
 import { firestoreApi } from '../api/firestoreApi';
-import Profile from '../components/Profile/Profile';
+import Profile from '../features/profile/components/Profile';
 
 interface ProfileData {
   firstName: string;

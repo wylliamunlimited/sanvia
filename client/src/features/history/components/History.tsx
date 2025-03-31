@@ -1,14 +1,9 @@
 import { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
 import './History.css'
-import Header from '../ui/Header'
-import chatApi from '../../api/chatApi'
-
-type ChatSession = {
-  id: string;
-  title: string;
-  timestamp: Date;
-}
+import Header from '../../../shared/components/Header'
+import chatApi from '../../../api/chatApi'
+import { formatHistoryTime, groupSessionsByDate, ChatSession } from '../utils/dateUtils'
 
 const History = () => {
   const navigate = useNavigate()
@@ -29,7 +24,7 @@ const History = () => {
         const sessions = threads.map(thread => ({
           id: thread.thread_id,
           title: thread.title || 'Untitled Chat',
-          timestamp: new Date(thread.last_updated_at)
+          timestamp: new Date(thread.last_updated_at + 'Z')
         }))
         
         setChatSessions(sessions)
@@ -47,78 +42,6 @@ const History = () => {
   // Handle navigation to chat thread
   const handleChatItemClick = (chatId: string) => {
     navigate(`/chat/${chatId}`)
-  }
-
-  const formatHistoryTime = (timestamp: Date) => {
-    const now = new Date()
-    const today = now.setHours(0, 0, 0, 0)
-    const yesterday = today - 86400000
-    
-    const itemDate = new Date(timestamp).setHours(0, 0, 0, 0)
-    const time = timestamp.toLocaleTimeString([], { 
-      hour: '2-digit', 
-      minute: '2-digit'
-    })
-
-    if (itemDate === today) {
-      return `Today at ${time}`
-    } else if (itemDate === yesterday) {
-      return `Yesterday at ${time}`
-    } else {
-      return `${timestamp.toLocaleDateString('en-US', { 
-        month: 'short',
-        day: 'numeric',
-        year: 'numeric'
-      })} at ${time}`
-    }
-  }
-
-  const groupSessionsByDate = (sessions: ChatSession[]) => {
-    const now = new Date()
-    const today = now.setHours(0, 0, 0, 0)
-    const yesterday = today - 86400000
-    const oneWeekAgo = today - 86400000 * 7
-
-    const grouped = sessions.reduce((groups, session) => {
-      const timestamp = session.timestamp.getTime()
-      const itemDate = new Date(session.timestamp).setHours(0, 0, 0, 0)
-      
-      let key
-      if (itemDate === today) {
-        key = 'Today'
-      } else if (itemDate === yesterday) {
-        key = 'Yesterday'
-      } else if (timestamp > oneWeekAgo) {
-        key = session.timestamp.toLocaleDateString('en-US', { weekday: 'long' })
-      } else {
-        key = session.timestamp.toLocaleDateString('en-US', { 
-          month: 'short',
-          year: 'numeric'
-        })
-      }
-      
-      if (!groups[key]) {
-        groups[key] = {
-          timestamp: itemDate,
-          sessions: []
-        }
-      }
-      groups[key].sessions.push(session)
-      return groups
-    }, {} as Record<string, { timestamp: number; sessions: ChatSession[] }>)
-
-    // Sort sessions within each group by timestamp (newest first)
-    Object.values(grouped).forEach(group => {
-      group.sessions.sort((a, b) => b.timestamp.getTime() - a.timestamp.getTime())
-    })
-
-    // Convert to array and sort groups by timestamp (newest first)
-    return Object.entries(grouped)
-      .sort(([, a], [, b]) => b.timestamp - a.timestamp)
-      .reduce((obj, [key, value]) => {
-        obj[key] = value.sessions
-        return obj
-      }, {} as Record<string, ChatSession[]>)
   }
 
   const filteredSessions = chatSessions.filter(session =>
