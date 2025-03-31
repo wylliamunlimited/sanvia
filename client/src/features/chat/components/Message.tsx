@@ -1,6 +1,6 @@
 import React from 'react';
 import ReactMarkdown from 'react-markdown';
-import { SourceItem } from '../../api/chatApi';
+import { SourceItem } from '../../../api/chatApi';
 
 interface MessageProps {
   id: number;

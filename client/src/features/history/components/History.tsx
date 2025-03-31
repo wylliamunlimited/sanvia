@@ -1,8 +1,8 @@
 import { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
 import './History.css'
-import Header from '../ui/Header'
-import chatApi from '../../api/chatApi'
+import Header from '../../../shared/components/Header'
+import chatApi from '../../../api/chatApi'
 
 type ChatSession = {
   id: string;

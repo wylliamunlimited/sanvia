@@ -1,4 +1,4 @@
-import { firestoreApi } from '../../api/firestoreApi';
+import { firestoreApi } from '../../../api/firestoreApi';
 import './Profile.css';
 import { useState } from 'react';
 

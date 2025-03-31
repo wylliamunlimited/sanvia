@@ -1,9 +1,9 @@
 import { useEffect, useState } from 'react'
 import './Sidebar.css'
 import { useNavigate } from 'react-router-dom'
-import { firestoreApi } from '../../api/firestoreApi'
-import { useAuth } from '../../provider/AuthContext'
-import { useProfile } from '../../provider/ProfileContext'
+import { firestoreApi } from '../../../api/firestoreApi'
+import { useAuth } from '../../../context/AuthContext'
+import { useProfile } from '../../../context/ProfileContext'
 import Banner from './Banner'
 
 type NavItem = {

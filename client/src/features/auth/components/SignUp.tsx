@@ -2,9 +2,9 @@ import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import "./SignUp.css"; // Import shared styles
 // import { useAuth } from "../../provider/AuthContext";
-import { auth } from "../../api/firebase";
+import { auth } from "../../../api/firebase";
 import { createUserWithEmailAndPassword } from "firebase/auth";
-import { firestoreApi } from "../../api/firestoreApi";
+import { firestoreApi } from "../../../api/firestoreApi";
 
 interface SignUpProps {
   onSignUpSuccess: () => void;
