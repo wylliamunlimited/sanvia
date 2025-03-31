@@ -1,11 +1,11 @@
 import { useState, useRef, useEffect } from 'react'
 import { useParams, useNavigate } from 'react-router-dom'
 import './Chat.css'
-import { getScrollbarWidth } from '../../utils/scrollbar'
-import chatApi, { SourceItem } from '../../api/chatApi'
-import Header from '../ui/Header'
-import SourcesSidebar from './SourcesSidebar'
-import Message from './Message'
+import { getScrollbarWidth } from '../utils/scrollbar'
+import chatApi, { SourceItem } from '../../../api/chatApi'
+import Header from '../../../shared/components/Header'
+import SourcesSidebar from '../components/SourcesSidebar'
+import Message from '../components/Message'
 
 type Message = {
   id: number

@@ -1,8 +1,8 @@
 import { useState, useEffect } from 'react'
 import './Documents.css'
-import Header from '../ui/Header'
-import documentApi, { DocumentMetadata } from '../../api/documentApi'
-import { getScrollbarWidth } from '../../utils/scrollbar'
+import Header from '../../../shared/components/Header'
+import documentApi, { DocumentMetadata } from '../../../api/documentApi'
+import { getScrollbarWidth } from '../../chat/utils/scrollbar'
 
 type Document = DocumentMetadata
 
