@@ -74,16 +74,14 @@ function App() {
         <Route
           path="/auth/survey"
           element={
-            user && isSignUp ? (
+             
               <Survey
                 onSurveyComplete={() => {
                   // setIsSurveyCompleted(true);
                   localStorage.setItem('isSurveyCompleted', 'true');
                 }}
               />
-            ) : (
-              <Navigate to="/" replace />
-            )
+
           }
         />
         
