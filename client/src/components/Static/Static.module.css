@@ -39,6 +39,11 @@
   max-height: 10px;
 }
 
+#extra {
+  min-width: 100vw;
+  object-fit: cover;
+}
+
 .promise {
   max-height: 200px;
   text-align: left;
@@ -88,7 +93,7 @@ h1 {
 }
 
 .card {
-  width: 50vw;
+  width: calc(200px + 12.5vw);
   height: 300px;
   background-color: hsla(210, 100%, 90%, 0.1);
   border-radius: 16px;
