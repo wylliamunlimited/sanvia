@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { useNavigate } from "react-router-dom";
 import "./Survey.css";
 interface SurveyQuestion {
   id: string;
@@ -181,6 +182,8 @@ const AnimatedSurvey: React.FC = () => {
       default: return false;
     }
   };
+  const navigate = useNavigate();
+
 
   return (
     <div className="fixed inset-0 w-full h-full overflow-hidden">
@@ -425,6 +428,12 @@ const AnimatedSurvey: React.FC = () => {
               className="px-6 py-3 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition focus:outline-none focus:ring-2 focus:ring-blue-700"
             >
               Take Survey Again
+            </button>
+            <button
+              onClick={() => navigate("/*")}
+              className="px-6 py-3 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition focus:outline-none focus:ring-2 focus:ring-blue-700"
+            >
+              Home Page
             </button>
           </div>
         )}
