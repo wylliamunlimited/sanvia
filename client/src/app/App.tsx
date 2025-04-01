@@ -69,24 +69,27 @@ function App() {
             ) 
           }
         />
+
         
         {/* Survey Route */}
         <Route
           path="/auth/survey"
           element={
-             
+            user && isSignUp ? (
               <Survey
                 onSurveyComplete={() => {
                   // setIsSurveyCompleted(true);
                   localStorage.setItem('isSurveyCompleted', 'true');
                 }}
               />
-
+            ) : (
+              <Navigate to="/" replace />
+            )
           }
         />
         
         <Route
-          path="/*"
+          path="/home"
           element={user ? (
             <div className="app-container">
               {isSidebarOpen && (
