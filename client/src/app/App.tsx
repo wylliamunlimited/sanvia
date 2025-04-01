@@ -10,7 +10,7 @@ import SignUp from '../components/SignUp/SignUp'
 import Login from '../components/Login/Login'
 import { FirebaseProvider } from '../provider/FirebaseContext';
 import { AuthProvider, useAuth } from '../provider/AuthContext';
-import Survey from '../components/Survey/Survey';
+import AnimatedSurvey from '../components/Survey/Survey';
 
 
 function App() {
@@ -18,8 +18,7 @@ function App() {
   const [isSidebarOpen, setSidebarOpen] = useState(true)
   // const [isLogged, setIsLogged] = useState(false);
   const [isSignUp, setIsSignUp] = useState(false);
-
-  // const [isSurveyCompleted, setIsSurveyCompleted] = useState(false);
+  const [isSurveyCompleted, setIsSurveyCompleted] = useState(false);
 
   const getActiveComponent = () => {
     switch (activeSection) {
@@ -75,22 +74,23 @@ function App() {
         <Route
           path="/auth/survey"
           element={
-            user && isSignUp ? (
-              <Survey
-                onSurveyComplete={() => {
-                  // setIsSurveyCompleted(true);
-                  localStorage.setItem('isSurveyCompleted', 'true');
-                }}
-              />
-            ) : (
-              <Navigate to="/" replace />
-            )
+            isSignUp ? (
+            <Navigate to="/" replace />
+              ) : (
+            <AnimatedSurvey
+              onSurveyComplete={() => {
+                setIsSurveyCompleted(true);
+                // setIsSurvey(true);
+                localStorage.setItem('isSurvey', 'true');
+              }}
+            />
+              )
           }
         />
         
         <Route
-          path="/home"
-          element={user ? (
+          path="/"
+          element={user || isSurveyCompleted ? (
             <div className="app-container">
               {isSidebarOpen && (
                 <Sidebar

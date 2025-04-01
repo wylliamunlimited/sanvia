@@ -7,7 +7,11 @@ interface SurveyQuestion {
   backgroundColor: string;
 }
 
-const AnimatedSurvey: React.FC = () => {
+interface SurveyProps {
+  onSurveyComplete: () => void;
+}
+
+const AnimatedSurvey: React.FC<SurveyProps> = ({onSurveyComplete}) => {
   // Survey state
   const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0);
   const [previousQuestionIndex, setPreviousQuestionIndex] = useState(0);
@@ -167,6 +171,10 @@ const AnimatedSurvey: React.FC = () => {
     setCurrentQuestionIndex(0);
     setTransitionDirection('prev');
   };
+  const handleSurveyComplete = () => {
+    onSurveyComplete();
+    navigate("/");
+  }
 
   // Check if current question can proceed
   const canProceed = () => {
@@ -425,7 +433,7 @@ const AnimatedSurvey: React.FC = () => {
               Take Survey Again
             </button>
             <button
-              onClick={() => navigate("/*")}
+              onClick={handleSurveyComplete}
               className="px-6 py-3 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition focus:outline-none focus:ring-2 focus:ring-blue-700"
             >
               Home Page
@@ -437,8 +445,5 @@ const AnimatedSurvey: React.FC = () => {
   );
 };
 
-function Survey() {
-  return <AnimatedSurvey />;
-}
 
-export default Survey;
+export default AnimatedSurvey;
