@@ -60,7 +60,7 @@ const AnimatedSurvey: React.FC = () => {
     e: React.ChangeEvent<HTMLInputElement>
   ) => {
     const value = e.target.value;
-    // Only allow numbers and decimal point
+    // Only allow numbers 
     if (value === '' || /^[0-9]*\.?[0-9]*$/.test(value)) {
       setter(value);
     }
@@ -94,7 +94,7 @@ const AnimatedSurvey: React.FC = () => {
     }
   };
 
-  // Toggle height unit and convert values
+  //unit conversion for height
   const toggleHeightUnit = () => {
     if (heightUnit === 'cm' && height) {
       // Convert cm to feet and inches
@@ -111,12 +111,11 @@ const AnimatedSurvey: React.FC = () => {
       setHeight(cmValue);
       setHeightUnit('cm');
     } else {
-      // Just toggle the unit without conversion if no value entered
       setHeightUnit(heightUnit === 'cm' ? 'ft' : 'cm');
     }
   };
 
-  // Toggle weight unit and convert values
+  // unit conversion for weight
   const toggleWeightUnit = () => {
     if (weightUnit === 'kg' && weight) {
       // Convert kg to lbs
@@ -129,7 +128,6 @@ const AnimatedSurvey: React.FC = () => {
       setWeight(kgValue);
       setWeightUnit('kg');
     } else {
-      // Just toggle the unit without conversion if no value entered
       setWeightUnit(weightUnit === 'kg' ? 'lbs' : 'kg');
     }
   };
@@ -144,7 +142,6 @@ const AnimatedSurvey: React.FC = () => {
       setIsAnimating(false);
     }, 500);
 
-    // You could save the data here or send it to a server
     const surveyData = {
       age,
       gender,
@@ -187,9 +184,7 @@ const AnimatedSurvey: React.FC = () => {
 
   return (
     <div className="fixed inset-0 w-full h-full overflow-hidden">
-      {/* Animated background layers */}
       {questions.map((question, index) => {
-        // Only render necessary backgrounds for performance
         if (index === currentQuestionIndex || index === previousQuestionIndex) {
           return (
             <div
