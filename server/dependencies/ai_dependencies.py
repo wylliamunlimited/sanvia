@@ -5,33 +5,38 @@ sys.path.insert(1, "../dependencies")
 sys.path.insert(2, "../constants")
 
 import json
+from typing import Dict, List, Optional
 from langchain_openai import ChatOpenAI
 from constants.credentials import OPENAI_API_KEY
 from constants.langgraph_obj import AIBrain
-
-from dependencies.tavily_dependencies import (
-    tavily_intense_search,
-)
-
+from dependencies.tavily_dependencies import tavily_intense_search
 from langgraph.graph import START, StateGraph, END
-
-# from langchain_core.messages import (
-#     BaseMessage,
-#     HumanMessage,
-#     ToolMessage,
-# )
 from langchain_core.prompts import ChatPromptTemplate, MessagesPlaceholder
 from langgraph.checkpoint.memory import MemorySaver
+from langchain_community.document_loaders import (
+    UnstructuredFileLoader,
+    UnstructuredMarkdownLoader,
+    UnstructuredHTMLLoader,
+    UnstructuredPDFLoader,
+    UnstructuredImageLoader,
+)
+from langchain_core.documents import Document
+from dependencies.rag_dependencies import retrieve_relevant_chunks
+from dependencies.firebase_dependencies import get_firestore_client
 
 
 def get_llm():
     """Return the LLM."""
-    return ChatOpenAI(
-        model="gpt-4o-mini",
-        temperature=0,
-        api_key=OPENAI_API_KEY,
-        max_retries=3,
-    )
+    try:
+        return ChatOpenAI(
+            model="gpt-4o-mini",
+            temperature=0,
+            api_key=OPENAI_API_KEY,
+            max_retries=3,
+        )
+    except Exception as e:
+        print(f"❌ Error initializing LLM: {str(e)}")
+        raise
 
 
 def determine_relevance(thoughts: AIBrain) -> AIBrain:
@@ -285,7 +290,34 @@ def data_extract(thoughts: AIBrain) -> AIBrain:
     AIBrain
         state of LangGraph Agent
     """
-    thoughts["data"] = {}
+    # Get user's documents from Firestore
+    db = get_firestore_client()
+    user_id = thoughts.get("user_id")
+    if not user_id:
+        return thoughts
+
+    # Get all documents for the user
+    docs = db.collection("documents").document(user_id).collection("files").stream()
+
+    # Retrieve relevant chunks from each document
+    relevant_chunks = []
+    for doc in docs:
+        doc_data = doc.to_dict()
+        chunks = retrieve_relevant_chunks(
+            query=thoughts["prompt_chain"][-1]["content"],  # Latest user message
+            user_id=user_id,
+            document_id=doc_data["document_id"],
+        )
+        relevant_chunks.extend(chunks)
+
+    # Add relevant chunks to thoughts
+    thoughts["data"] = {
+        "relevant_chunks": [
+            {"content": chunk.page_content, "metadata": chunk.metadata}
+            for chunk in relevant_chunks
+        ]
+    }
+
     return thoughts
 
 
@@ -364,9 +396,19 @@ def summarize(thoughts: AIBrain) -> AIBrain:
     AIBrain
         state of LangGraph Agent
     """
+    # Get relevant chunks from data
+    relevant_chunks = thoughts.get("data", {}).get("relevant_chunks", [])
+
+    # Prepare context from relevant chunks
+    chunk_context = "\n\n".join(
+        [
+            f"From document '{chunk['metadata']['filename']}':\n{chunk['content']}"
+            for chunk in relevant_chunks
+        ]
+    )
 
     ## APPENDING RESEARCH RESULT INTO PROMPT
-    if thoughts["knowledge"] == []:
+    if thoughts["knowledge"] == [] and not chunk_context:
         print(f"🧠 no knowledge is included")
         prompt = thoughts["prompt_chain"] + [
             {
@@ -380,23 +422,37 @@ def summarize(thoughts: AIBrain) -> AIBrain:
             }
         ]
     else:
+        # Combine external knowledge with document chunks
+        knowledge_context = (
+            "\n\n".join(
+                [
+                    search_["content"] + " Title: " + search_["title"]
+                    for search_ in thoughts["knowledge"]
+                ]
+            )
+            if thoughts["knowledge"]
+            else ""
+        )
+
         prompt = thoughts["prompt_chain"] + [
             {
                 "role": "user",
                 "content": (
                     "Based on the information I provided, please summarize the key points and provide "
                     "any relevant insights or recommendations. "
-                    "Reference the information here: [BEGIN OF KNOWLEDGE] "
-                    + "\n\n".join(
-                        [
-                            search_["content"] + " Title: " + search_["title"]
-                            for search_ in thoughts["knowledge"]
-                        ]
+                    "Reference the information here:\n\n"
+                    + (
+                        f"[BEGIN OF DOCUMENT CHUNKS]\n{chunk_context}\n[END OF DOCUMENT CHUNKS]\n\n"
+                        if chunk_context
+                        else ""
                     )
-                    + ". [END OF KNOWLEDGE]\n\n"
-                    # "Please exclusively check which information is relevant to the user's condition and summarize them, with clear indication 'according to [insert source title]'. "
-                    "Summarize the information and use phrases like 'according to [insert source title]' to indicate the source of the information. "
-                    "Respond in sections: risk level (high, medium, low) with an explanation of what this means in context, suspected condition, next steps, and side notes (if any)."
+                    + (
+                        f"[BEGIN OF KNOWLEDGE]\n{knowledge_context}\n[END OF KNOWLEDGE]\n\n"
+                        if knowledge_context
+                        else ""
+                    )
+                    + "Summarize the information and use phrases like 'according to [insert source title]' to indicate the source of the information. "
+                    + "Respond in sections: risk level (high, medium, low) with an explanation of what this means in context, suspected condition, next steps, and side notes (if any)."
                 ),
             }
         ]
@@ -420,7 +476,7 @@ def summarize(thoughts: AIBrain) -> AIBrain:
     prompt_chain_ai_obj = {
         "role": "assistant",
         "content": final_response.content,
-        "references": thoughts["shortterm_knowledge"],
+        "references": thoughts["shortterm_knowledge"] + relevant_chunks,
     }
 
     ## adding the response to the chain too
