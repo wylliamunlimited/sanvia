@@ -544,7 +544,7 @@ def summarize(thoughts: AIBrain) -> AIBrain:
     return thoughts
 
 
-def initializeGraph(with_state: bool = True, prompt_chain: list = [], user_id: str = ""):
+def initializeGraph(with_state: bool = True, prompt_chain: list = []):
     """Initialize the LangGraph state
 
     Parameters
@@ -607,7 +607,6 @@ def initializeGraph(with_state: bool = True, prompt_chain: list = [], user_id: s
             proceed=False,
             shortterm_knowledge=[],
             category_focus=None,
-            needs_documents=False,
         )
 
     workflow = StateGraph(AIBrain)
