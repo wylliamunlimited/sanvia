@@ -461,6 +461,10 @@ def summarize(thoughts: AIBrain) -> AIBrain:
     if survey_context:
         chunk_context = f"[PATIENT PROFILE]\n{survey_context}\n\n[RELEVANT DOCUMENTS]\n{doc_context}"
 
+    # Add survey context if available
+    if survey_context:
+        chunk_context = f"[PATIENT PROFILE]\n{survey_context['content']}\n\n[RELEVANT DOCUMENTS]\n{chunk_context}"
+
     ## APPENDING RESEARCH RESULT INTO PROMPT
     if thoughts["knowledge"] == [] and not chunk_context:
         print(f"🧠 no knowledge is included")
