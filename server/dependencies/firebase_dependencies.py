@@ -108,6 +108,26 @@ def get_chat(user_id: str, thread_id: str) -> Optional[Dict[str, Any]]:
         print(f"❌ Error getting chat: {str(e)}")
         raise
 
+    doc_ref = (
+        get_firestore_client()
+        .collection("chat-history")
+        .document(user_id)
+        .collection("threads")
+        .document(thread_id)
+    )
+    return doc_ref.get()
+
+
+def get_all_chat_threads(user_id: str):
+    """Retrieve all chat threads for a user from Firestore"""
+    collection_ref = (
+        get_firestore_client()
+        .collection("chat-history")
+        .document(user_id)
+        .collection("threads")
+    )
+    return collection_ref.stream()
+
 
 # Authentication setup (Bearer Token)
 bearer_scheme = HTTPBearer(auto_error=False)
