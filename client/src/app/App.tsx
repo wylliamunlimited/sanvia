@@ -2,16 +2,17 @@ import { useState } from 'react';
 import { BrowserRouter as Router, Routes, Route, Navigate, useLocation, useNavigate } from 'react-router-dom';
 
 import './App.css'
-import Sidebar from '../components/Sidebar/Sidebar'
-import Chat from '../components/Chat/Chat'
-import Documents from '../components/Documents/Documents'
-import History from '../components/History/History'
-import SignUp from '../components/SignUp/SignUp'
-import Login from '../components/Login/Login'
-import { FirebaseProvider } from '../provider/FirebaseContext';
-import { AuthProvider, useAuth } from '../provider/AuthContext';
-import { ProfileProvider } from '../provider/ProfileContext';
-import Survey from '../components/Survey/Survey';
+import Sidebar from '../features/sidebar/components/Sidebar'
+import Chat from '../features/chat/components/Chat'
+import NewChat from '../features/chat/components/NewChat'
+import Documents from '../features/documents/components/Documents'
+import History from '../features/history/components/History'
+import SignUp from '../features/auth/components/SignUp'
+import Login from '../features/auth/components/Login'
+import { FirebaseProvider } from '../context/FirebaseContext';
+import { AuthProvider, useAuth } from '../context/AuthContext';
+import { ProfileProvider } from '../context/ProfileContext';
+import Survey from '../features/onboarding/components/Survey';
 
 function App() {
   const [isSidebarOpen, setSidebarOpen] = useState(true)
@@ -26,10 +27,12 @@ function App() {
 
     const getActiveSection = () => {
       const path = location.pathname;
-      if (path === '/chat' || path === '/') return 'chat';
+      if (path.match(/^\/chat\/[^/]+$/)) return 'chat';
+      if (path === '/') return 'chat';
       if (path === '/documents') return 'documents';
       if (path === '/history') return 'history';
       if (path === '/settings') return 'settings';
+      if (path === '/chat') return '';
       return 'chat';
     };
 
@@ -112,7 +115,8 @@ function App() {
                 )}
                 <Routes>
                   <Route path="/" element={<Navigate to="/chat" replace />} />
-                  <Route path="/chat" element={<Chat />} />
+                  <Route path="/chat" element={<NewChat />} />
+                  <Route path="/chat/:threadId" element={<Chat />} />
                   <Route path="/documents" element={<Documents />} />
                   <Route path="/history" element={<History />} />
                   <Route path="/settings" element={<div>Settings Page</div>} />
