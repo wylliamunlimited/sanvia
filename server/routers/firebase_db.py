@@ -14,9 +14,10 @@ from dependencies.firebase_dependencies import (
     update_survey_entry,
     get_firestore_client,
     update_name_entry,
-    get_profile
+    get_profile,
 )
 from constants.firestore_obj import Survey
+from dependencies.survey_rag import store_survey_embeddings
 
 router = APIRouter()
 
@@ -41,12 +42,15 @@ async def submit_survey(
     except Exception as e:
         print(f"❌ Error submitting survey: {str(e)}")
         raise HTTPException(
-            status_code=400, detail=f"survey data upload failed."
+            status_code=400, detail=f"Survey data upload failed: {str(e)}"
         )
+
 
 @router.post("/store-names")
 async def upload_names(
-    user: Annotated[dict, Depends(get_firebase_user_from_token)], first_name: str, last_name: str
+    user: Annotated[dict, Depends(get_firebase_user_from_token)],
+    first_name: str,
+    last_name: str,
 ):
     """Upload user's first & last name in Firestore."""
     try:
