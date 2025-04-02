@@ -1,6 +1,7 @@
 from typing import List, Annotated
 import sys
 import json
+from dask.dataframe.dask_expr._categorical import Categorize
 
 # caution: path[0] is reserved for script path (or '' in REPL)
 sys.path.insert(1, "../dependencies")
@@ -22,8 +23,11 @@ from dependencies.firebase_dependencies import (
     get_firestore_client,
     get_firebase_user_from_token,
 )
-from constants.credentials import (
-    FIREBASE_ADMIN_API_KEY
+from constants.credentials import FIREBASE_ADMIN_API_KEY
+from dependencies.ai_dependencies import *
+from dependencies.rag_dependencies import (
+    process_and_store_document,
+    retrieve_relevant_chunks,
 )
 
 from constants.utils import POPPLER_PATH
@@ -41,7 +45,7 @@ def upload_to_gcs(file_bytes, destination_blob_name):
 
         # if not credentials_json:
         #     raise ValueError("❌ GOOGLE_APPLICATION_CREDENTIALS is not set in .env!")
-        
+
         credentials = service_account.Credentials.from_service_account_info(
             FIREBASE_ADMIN_API_KEY
         )
@@ -118,6 +122,19 @@ async def upload_document(
         file_bytes.seek(0)  # Reset pointer for OCR processing
         extracted_text = extract_text_with_ocr(file_bytes)
 
+        # Process document with RAG
+        rag_metadata = process_and_store_document(
+            text=extracted_text,
+            user_id=user_id,
+            document_id=document_id,
+            metadata={
+                "filename": file.filename,
+                "upload_date": upload_date,
+                "gcs_path": gcs_path,
+                "gcs_url": gcs_url,
+            },
+        )
+
         # Save metadata + extracted text in Firestore
         db = get_firestore_client()
         doc_ref = (
@@ -135,6 +152,8 @@ async def upload_document(
             "gcs_path": gcs_path,
             "gcs_url": gcs_url,
             "extracted_text": extracted_text,  # Store OCR text in Firestore
+            "category": rag_metadata["category"],  # Add document category
+            "num_chunks": rag_metadata["num_chunks"],  # Add number of chunks
         }
 
         doc_ref.set(metadata)
@@ -146,6 +165,8 @@ async def upload_document(
             "msg": "File uploaded, processed, and stored successfully",
             "upload_date": upload_date,
             "gcs_url": gcs_url,
+            "category": rag_metadata["category"],
+            "num_chunks": rag_metadata["num_chunks"],
             "extracted_text": extracted_text[
                 :500
             ],  # Return only first 500 chars for preview
@@ -223,36 +244,38 @@ async def list_documents(user: Annotated[dict, Depends(get_firebase_user_from_to
 
     return {"documents": document_list}
 
+
 def generate_signed_url(gcs_path):
-     """
-     Generate a signed URL for secure temporary access to the file in GCS.
-     """
-     try:
+    """
+    Generate a signed URL for secure temporary access to the file in GCS.
+    """
+    try:
         #  credentials_json = os.getenv("GOOGLE_APPLICATION_CREDENTIALS")
 
         #  if not credentials_json:
         #      raise ValueError("❌ GOOGLE_APPLICATION_CREDENTIALS is not set in .env!")
 
         #  credentials_dict = json.loads(credentials_json)
-         
-         credentials = service_account.Credentials.from_service_account_info(
-            FIREBASE_ADMIN_API_KEY
-         )
 
-         storage_client = storage.Client(credentials=credentials)
-         bucket = storage_client.bucket(BUCKET_NAME)
-         blob = bucket.blob(gcs_path)
- 
-         signed_url = blob.generate_signed_url(
-             version="v4",
-             expiration=timedelta(minutes=30),  # URL expires in 30 minutes
-             method="GET",
-         )
-         return signed_url
-     except Exception as e:
-         raise HTTPException(
-             status_code=500, detail=f"Error generating signed URL: {str(e)}"
-         )
+        credentials = service_account.Credentials.from_service_account_info(
+            FIREBASE_ADMIN_API_KEY
+        )
+
+        storage_client = storage.Client(credentials=credentials)
+        bucket = storage_client.bucket(BUCKET_NAME)
+        blob = bucket.blob(gcs_path)
+
+        signed_url = blob.generate_signed_url(
+            version="v4",
+            expiration=timedelta(minutes=30),  # URL expires in 30 minutes
+            method="GET",
+        )
+        return signed_url
+    except Exception as e:
+        raise HTTPException(
+            status_code=500, detail=f"Error generating signed URL: {str(e)}"
+        )
+
 
 @router.get("/document/{document_id}/signed-url")
 async def get_fresh_signed_url(
