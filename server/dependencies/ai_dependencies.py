@@ -496,6 +496,45 @@ def summarize(thoughts: AIBrain) -> AIBrain:
     return thoughts
 
 
+def determine_document_need(thoughts: AIBrain) -> AIBrain:
+    """DECISION POINT FOR DOCUMENT NEED
+
+    Description
+    -----------
+    This node determines if the current health query needs to access user documents.
+
+    Parameters
+    ----------
+    thoughts : AIBrain
+        state of LangGraph Agent
+
+    Returns
+    -------
+    AIBrain
+        state of LangGraph Agent
+    """
+    session_history = thoughts["prompt_chain"]
+
+    reconstructed_prompt = session_history + [
+        {
+            "role": "user",
+            "content": (
+                "Determine if this health query needs to access the user's medical documents or survey data.\n"
+                "Consider:\n"
+                "1. Is this a general health question that can be answered without personal data?\n"
+                "2. Does this query specifically ask about the user's documents or health history?\n"
+                "3. Would personal health data significantly improve the response?\n"
+                "4. Is this a follow-up question that might need context from previous documents?\n"
+                "Return ONLY 'yes' or 'no'."
+            ),
+        }
+    ]
+
+    decision = get_llm().invoke(reconstructed_prompt)
+    thoughts["needs_documents"] = decision.content.strip().lower() == "yes"
+    return thoughts
+
+
 def initializeGraph(with_state: bool = True, prompt_chain: list = []):
     """Initialize the LangGraph state
 
@@ -553,6 +592,7 @@ def initializeGraph(with_state: bool = True, prompt_chain: list = []):
             proceed=False,
             shortterm_knowledge=[],
             category_focus=None,
+            needs_documents=False,
         )
 
     workflow = StateGraph(AIBrain)
@@ -567,11 +607,14 @@ def initializeGraph(with_state: bool = True, prompt_chain: list = []):
     workflow.add_node("generate_question", generate_question)
     workflow.add_node("information_gathering", information_gathering)
     workflow.add_node("respond_manner", respond_manner)
+    workflow.add_node("determine_document_need", determine_document_need)
 
     def enough_information_conditional(thoughts: AIBrain) -> str:
         """Decision Point for determining if there is enough information to proceed with the next steps."""
         return (
-            "generate_question" if not thoughts["proceed"] else "information_gathering"
+            "generate_question"
+            if not thoughts["proceed"]
+            else "determine_document_need"
         )
 
     def discussion_relevance_conditional(thoughts: AIBrain) -> str:
@@ -583,18 +626,31 @@ def initializeGraph(with_state: bool = True, prompt_chain: list = []):
         else:
             return "enough_info_dec_pt"  # Proceed to check for enough information
 
-    workflow.add_edge(START, "determine_relevance")  # Start with the relevance check
+    def document_need_conditional(thoughts: AIBrain) -> str:
+        """Decision Point for determining if documents are needed."""
+        if thoughts["needs_documents"]:
+            return "data_extract"
+        return "information_gathering"
+
+    workflow.add_edge(START, "determine_relevance")
     workflow.add_conditional_edges(
         "enough_info_dec_pt",
         enough_information_conditional,
         [
             "generate_question",
-            "information_gathering",
-        ],  # if enough info, go to summarize, else generate question
+            "determine_document_need",
+        ],
     )
-    workflow.add_edge(
-        "information_gathering", "summarize"
-    )  # After gathering info, go to summarize
+    workflow.add_conditional_edges(
+        "determine_document_need",
+        document_need_conditional,
+        [
+            "data_extract",
+            "information_gathering",
+        ],
+    )
+    workflow.add_edge("data_extract", "information_gathering")
+    workflow.add_edge("information_gathering", "summarize")
     workflow.add_conditional_edges(
         "determine_relevance",
         discussion_relevance_conditional,
@@ -602,7 +658,7 @@ def initializeGraph(with_state: bool = True, prompt_chain: list = []):
             "refocus_medicine",
             "enough_info_dec_pt",
             "respond_manner",
-        ],  # if not relevant, refocus, else check for enough info
+        ],
     )
 
     # workflow.set_entry_point("summarize")
