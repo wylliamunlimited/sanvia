@@ -23,6 +23,7 @@ from langchain_community.document_loaders import (
 from langchain_core.documents import Document
 from dependencies.rag_dependencies import retrieve_relevant_chunks
 from dependencies.firebase_dependencies import get_firestore_client
+from dependencies.survey_dependencies import retrieve_survey_context
 
 
 def get_llm():
@@ -296,6 +297,14 @@ def data_extract(thoughts: AIBrain) -> AIBrain:
     if not user_id:
         return thoughts
 
+    # Get survey data context
+    survey_context = retrieve_survey_context(user_id)
+    if survey_context:
+        thoughts["data"]["survey_context"] = {
+            "content": survey_context.page_content,
+            "metadata": survey_context.metadata,
+        }
+
     # Get all documents for the user
     docs = db.collection("documents").document(user_id).collection("files").stream()
 
@@ -311,12 +320,10 @@ def data_extract(thoughts: AIBrain) -> AIBrain:
         relevant_chunks.extend(chunks)
 
     # Add relevant chunks to thoughts
-    thoughts["data"] = {
-        "relevant_chunks": [
-            {"content": chunk.page_content, "metadata": chunk.metadata}
-            for chunk in relevant_chunks
-        ]
-    }
+    thoughts["data"]["relevant_chunks"] = [
+        {"content": chunk.page_content, "metadata": chunk.metadata}
+        for chunk in relevant_chunks
+    ]
 
     return thoughts
 
@@ -398,6 +405,7 @@ def summarize(thoughts: AIBrain) -> AIBrain:
     """
     # Get relevant chunks from data
     relevant_chunks = thoughts.get("data", {}).get("relevant_chunks", [])
+    survey_context = thoughts.get("data", {}).get("survey_context")
 
     # Prepare context from relevant chunks
     chunk_context = "\n\n".join(
@@ -406,6 +414,10 @@ def summarize(thoughts: AIBrain) -> AIBrain:
             for chunk in relevant_chunks
         ]
     )
+
+    # Add survey context if available
+    if survey_context:
+        chunk_context = f"[PATIENT PROFILE]\n{survey_context['content']}\n\n[RELEVANT DOCUMENTS]\n{chunk_context}"
 
     ## APPENDING RESEARCH RESULT INTO PROMPT
     if thoughts["knowledge"] == [] and not chunk_context:
