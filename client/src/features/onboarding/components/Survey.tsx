@@ -1,5 +1,5 @@
 
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { useNavigate } from "react-router-dom";
 import "./Survey.css";
 interface SurveyQuestion {
@@ -14,7 +14,7 @@ interface SurveyProps {
   onSurveyComplete: () => void;
 }
 
-const AnimatedSurvey: React.FC<SurveyProps> = ({onSurveyComplete}) => {
+const AnimatedSurvey: React.FC<SurveyProps> = ({ onSurveyComplete }) => {
   // Survey state
   const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0);
   const [previousQuestionIndex, setPreviousQuestionIndex] = useState(0);
@@ -140,7 +140,7 @@ const AnimatedSurvey: React.FC<SurveyProps> = ({onSurveyComplete}) => {
   };
 
   // Handle form submission
-  const handleSubmit = () => {
+  const handleSubmit = async () => {
     setTransitionDirection('next');
     setPreviousQuestionIndex(currentQuestionIndex);
     setIsAnimating(true);
@@ -157,6 +157,17 @@ const AnimatedSurvey: React.FC<SurveyProps> = ({onSurveyComplete}) => {
       weight: `${weight} ${weightUnit}`
     };
     console.log('Survey submitted:', surveyData);
+
+    // Upload to Firestore
+    try {
+      const response = await firestoreApi.uploadProfile(
+        age, gender, sex, height, weight
+      )  // Change to chatApi.sendMessage once auth is implemented
+      console.log(`Uploaded survey data onto Firestore, ${response}`);
+
+    } catch (err) {
+      console.error('Survey Upload Failed. Error uploading data:', err)
+    }
   };
 
   const handleRestart = () => {
@@ -202,8 +213,8 @@ const AnimatedSurvey: React.FC<SurveyProps> = ({onSurveyComplete}) => {
               key={index}
               className="absolute inset-0 w-full h-full transition-all duration-700 ease-in-out"
               style={{
-                transform: 
-                  transitionDirection === 'next' 
+                transform:
+                  transitionDirection === 'next'
                     ? `translateY(${index < currentQuestionIndex ? -100 : index > currentQuestionIndex ? 100 : 0}vh)`
                     : `translateY(${index < currentQuestionIndex ? -100 : index > currentQuestionIndex ? 100 : 0}vh)`,
                 backgroundColor: question.backgroundColor,
@@ -216,9 +227,9 @@ const AnimatedSurvey: React.FC<SurveyProps> = ({onSurveyComplete}) => {
       })}
 
       {/* Thank you background */}
-      <div 
+      <div
         className="absolute inset-0 w-full h-full transition-all duration-700 ease-in-out"
-        style={{ 
+        style={{
           transform: `translateY(${isCompleted ? 0 : 100}vh)`,
           backgroundColor: "#0047B3", // Deep royal blue for completion
           zIndex: isCompleted ? 0 : -1
@@ -228,14 +239,13 @@ const AnimatedSurvey: React.FC<SurveyProps> = ({onSurveyComplete}) => {
       {/* Survey content */}
       <div className="absolute inset-0 flex items-center justify-center px-4 z-10">
         {!isCompleted ? (
-          <div 
-            className={`w-full max-w-2xl transition-all duration-500 ${
-              isAnimating 
-                ? transitionDirection === 'next' 
-                  ? 'opacity-0 transform -translate-y-12' 
+          <div
+            className={`w-full max-w-2xl transition-all duration-500 ${isAnimating
+                ? transitionDirection === 'next'
+                  ? 'opacity-0 transform -translate-y-12'
                   : 'opacity-0 transform translate-y-12'
                 : 'opacity-100 transform translate-y-0'
-            }`}
+              }`}
           >
             <div className="bg-white bg-opacity-90 p-8 rounded-lg shadow-lg">
               <h2 className="text-3xl font-bold mb-8 text-gray-800">
@@ -267,11 +277,10 @@ const AnimatedSurvey: React.FC<SurveyProps> = ({onSurveyComplete}) => {
                       <button
                         key={option}
                         type="button"
-                        className={`py-4 px-6 text-lg border border-gray-300 rounded-lg transition-all ${
-                          gender === option
+                        className={`py-4 px-6 text-lg border border-gray-300 rounded-lg transition-all ${gender === option
                             ? 'bg-blue-500 text-white border-blue-500'
                             : 'bg-white hover:bg-gray-50'
-                        }`}
+                          }`}
                         onClick={() => setGender(option)}
                       >
                         {option}
@@ -289,11 +298,10 @@ const AnimatedSurvey: React.FC<SurveyProps> = ({onSurveyComplete}) => {
                       <button
                         key={option}
                         type="button"
-                        className={`py-4 px-6 text-lg border border-gray-300 rounded-lg transition-all ${
-                          sex === option
+                        className={`py-4 px-6 text-lg border border-gray-300 rounded-lg transition-all ${sex === option
                             ? 'bg-blue-500 text-white border-blue-500'
                             : 'bg-white hover:bg-gray-50'
-                        }`}
+                          }`}
                         onClick={() => setSex(option)}
                       >
                         {option}
@@ -307,7 +315,7 @@ const AnimatedSurvey: React.FC<SurveyProps> = ({onSurveyComplete}) => {
               {currentQuestionIndex === 3 && (
                 <div className="space-y-4">
                   <label className="block text-lg text-gray-700">Height ({heightUnit}):</label>
-                  
+
                   {heightUnit === 'cm' ? (
                     <input
                       type="text"
@@ -337,7 +345,7 @@ const AnimatedSurvey: React.FC<SurveyProps> = ({onSurveyComplete}) => {
                       />
                     </div>
                   )}
-                  
+
                   <button
                     type="button"
                     onClick={toggleHeightUnit}
@@ -360,7 +368,7 @@ const AnimatedSurvey: React.FC<SurveyProps> = ({onSurveyComplete}) => {
                     className="w-full p-4 border border-gray-300 rounded-lg text-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
                     required
                   />
-                  
+
                   <button
                     type="button"
                     onClick={toggleWeightUnit}
@@ -382,16 +390,15 @@ const AnimatedSurvey: React.FC<SurveyProps> = ({onSurveyComplete}) => {
                     Back
                   </button>
                 )}
-                
+
                 <button
                   type="button"
                   onClick={currentQuestionIndex === questions.length - 1 ? handleSubmit : handleNext}
                   disabled={!canProceed()}
-                  className={`py-3 px-6 rounded-lg transition ${
-                    canProceed()
+                  className={`py-3 px-6 rounded-lg transition ${canProceed()
                       ? 'bg-blue-500 text-white hover:bg-blue-600'
                       : 'bg-gray-200 text-gray-500 cursor-not-allowed'
-                  }`}
+                    }`}
                 >
                   {currentQuestionIndex === questions.length - 1 ? 'Submit' : 'Next'}
                 </button>
@@ -403,8 +410,8 @@ const AnimatedSurvey: React.FC<SurveyProps> = ({onSurveyComplete}) => {
                   <span>Question {currentQuestionIndex + 1} of {questions.length}</span>
                 </div>
                 <div className="h-2 bg-gray-200 rounded-full overflow-hidden mt-2">
-                  <div 
-                    className="h-2 bg-blue-500 transition-all duration-700 ease-in-out" 
+                  <div
+                    className="h-2 bg-blue-500 transition-all duration-700 ease-in-out"
                     style={{ width: `${(currentQuestionIndex / (questions.length - 1)) * 100}%` }}
                   />
                 </div>
@@ -412,12 +419,11 @@ const AnimatedSurvey: React.FC<SurveyProps> = ({onSurveyComplete}) => {
             </div>
           </div>
         ) : (
-          <div className={`text-center bg-white bg-opacity-90 p-8 rounded-lg shadow-xl transition-all duration-500 ${
-            isAnimating ? 'opacity-0 transform translate-y-8' : 'opacity-100 transform translate-y-0'
-          }`}>
+          <div className={`text-center bg-white bg-opacity-90 p-8 rounded-lg shadow-xl transition-all duration-500 ${isAnimating ? 'opacity-0 transform translate-y-8' : 'opacity-100 transform translate-y-0'
+            }`}>
             <h2 className="text-3xl font-bold mb-4">Thank you for completing the survey!</h2>
             <p className="text-xl mb-6">Your responses have been recorded.</p>
-            
+
             <div className="bg-gray-100 p-6 rounded-lg mb-6 text-left">
               <h3 className="text-xl font-semibold mb-4">Survey Summary:</h3>
               <ul className="space-y-2">
@@ -428,7 +434,7 @@ const AnimatedSurvey: React.FC<SurveyProps> = ({onSurveyComplete}) => {
                 <li><strong>Weight:</strong> {weight} {weightUnit}</li>
               </ul>
             </div>
-            
+
             <button
               onClick={handleRestart}
               className="px-6 py-3 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition focus:outline-none focus:ring-2 focus:ring-blue-700"
