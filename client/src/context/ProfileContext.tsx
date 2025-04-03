@@ -1,6 +1,5 @@
 import React, { createContext, useState, useContext, ReactNode } from 'react';
 import { firestoreApi } from '../api/firestoreApi';
-import Profile from '../features/profile/components/Profile';
 
 interface ProfileData {
   firstName: string;
@@ -13,9 +12,6 @@ interface ProfileData {
 }
 
 interface ProfileContextType {
-  showProfile: boolean;
-  openProfile: () => void;
-  closeProfile: () => void;
   userData: ProfileData;
   setUserData: (data: ProfileData) => void;
   updateUserData: (data: ProfileData) => void;
@@ -23,9 +19,6 @@ interface ProfileContextType {
 
 // Create context with default values
 const ProfileContext = createContext<ProfileContextType>({
-  showProfile: false,
-  openProfile: () => {},
-  closeProfile: () => {},
   userData: {
     firstName: '',
     lastName: '',
@@ -44,7 +37,6 @@ export const useProfile = () => useContext(ProfileContext);
 
 // Provider component
 export const ProfileProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
-  const [showProfile, setShowProfile] = useState(false);
   const [userData, setUserData] = useState<ProfileData>({
     firstName: '',
     lastName: '',
@@ -54,14 +46,6 @@ export const ProfileProvider: React.FC<{ children: ReactNode }> = ({ children })
     sex: '',
     age: ''
   });
-
-  const openProfile = () => {
-    setShowProfile(true);
-  };
-
-  const closeProfile = () => {
-    setShowProfile(false);
-  };
 
   const updateUserData = async (updatedData: ProfileData) => {
     try {
@@ -84,21 +68,12 @@ export const ProfileProvider: React.FC<{ children: ReactNode }> = ({ children })
   return (
     <ProfileContext.Provider 
       value={{ 
-        showProfile, 
-        openProfile, 
-        closeProfile, 
         userData, 
         setUserData,
         updateUserData
       }}
     >
       {children}
-      <Profile 
-        {...userData} 
-        isOpen={showProfile} 
-        onClose={closeProfile} 
-        onSave={updateUserData}
-      />
     </ProfileContext.Provider>
   );
 }; 

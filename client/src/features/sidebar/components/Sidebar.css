@@ -236,8 +236,17 @@ body.sidebar-collapsed .menu-item-icon {
   transition: background-color 0.2s;
 }
 
-.menu-item:hover {
+.menu-item:hover, .menu-item.active {
   background-color: #f2f5fc;
+}
+
+.menu-item.active {
+  color: #333;
+  font-weight: 500;
+}
+
+.menu-item.active .menu-item-icon {
+  color: #333;
 }
 
 .menu-item:not(:last-child) {

@@ -58,7 +58,7 @@ const Sidebar: React.FC<SidebarProps> = ({
   const [menuOpen, setMenuOpen] = useState(false)
   const [userName, setUserName] = useState("");
   const { user, loading, logout } = useAuth();
-  const { openProfile, setUserData } = useProfile();
+  const { setUserData } = useProfile();
   const navigate = useNavigate();
   const [onboardingComplete, setOnboardingComplete] = useState<boolean>(true);
 
@@ -133,7 +133,8 @@ const Sidebar: React.FC<SidebarProps> = ({
       ),
       onClick: () => {
         console.log('Profile button clicked');
-        openProfile();
+        navigate('/profile');
+        setMenuOpen(true);
       }
     },
     {
@@ -147,7 +148,7 @@ const Sidebar: React.FC<SidebarProps> = ({
       ),
       onClick: () => {
         console.log('Settings clicked');
-        setMenuOpen(false);
+        setMenuOpen(true);
       }
     },
     {
@@ -160,7 +161,7 @@ const Sidebar: React.FC<SidebarProps> = ({
       ),
       onClick: () => {
         console.log('Feedback clicked');
-        setMenuOpen(false);
+        setMenuOpen(true);
       }
     },
     {
@@ -249,7 +250,7 @@ const Sidebar: React.FC<SidebarProps> = ({
             {menuItems.map(item => (
               <button
                 key={item.id}
-                className="menu-item"
+                className={`menu-item ${activeSection === item.id ? 'active' : ''}`}
                 onClick={item.onClick}
               >
                 <span className="menu-item-icon">{item.icon}</span>
