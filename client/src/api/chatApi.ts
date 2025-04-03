@@ -1,15 +1,34 @@
 import axios from 'axios';
 
 const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:8000';
-const TEST_AUTH_TOKEN = import.meta.env.VITE_TEST_AUTH_TOKEN;  // Testing
 
 export interface ChatMessage {
   role: string;
   content: string;
+  references?: SourceItem[];
+}
+
+export interface SourceItem {
+  title: string;
+  url: string;
+  content?: string;
+  score?: number;
+  categories?: string[];
 }
 
 export interface ChatResponse {
   chat: ChatMessage[];
+  full_response?: string;
+  simple_response?: string;
+  total_sources?: SourceItem[];
+  sources?: SourceItem[];
+  thread_id?: string;
+}
+
+export interface ChatThread {
+  thread_id: string;
+  title: string;
+  last_updated_at: string;
 }
 
 // Create axios instance
@@ -32,31 +51,42 @@ api.interceptors.request.use((config) => {
 });
 
 export const chatApi = {
-  sendMessage: async (prompt: string): Promise<ChatResponse> => {
+  createChat: async (): Promise<{ msg: string, thread_id: string }> => {
     try {
-      const response = await api.post<ChatResponse>('/ai-response', { prompt });
+      const response = await api.post<{ msg: string, thread_id: string }>('/create-chat');
       return response.data;
     } catch (error) {
-      console.error('Error sending message:', error);
+      console.error('Error creating chat:', error);
+      throw error;
+    }
+  },
+  
+  sendMessageToThread: async (threadId: string, prompt: string): Promise<ChatResponse> => {
+    try {
+      const response = await api.post<ChatResponse>(`/sanvia-chat/${threadId}`, { prompt });
+      return response.data;
+    } catch (error) {
+      console.error('Error sending message to thread:', error);
+      throw error;
+    }
+  },
+  
+  getChatByThreadId: async (threadId: string): Promise<ChatResponse> => {
+    try {
+      const response = await api.get<ChatResponse>(`/chat/${threadId}`);
+      return response.data;
+    } catch (error) {
+      console.error('Error retrieving chat:', error);
       throw error;
     }
   },
 
-  // Testing with hardcoded auth token
-  testSendMessage: async (prompt: string): Promise<ChatResponse> => {
+  getAllChatThreads: async (): Promise<ChatThread[]> => {
     try {
-      const response = await axios.post<ChatResponse>(`${API_URL}/ai-response`, 
-        { prompt },
-        {
-          headers: {
-            'Content-Type': 'application/json',
-            'Authorization': `Bearer ${TEST_AUTH_TOKEN}`
-          }
-        }
-      );
-      return response.data;
+      const response = await api.get<{ threads: ChatThread[] }>('/chats');
+      return response.data.threads;
     } catch (error) {
-      console.error('Error sending test message:', error);
+      console.error('Error fetching chat threads:', error);
       throw error;
     }
   },

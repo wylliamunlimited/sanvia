@@ -25,6 +25,7 @@ class Survey:
         self.sex = sex
         self.height = height
         self.weight = weight
+        self.onboarding = "complete"
     
     @staticmethod
     def from_dict(source):
@@ -39,8 +40,9 @@ class Survey:
             "Gender": self.gender,
             "Sex": self.sex,
             "Height": self.height,
-            "Weight": self.weight
+            "Weight": self.weight,
+            "onboarding": self.onboarding
         }
     
     def __repr__(self):
-        return f'Survey(age={self.age}, gender={self.gender}, sex={self.sex}, height={self.height}, weight={self.weight}'
+        return f'Survey(age={self.age}, gender={self.gender}, sex={self.sex}, height={self.height}, weight={self.weight}, onboarding={self.onboarding})'

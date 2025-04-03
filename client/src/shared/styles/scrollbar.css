@@ -1,0 +1,21 @@
+.scrollable-area::-webkit-scrollbar {
+  width: 8px;
+}
+
+.scrollable-area::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.scrollable-area::-webkit-scrollbar-thumb {
+  background-color: rgba(0, 0, 0, 0.1);
+  border-radius: 4px;
+}
+
+:root {
+  --scrollbar-width: 0px; /* Will be set by JS */
+}
+
+.scrollable-area {
+  padding-right: calc(max(1rem, (100% - 768px) / 2) - var(--scrollbar-width));
+  scrollbar-gutter: stable;
+} 
