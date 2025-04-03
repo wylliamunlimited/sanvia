@@ -241,10 +241,10 @@ const AnimatedSurvey: React.FC<SurveyProps> = ({ onSurveyComplete }) => {
         {!isCompleted ? (
           <div
             className={`w-full max-w-2xl transition-all duration-500 ${isAnimating
-                ? transitionDirection === 'next'
-                  ? 'opacity-0 transform -translate-y-12'
-                  : 'opacity-0 transform translate-y-12'
-                : 'opacity-100 transform translate-y-0'
+              ? transitionDirection === 'next'
+                ? 'opacity-0 transform -translate-y-12'
+                : 'opacity-0 transform translate-y-12'
+              : 'opacity-100 transform translate-y-0'
               }`}
           >
             <div className="bg-white bg-opacity-90 p-8 rounded-lg shadow-lg">
@@ -278,8 +278,8 @@ const AnimatedSurvey: React.FC<SurveyProps> = ({ onSurveyComplete }) => {
                         key={option}
                         type="button"
                         className={`py-4 px-6 text-lg border border-gray-300 rounded-lg transition-all ${gender === option
-                            ? 'bg-blue-500 text-white border-blue-500'
-                            : 'bg-white hover:bg-gray-50'
+                          ? 'bg-blue-500 text-white border-blue-500'
+                          : 'bg-white hover:bg-gray-50'
                           }`}
                         onClick={() => setGender(option)}
                       >
@@ -299,8 +299,8 @@ const AnimatedSurvey: React.FC<SurveyProps> = ({ onSurveyComplete }) => {
                         key={option}
                         type="button"
                         className={`py-4 px-6 text-lg border border-gray-300 rounded-lg transition-all ${sex === option
-                            ? 'bg-blue-500 text-white border-blue-500'
-                            : 'bg-white hover:bg-gray-50'
+                          ? 'bg-blue-500 text-white border-blue-500'
+                          : 'bg-white hover:bg-gray-50'
                           }`}
                         onClick={() => setSex(option)}
                       >
@@ -396,8 +396,8 @@ const AnimatedSurvey: React.FC<SurveyProps> = ({ onSurveyComplete }) => {
                   onClick={currentQuestionIndex === questions.length - 1 ? handleSubmit : handleNext}
                   disabled={!canProceed()}
                   className={`py-3 px-6 rounded-lg transition ${canProceed()
-                      ? 'bg-blue-500 text-white hover:bg-blue-600'
-                      : 'bg-gray-200 text-gray-500 cursor-not-allowed'
+                    ? 'bg-blue-500 text-white hover:bg-blue-600'
+                    : 'bg-gray-200 text-gray-500 cursor-not-allowed'
                     }`}
                 >
                   {currentQuestionIndex === questions.length - 1 ? 'Submit' : 'Next'}
@@ -435,18 +435,20 @@ const AnimatedSurvey: React.FC<SurveyProps> = ({ onSurveyComplete }) => {
               </ul>
             </div>
 
-            <button
-              onClick={handleRestart}
-              className="px-6 py-3 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition focus:outline-none focus:ring-2 focus:ring-blue-700"
-            >
-              Take Survey Again
-            </button>
-            <button
-              onClick={handleSurveyComplete}
-              className="px-6 py-3 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition focus:outline-none focus:ring-2 focus:ring-blue-700"
-            >
-              Home Page
-            </button>
+            <div className="flex justify-center gap-4"> 
+              <button
+                onClick={handleRestart}
+                className="px-6 py-3 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition focus:outline-none focus:ring-2 focus:ring-blue-700"
+              >
+                Take Survey Again
+              </button>
+              <button
+                onClick={handleSurveyComplete}
+                className="px-6 py-3 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition focus:outline-none focus:ring-2 focus:ring-blue-700"
+              >
+                Confirm
+              </button>
+            </div>
           </div>
         )}
       </div>
