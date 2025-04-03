@@ -1,22 +1,23 @@
 import { useState } from 'react';
-import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
+import { BrowserRouter as Router, Routes, Route, Navigate, useLocation, useNavigate } from 'react-router-dom';
 
 import './App.css'
-import Sidebar from '../components/Sidebar/Sidebar'
-import Chat from '../components/Chat/Chat'
-import Documents from '../components/Documents/Documents'
-import History from '../components/History/History'
-import SignUp from '../components/SignUp/SignUp'
-import Login from '../components/Login/Login'
-import { FirebaseProvider } from '../provider/FirebaseContext';
-import { AuthProvider, useAuth } from '../provider/AuthContext';
-import AnimatedSurvey from '../components/Survey/Survey';
-
+import Sidebar from '../features/sidebar/components/Sidebar'
+import Chat from '../features/chat/components/Chat'
+import NewChat from '../features/chat/components/NewChat'
+import Documents from '../features/documents/components/Documents'
+import History from '../features/history/components/History'
+import SignUp from '../features/auth/components/SignUp'
+import Login from '../features/auth/components/Login'
+import { FirebaseProvider } from '../context/FirebaseContext';
+import { AuthProvider, useAuth } from '../context/AuthContext';
+import { ProfileProvider } from '../context/ProfileContext';
+import AnimatedSurvey from '../features/onboarding/components/Survey';
+import ProfilePage from '../features/profile/components/Profile';
 
 function App() {
   const [activeSection, setActiveSection] = useState('chat')
   const [isSidebarOpen, setSidebarOpen] = useState(true)
-  // const [isLogged, setIsLogged] = useState(false);
   const [isSignUp, setIsSignUp] = useState(false);
   const [isSurveyCompleted, setIsSurveyCompleted] = useState(false);
 
@@ -31,8 +32,23 @@ function App() {
 
   const AppRoutes = () => {
     const { user, loading } = useAuth();
+    const location = useLocation();
+    const navigate = useNavigate();
 
-    if (loading) return <div>Loading...</div>;
+    if (loading) return null;
+
+    const getActiveSection = () => {
+      const path = location.pathname;
+      if (path.match(/^\/chat\/[^/]+$/)) return 'chat';
+      if (path === '/') return 'chat';
+      if (path === '/documents') return 'documents';
+      if (path === '/history') return 'history';
+      if (path === '/settings') return 'settings';
+      if (path === '/profile') return 'profile';
+      if (path === '/chat') return '';
+      return 'chat';
+    };
+
     return (
       <Routes>
         {/* Sign-Up Route */}
@@ -40,7 +56,7 @@ function App() {
           path="/auth/signup"
           element={
             isSignUp ? (
-              <Navigate to="/auth/survey" replace />
+              <Navigate to="/onboarding" replace />
             ) : (
               <SignUp
                 onSignUpSuccess={() => {
@@ -57,11 +73,10 @@ function App() {
           path="/auth/login"
           element={
             user ? (
-              <Navigate to="/" replace />
+              <Navigate to="/chat" replace />
             ) : (
               <Login
                 onLoginSuccess={() => {
-                  // setIsLogged(true);
                   localStorage.setItem('isLogged', 'true');
                 }}
               />
@@ -72,7 +87,7 @@ function App() {
         
         {/* Survey Route */}
         <Route
-          path="/auth/survey"
+          path="/onboarding"
           element={
             isSignUp ? (
             <Navigate to="/" replace />
@@ -88,14 +103,17 @@ function App() {
           }
         />
         
+        {/* Main App Routes */}
         <Route
           path="/"
           element={user || isSurveyCompleted ? (
             <div className="app-container">
               {isSidebarOpen && (
                 <Sidebar
-                  activeSection={activeSection}
-                  onSectionChange={setActiveSection}
+                  activeSection={getActiveSection()}
+                  onSectionChange={(section) => {
+                    navigate(`/${section}`);
+                  }}
                   onCollapse={() => setSidebarOpen(false)}
                 />
               )}
@@ -111,35 +129,31 @@ function App() {
                     </svg>
                   </button>
                 )}
-                <div className="main-section">
-                  {!isSidebarOpen && (
-                    <button 
-                      className="open-sidebar-button"
-                      onClick={() => setSidebarOpen(true)}
-                      aria-label="Open sidebar"
-                    >
-                      <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                        <polyline points="9 18 15 12 9 6"/>
-                      </svg>
-                    </button>
-                  )}
-                  {getActiveComponent()}
-                </div>
+                <Routes>
+                  <Route path="/" element={<Navigate to="/chat" replace />} />
+                  <Route path="/chat" element={<NewChat />} />
+                  <Route path="/chat/:threadId" element={<Chat />} />
+                  <Route path="/documents" element={<Documents />} />
+                  <Route path="/history" element={<History />} />
+                  <Route path="/profile" element={<ProfilePage />} />
+                  <Route path="*" element={<Navigate to="/chat" replace />} />
+                </Routes>
               </div>
             </div>
           ) : <Navigate to="/auth/login" replace />}
         />
       </Routes>
     );
-
   };
 
   return (
     <FirebaseProvider>
       <AuthProvider>
-        <Router>
-          <AppRoutes></AppRoutes>
-        </Router>
+        <ProfileProvider>
+          <Router>
+            <AppRoutes></AppRoutes>
+          </Router>
+        </ProfileProvider>
       </AuthProvider>
     </FirebaseProvider>
   );

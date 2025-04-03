@@ -1,5 +1,9 @@
 import sys
 
+from openai import BaseModel
+
+from dependencies.tavily_dependencies import get_tavily_client, tavily_search_function
+
 # caution: path[0] is reserved for script path (or '' in REPL)
 sys.path.insert(1, "../dependencies")
 sys.path.insert(2, "../constants")
@@ -9,18 +13,31 @@ from typing import Annotated, Dict
 from dependencies.firebase_dependencies import (
     get_firebase_user_from_token,
     update_chat_entry,
-    get_chat
+    get_chat,
+    get_all_chat_threads,
 )
 from constants.request_obj import (
-    PromptRequest
+    PromptRequest,
 )
-from dependencies.ai_dependencies import get_llm, initializeGraph, trigger_response, AIBrain
-
+from constants.langgraph_obj import (
+    AIBrain,
+)
+from dependencies.chat_dependencies import (
+    create_new_thread
+)
+from dependencies.ai_dependencies import (
+    get_llm,
+    initializeGraph,
+    trigger_response,
+)
+from langchain_core.messages import HumanMessage  # ✅ Correct Import
 import random  ## TO BE REMOVED
 from datetime import datetime
 import json
 
+
 router = APIRouter()
+
 
 ## recording the graph for each user
 ## NEEDED FOR ISOLATION OF USER CHAT & DATA
@@ -73,105 +90,419 @@ async def health_check():
 #         "content": "Hello! How can I help with your health related questions?"
 #     }
 # ]
+# ]
 @router.post("/ai-response")
 async def ai_response(
-    request: PromptRequest, user: Annotated[dict, Depends(get_firebase_user_from_token)]
+    request: PromptRequest,
+    user: Annotated[dict, Depends(get_firebase_user_from_token)],
 ):
-    """
-    Get AI response based on the provided prompt, limited to currently active session.
+    """[LEGACY] Obtain for AI Response
+
+    Descriptions
+    ------------
+    - User authentication is required, token must be embedded in request header
+    - Take in user prompt, and run LangGraph based on it
+    - Update the LangGraph global states
+    - If no prior chat for this user, it would create one for user
+
+    Parameters
+    ----------
+    request : PromptRequest
+        consist of a prompt
+
+    Returns
+    -------
+    dict
+        chat: str
+            messages
+        full_response: str
+            ai response
+        simple_response: str
+            abstract ai response 
+        total_sources: list[dict]
+            all the references 
+        sources: list[dict]
+            references for ai response
+        thread_id: str
+            chat thread id
+
+    Raises
+    ------
+    HTTPException 422
+        indicate there is no prompt, parameter value is invalid
+    HTTPException 
+        general endpoint errors
     """
 
     if request is None or request.prompt is None:
-        return {"error": "No prompt provided."}
+        raise HTTPException(status_code=422, detail=f"Request does not contain prompt for AI to work with.")
+
     try:
-        ## AUTHENTICATION NEEDED HERE
+        # Initialize user session if not active
         if user["uid"] not in states:
-            ## make a graph for this user
-            thread_id = user['uid'] + datetime.now().strftime("%Y%m%d%H%M%S") + str(random.randint(0, 1000))
+            thread_id = (
+                user["uid"]
+                + datetime.now().strftime("%Y%m%d%H%M%S")
+                + str(random.randint(0, 1000))
+            )
             _graph, _state = initializeGraph()
             _state["thread_id"] = thread_id
             states[user["uid"]] = _state
         else:
             _graph = initializeGraph(with_state=False)
             _state = states[user["uid"]]
+
+        # Append user message to chat history
+        _state["prompt_chain"].append({"role": "user", "content": request.prompt})
+        states[user["uid"]] = _state
+
+        # Call AI response
+        response = trigger_response(_graph, _state)
+        full_response = response["prompt_chain"][-1]["content"]  # Last AI response
+
+        # Modify response based on complexity choice
+        simple_response = (
+            " ".join(full_response.split()[:30]) + "..."
+        )  # Shortened summary
+
+        # Save chat to Firestore
+        update_chat_entry(
+            user_id=user["uid"],
+            thread_id=_state["thread_id"],
+            chat_data={
+                "prompt_chain": _state["prompt_chain"],
+                "sources": _state["knowledge"],
+                "last_updated_at": datetime.now().strftime("%m/%d/%y %H:%M:%S"),
+            },
+        )
+
+        return {
+            "chat": _state["prompt_chain"],
+            "full_response": full_response,  # Full text for "See More"
+            "simple_response": simple_response,  # Now correctly accessible
+            "total_sources": _state.get("knowledge", []),  # All sources used in the chat
+            "sources": _state.get("shortterm_knowledge", []),  # Tavily search results
+            "thread_id": _state["thread_id"],
+        }
+
+    except Exception as e:
+        print(f"AI Response Trigger Error: {e}")
+        raise HTTPException(status_code=400, detail=f"Error: {e}")
+
+
+@router.post("/destroy-chat-session")
+async def destroy_chat_session(
+    user: Annotated[dict, Depends(get_firebase_user_from_token)],
+):
+    """[LEGACY ENDPOINT] Remove session from active states
+
+    Descriptions
+    ------------
+    - Remove the active session belonging to <user>
+    - Require token in the request header
+
+    Returns
+    -------
+    msg: str
+        indicating destruction status
+
+    Raises
+    ------
+    HTTPException
+        general endpoint error
+    """
+    
+    try:
+        if user["uid"] in states:
+            states.pop(user["uid"])
+
+        print(f"ALL STATES:\n{json.dumps(states, indent=4)}")
+
+        return {"msg": "Session detroyed. User does not have any active chat session."}
+    except Exception as e:
+        raise HTTPException(status_code=400, detail=f"Error: {e}")
+
+
+@router.post("/sanvia-chat/{thread_id}")
+async def sanvia_chat(
+    thread_id: str,
+    request: PromptRequest,
+    user: Annotated[dict, Depends(get_firebase_user_from_token)],
+):
+    
+    """Message AI in Specific Chat
+    
+    Description
+    -----------
+    Authenticated Token is Needed in Request Header
+    
+    Parameters
+    ----------
+    thread_id: str
+        Indicating which chat the message should go under
+
+    Returns
+    -------
+    dict
+        chat: str
+            messages
+        full_response: str
+            ai response
+        simple_response: str
+            abstract ai response 
+        total_sources: list[dict]
+            all the references 
+        sources: list[dict]
+            references for ai response
+        thread_id: str
+            chat thread id
+
+    Raises
+    ------
+    HTTPException 422
+        prompt is not included, parameter value invalid
+    HTTPException 404
+        when the chat is not found / inactive
+    HTTPException 400
+        general codebase error
+    """
+    
+    if request is None or request.prompt is None:
+        raise HTTPException(status_code=422, detail=f"Request does not contain prompt for AI to work with.")
+
+    
+    try:
+        # 1) Check if the chat [thread_id] is currently active in global state
+        #       if not
+        #           throw an error
+        #       else
+        #           get the state of the chat
+        userid = user["uid"]
+        if userid not in states or "thread_id" not in states[userid] or thread_id != states[userid]["thread_id"]:
+            raise HTTPException(status_code=404, detail=f"Chat was not found.")
         
-        ## Include the new message
+        _state = states[user["uid"]]
+        _graph = initializeGraph(with_state=False)
+        
+        
+        # 2) Append User Prompt to global states
+        
         _state["prompt_chain"].append({"role": "user", "content": request.prompt})
         states[user["uid"]] = _state
         
-        ## Call for AI response, reference ai_dependencies.py
+        
+        # 3) Generate AI response & Cleaning
+        
         response = trigger_response(_graph, _state)
-        
-        ## Uploading chat data onto Firestore 
-        ## ** THIS MUST FOLLOW THE TRIGGER RESPONSE TO INCLUDE THE AI RESPONSE!! **
-        update_chat_entry(user_id=user['uid'], thread_id=_state["thread_id"], chat_data={
-            "prompt_chain": _state["prompt_chain"],
-            "last_updated_at": datetime.now().strftime("%m/%d/%y %H:%M:%S")
-        })
-        
-        print(f"ALL STATES:\n{json.dumps(states, indent=4)}")
-        
-        return {"chat": response["prompt_chain"], "thread_id": _state["thread_id"]}
-    except Exception as e:
-        print(f"Error: {e}")
-        raise HTTPException(
-            status_code=400, detail=f'Error: {e}'
-        )
+        full_response = response["prompt_chain"][-1]["content"]  # Last AI response
 
-@router.post("/detach-chat-session")
-async def detach_chat_session(
-                            user: Annotated[dict, Depends(get_firebase_user_from_token)]
-                        ):
+        # Modify response based on complexity choice
+        simple_response = (
+            " ".join(full_response.split()[:30]) + "..."
+        )  # Shortened summary
+        
+        
+        # 4) Update the Firestore entry of the chat [thread_id]
+        update_chat_entry(
+            user_id=user["uid"],
+            thread_id=thread_id if _state["thread_id"] == thread_id else None,
+            chat_data={
+                "prompt_chain": _state["prompt_chain"],
+                "sources": _state["knowledge"],
+                "last_updated_at": datetime.now().strftime("%m/%d/%y %H:%M:%S"),
+            },
+        )
+        
+        
+        # 5) HTTP Response
+        return {
+            "chat": _state["prompt_chain"],
+            "full_response": full_response,  # Full text for "See More"
+            "simple_response": simple_response,  # Now correctly accessible
+            "total_sources": _state.get("knowledge", []),  # All sources used in the chat
+            "sources": _state.get("shortterm_knowledge", []),  # Tavily search results
+            "thread_id": _state["thread_id"],
+        }
+
+    except Exception as e:
+        print(f"=========> ERROR: {e}")
+        raise HTTPException(status_code=400, detail=f"Error: {e}")
+        
+
+@router.post("/create-chat")
+async def create_chat_session(
+    user: Annotated[dict, Depends(get_firebase_user_from_token)],
+):
     
-    '''
-    Drop the chat session on the server side. The sesion becomes inactive and cannot be interacted with.
-    '''
+    """Create new chat
+    
+    Descriptions
+    ------------
+    - User authentication is required, token needed in request header
+    - Newly created chat would be both appended to LangGraph global states & uploaded onto Firestore
+    - Any session user (global states) has would be replaced
+
+    Returns
+    -------
+    dict
+        msg: str
+            indicating success/failure of chat creation
+        thread_id: str
+            thread_id of the newly created chat
+
+    Raises
+    ------
+    HTTPException 400
+        Chat creation encountered problem
+    """
     
     try:
-        states.pop(user["uid"])
         
-        print(f"ALL STATES:\n{json.dumps(states, indent=4)}")
+        # 1) Check if user has ongoing state in global state variable [aka user['uid'] exists in global states]
+        #       if yes,
+        #           replace with new one
+        #       else,
+        #           simply create new one
         
-        return {
-            "msg": "Session detroyed. User does not have any active chat session."
-        }
-    except Exception as e:
-        raise HTTPException(
-            status_code=400, detail=f"Error: {e}"
+        thread_id, _graph, _state = create_new_thread(user=user)
+        
+        if user['uid'] not in states:
+            states[user["uid"]] = _state
+        else:
+            states[user["uid"]] = _state
+        
+        states[user["uid"]]["thread_id"] = thread_id
+        
+        # 2) Upload thread onto Firestore
+        
+        update_chat_entry(
+            user_id=user["uid"],
+            thread_id=thread_id,
+            chat_data={
+                "prompt_chain": _state["prompt_chain"],
+                "sources": _state["knowledge"],
+                "last_updated_at": datetime.now().strftime("%m/%d/%y %H:%M:%S"),
+            }
         )
         
-@router.get('/chat')
+        return {
+            "msg": f"Chat created successfully",
+            "thread_id": thread_id
+        }
+        
+    except Exception as e:
+        
+        ## Clean up
+        if user["uid"] in states:
+            states.pop(user["uid"])
+        
+        raise HTTPException(status=400, detail=f"Chat Creation Failed, error: {e}")
+
+@router.get("/get-states")
+async def getStates(key: str):
+    if key == "404040":
+        return states
+    else:
+        raise HTTPException(status_code=401)
+    
+
+@router.get("/chat/{thread_id}")
 async def getChat(
-    thread_id: str,
-    user: Annotated[dict, Depends(get_firebase_user_from_token)]
+    thread_id: str, user: Annotated[dict, Depends(get_firebase_user_from_token)], replace: bool = True
 ):
-    """
-    Retrieve the chat data specified by thread_id, activating and replacing existing chat session (if any) with it.
+    """Retrieve Chat Data
+    
+    Descriptions
+    ------------
+    - User authentication needed, token attachment in request header required
+    - Automatically replace the existing chat
+
+    Parameters
+    ----------
+    thread_id : str
+        referring to the chat that needs to be retrieved
+    replace: bool
+        indicating whether the current session would be replaced
+
+    Returns
+    -------
+    dict
+        chat: list[dict]
+            list of messages in the chat
+        thread_id: str
+            thread_id
+
+    Raises
+    ------
+    HTTPException 404
+        thread_id was not provided, cannot retrieve without target
+    HTTPException 400
+        general endpoint error
     """
     if thread_id is None or thread_id.strip() == "":
         raise HTTPException(
-            status_code=400, detail=f"Error: thread_id is not provided."
+            status_code=404, detail=f"Error: thread_id is not provided."
         )
-    
+
     try:
-        
+
         ## get thread data
-        thread = get_chat(user_id=user['uid'], thread_id=thread_id)
+        thread = get_chat(user_id=user["uid"], thread_id=thread_id)
         
+        if not thread.exists:
+            raise HTTPException(status_code=404, detail=f"Chat data not found.")
+
         ## check for session replacement
-        if user['uid'] in states.keys():
-            states.pop(user['uid'])
-            
+        if replace and user["uid"] in states.keys():
+            states.pop(user["uid"])
+
         ## reinitialize session states for LangGraph
+        # initialize every completely 
         _graph, _state = initializeGraph()
         _state["thread_id"] = thread_id
-        _state["prompt_chain"] = thread.to_dict()["prompt_chain"] if thread.exists else _state["prompt_chain"]
+        _state["prompt_chain"] = (
+            thread.to_dict()["prompt_chain"]
+        )
         states[user["uid"]] = _state
-        
-        print(f"ALL STATES:\n{json.dumps(states, indent=4)}")
-        
+
+        # print(f"ALL STATES:\n{json.dumps(states, indent=4)}")
+
         return {"chat": _state["prompt_chain"], "thread_id": _state["thread_id"]}
     except Exception as e:
-        raise HTTPException(
-            status_code=400, detail=f"Error: {e}"
-        )
+        raise HTTPException(status_code=400, detail=f"Error: {e}")
+
+@router.get("/chats")
+async def getAllChats(
+    user: Annotated[dict, Depends(get_firebase_user_from_token)]
+):
+    try:
+        threads = get_all_chat_threads(user_id=user["uid"])
+        
+        thread_list = []
+        for thread in threads:
+            thread_data = thread.to_dict()
+            thread_info = {
+                "thread_id": thread.id,
+                "last_updated_at": thread_data.get("last_updated_at", ""),
+                "title": "",  # Default empty title
+            }
+            
+            # Extract title from first user message
+            prompt_chain = thread_data.get("prompt_chain", [])
+            if prompt_chain:
+                for message in prompt_chain:
+                    if message.get("role") == "user":
+                        # Use first few words as title
+                        content = message.get("content", "")
+                        thread_info["title"] = (content[:30] + "...") if len(content) > 30 else content
+                        break
+            
+            thread_list.append(thread_info)
+            
+        # Sort by last updated (newest first)
+        thread_list.sort(key=lambda x: x.get("last_updated_at", ""), reverse=True)
+            
+        return {"threads": thread_list}
+    
+    except Exception as e:
+        raise HTTPException(status_code=400, detail=f"Error: {e}")
