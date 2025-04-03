@@ -14,7 +14,7 @@ const Banner: React.FC<BannerProps> = ({ isVisible }) => {
   return (
     <div className="banner">
       <p>Personalize your Sanvia experience!</p>
-      <button onClick={() => navigate("/onboarding")}>
+      <button onClick={() => navigate("/profile")}>
         Complete Profile
       </button>
     </div>

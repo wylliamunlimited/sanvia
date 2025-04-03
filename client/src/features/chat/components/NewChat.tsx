@@ -1,7 +1,6 @@
 import { useState, useRef, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
 import './NewChat.css'
-import { getScrollbarWidth } from '../utils/scrollbar'
 import chatApi from '../../../api/chatApi'
 import Header from '../../../shared/components/Header'
 import { useProfile } from '../../../context/ProfileContext'
@@ -29,11 +28,6 @@ const NewChat = () => {
       textareaRef.current.style.height = `${textareaRef.current.scrollHeight}px`
     }
   }, [inputText])
-
-  // Set scrollbar width for consistent scrollbar width
-  useEffect(() => {
-    document.documentElement.style.setProperty('--scrollbar-width', `${getScrollbarWidth()}px`)
-  }, [])
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
