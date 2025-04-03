@@ -75,10 +75,23 @@ async def get_user_profile(
     """Retrieve User's Profile From Firestore."""
     try:
         print(f"Retrieving data for {user['uid']}...")
-        data = get_profile(user["uid"]).to_dict()
-        return data
+        profile_data = get_profile(user["uid"])
+
+        if not profile_data:
+            raise HTTPException(
+                status_code=404,
+                detail="Profile not found. Please complete the onboarding survey.",
+            )
+
+        return profile_data
+    except HTTPException as he:
+        raise he
     except Exception as e:
-        raise HTTPException(status_code=400, detail=f"user profile retrieval failed.")
+        print(f"❌ Error retrieving profile: {str(e)}")
+        raise HTTPException(
+            status_code=500,
+            detail="Failed to retrieve user profile. Please try again later.",
+        )
 
 
 @router.get("/firestore-health")
