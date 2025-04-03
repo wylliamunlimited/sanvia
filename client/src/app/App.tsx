@@ -13,6 +13,7 @@ import { FirebaseProvider } from '../context/FirebaseContext';
 import { AuthProvider, useAuth } from '../context/AuthContext';
 import { ProfileProvider } from '../context/ProfileContext';
 import Survey from '../features/onboarding/components/Survey';
+import ProfilePage from '../features/profile/components/Profile';
 
 function App() {
   const [isSidebarOpen, setSidebarOpen] = useState(true)
@@ -32,6 +33,7 @@ function App() {
       if (path === '/documents') return 'documents';
       if (path === '/history') return 'history';
       if (path === '/settings') return 'settings';
+      if (path === '/profile') return 'profile';
       if (path === '/chat') return '';
       return 'chat';
     };
@@ -119,7 +121,7 @@ function App() {
                   <Route path="/chat/:threadId" element={<Chat />} />
                   <Route path="/documents" element={<Documents />} />
                   <Route path="/history" element={<History />} />
-                  <Route path="/settings" element={<div>Settings Page</div>} />
+                  <Route path="/profile" element={<ProfilePage />} />
                   <Route path="*" element={<Navigate to="/chat" replace />} />
                 </Routes>
               </div>
