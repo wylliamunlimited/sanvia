@@ -103,19 +103,12 @@ def get_chat(user_id: str, thread_id: str) -> Optional[Dict[str, Any]]:
             .document(thread_id)
         )
         doc = doc_ref.get()
-        return doc.to_dict() if doc.exists else None
+        if not doc.exists:
+            return None
+        return doc
     except Exception as e:
         print(f"❌ Error getting chat: {str(e)}")
         raise
-
-    doc_ref = (
-        get_firestore_client()
-        .collection("chat-history")
-        .document(user_id)
-        .collection("threads")
-        .document(thread_id)
-    )
-    return doc_ref.get()
 
 
 def get_all_chat_threads(user_id: str):
@@ -162,14 +155,26 @@ def get_firebase_user_from_token(
                 detail="Token Required.",
                 headers={"WWW-Authenticate": "Bearer realm='Authentication Required'"},
             )
-        user = verify_id_token(token.credentials, check_revoked=True)
 
-        # print("Decoded Firebase User:", user)
-        return user
+        # Initialize Firebase if not already initialized
+        initialize_firebase()
+
+        # Verify the token
+        try:
+            user = verify_id_token(token.credentials, check_revoked=True)
+            return user
+        except Exception as token_error:
+            print(f"❌ Token verification error: {str(token_error)}")
+            raise HTTPException(
+                status_code=status.HTTP_401_UNAUTHORIZED,
+                detail="Invalid or expired token.",
+                headers={"WWW-Authenticate": "Bearer realm='Authentication Required'"},
+            )
+
     except Exception as e:
-        print(f"❌ Error verifying Firebase token: {str(e)}")
+        print(f"❌ Error in Firebase auth: {str(e)}")
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
-            detail="Invalid token.",
+            detail="Authentication failed.",
             headers={"WWW-Authenticate": "Bearer realm='Authentication Required'"},
         )
