@@ -83,30 +83,27 @@ function App() {
             ) 
           }
         />
-
         
         {/* Survey Route */}
         <Route
           path="/onboarding"
           element={
-            isSignUp ? (
-            <Navigate to="/" replace />
-              ) : (
-            <AnimatedSurvey
-              onSurveyComplete={() => {
-                setIsSurveyCompleted(true);
-                // setIsSurvey(true);
-                localStorage.setItem('isSurvey', 'true');
-              }}
-            />
-              )
+            user ? (
+              <AnimatedSurvey
+                onSurveyComplete={() => {
+                  localStorage.setItem('isSurveyCompleted', 'true');
+                }}
+              />
+            ) : (
+              <Navigate to="/" replace />
+            )
           }
         />
         
         {/* Main App Routes */}
         <Route
-          path="/"
-          element={user || isSurveyCompleted ? (
+          path="/*"
+          element={user ? (
             <div className="app-container">
               {isSidebarOpen && (
                 <Sidebar
