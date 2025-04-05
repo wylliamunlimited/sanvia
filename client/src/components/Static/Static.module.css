@@ -1,9 +1,29 @@
+@import url('https://fonts.googleapis.com/css2?family=Unbounded:wght@400;700&display=swap');
+
 .home {
   font-family: Impact, Haettenschweiler, 'Arial Narrow Bold', sans-serif;
   margin: 0;
   padding: 0;
   height: 100vh;
   overflow-y: auto;
+}
+
+.header {
+  text-align: center;
+  margin-top: 50px;
+  align-items: flex-end;
+}
+.title {
+  font-family: 'Unbounded', sans-serif;
+  font-size: 5vw;
+  color: #333;
+  margin: 0;
+}
+.brand {
+  font-family: 'Unbounded', sans-serif;
+  font-size: 12vw;
+  color: #0077cc;
+  margin: 0;
 }
 
 .navbar {
@@ -31,7 +51,7 @@
   justify-content: center;
   text-align: center;
   margin: 50px 20px;
-  padding-bottom: 8vh; 
+  gap: 5%;
 }
 
 .button {
@@ -70,11 +90,13 @@ h1 {
   border-radius: 8px;
   font-size: 16px;
   cursor: pointer;
-  margin-top: 18vh;
+  max-height: 75px;
   display: inline-flex;
   align-items: center;
   gap: 8px;
   transition: background-color 0.3s ease;
+  align-self: flex-end;
+  margin-bottom: 5vh;
 }
 
 

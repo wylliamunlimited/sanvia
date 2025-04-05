@@ -95,8 +95,8 @@ const Static: React.FC = () => {
         {/* Brand intro */}
         <div className={styles.content} >
           <div id="header">
-            <img className= "titleS" src="/images/welcomeTo.png" alt="app logo" />
-            <img className= "titleS" src="/images/sanvia.png" alt="app logo" />
+          <h1 className={styles.title}>Welcome to</h1>
+          <h1 className={styles.brand}>Sanvia</h1>
           </div>
           <button className={styles["get-started"]} onClick={() => navigate("/auth/signup")}>
             ↗ get started
