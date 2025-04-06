@@ -463,7 +463,7 @@ def summarize(thoughts: AIBrain) -> AIBrain:
 
     # Add survey context if available
     if survey_context:
-        chunk_context = f"[PATIENT PROFILE]\n{survey_context['content']}\n\n[RELEVANT DOCUMENTS]\n{chunk_context}"
+        chunk_context = f"[PATIENT PROFILE]\n{survey_context['content']}\n\n[RELEVANT DOCUMENTS]\n{doc_context}"
 
     ## APPENDING RESEARCH RESULT INTO PROMPT
     if thoughts["knowledge"] == [] and not chunk_context:
@@ -604,6 +604,7 @@ def initializeGraph(with_state: bool = True, prompt_chain: list = []):
             risk_level=0,
             knowledge=[],
             relevance=0,
+            data_extraction_completed=False,
             proceed=False,
             shortterm_knowledge=[],
             category_focus=None,

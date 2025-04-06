@@ -16,6 +16,9 @@ class AIBrain(TypedDict):
                 )
             }] ## list of prompt chain
     
+    ## Data Extracted
+    data_extraction_completed: bool = False
+    
     ## Personal Data
     data: Dict[str, Dict] ## user data
     
