@@ -88,15 +88,11 @@ function App() {
         <Route
           path="/onboarding"
           element={
-            user ? (
-              <AnimatedSurvey
-                onSurveyComplete={() => {
-                  localStorage.setItem('isSurveyCompleted', 'true');
-                }}
-              />
-            ) : (
-              <Navigate to="/" replace />
-            )
+            <AnimatedSurvey
+              onSurveyComplete={() => {
+                localStorage.setItem('isSurveyCompleted', 'true');
+              }}
+            />            
           }
         />
         

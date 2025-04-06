@@ -1,13 +1,14 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from "react-router-dom";
 import "./Survey.css";
+import { firestoreApi } from '../../../api/firestoreApi';
+import axios from 'axios';
+
 interface SurveyQuestion {
   id: string;
   text: string;
   backgroundColor: string;
 }
-import './Survey.css';
-import { firestoreApi } from '../../../api/firestoreApi';
 
 interface SurveyProps {
   onSurveyComplete: () => void;
@@ -21,6 +22,21 @@ const AnimatedSurvey: React.FC<SurveyProps> = ({ onSurveyComplete }) => {
   const [isCompleted, setIsCompleted] = useState(false);
   const [transitionDirection, setTransitionDirection] = useState<'next' | 'prev'>('next');
   const [activeIndices, setActiveIndices] = useState<number[]>([0]);
+  const [allConditions, setAllConditions] = useState([]);
+  const [searchTerm, setSearchTerm] = useState('');
+  const [filteredConditions, setFilteredConditions] = useState([]);
+  
+  useEffect(() => {
+    const fetchConditions = async () => {
+      try {
+        const res = await axios.get('/data/nlm-conditions');
+        setAllConditions(res.data || []);
+      } catch (error) {
+        console.error('Failed to fetch conditions:', error);
+      }
+    };
+    fetchConditions();
+  }, []);
 
   // Form input states
   const [age, setAge] = useState('');
@@ -239,13 +255,13 @@ const AnimatedSurvey: React.FC<SurveyProps> = ({ onSurveyComplete }) => {
   };
 
   return (
-    <div className="fixed inset-0 w-full h-full overflow-hidden">
+    <div className="survey-container">
       {/* Background slides */}
       {questions.map((question, index) => (
         <div
           key={index}
-          className={`absolute inset-0 w-full h-full transition-all duration-700 ease-in-out ${
-            activeIndices.includes(index) ? 'z-0' : '-z-10'
+          className={`background-slide ${
+            activeIndices.includes(index) ? 'active' : 'inactive'
           }`}
           style={{
             transform: `translateY(${activeIndices.includes(index) ? getSlidePosition(index) : index < currentQuestionIndex ? -100 : 100}vh)`,
@@ -257,35 +273,34 @@ const AnimatedSurvey: React.FC<SurveyProps> = ({ onSurveyComplete }) => {
 
       {/* Thank you background */}
       <div
-        className="absolute inset-0 w-full h-full transition-all duration-700 ease-in-out"
+        className="thank-you-background"
         style={{
           transform: `translateY(${isCompleted ? 0 : 100}vh)`,
-          backgroundColor: "#0047B3", // Deep royal blue for completion
-          zIndex: isCompleted ? 0 : -1
+          backgroundColor: "#0047B3" // Deep royal blue for completion
         }}
       />
 
       {/* Survey content */}
-      <div className="absolute inset-0 flex items-center justify-center px-4 z-10">
+      <div className="survey-content-container">
         {!isCompleted ? (
           <div
-            className={`w-full max-w-2xl transition-all duration-500 ${
+            className={`survey-form ${
               isAnimating
                 ? transitionDirection === 'next'
-                  ? 'opacity-0 transform -translate-y-12'
-                  : 'opacity-0 transform translate-y-12'
-                : 'opacity-100 transform translate-y-0'
+                  ? 'animate-exit-up'
+                  : 'animate-exit-down'
+                : 'animate-enter'
             }`}
           >
-            <div className="bg-white bg-opacity-90 p-8 rounded-lg shadow-lg">
-              <h2 className="text-3xl font-bold mb-8 text-gray-800">
+            <div className="survey-card">
+              <h2 className="question-title">
                 {questions[currentQuestionIndex].text}
               </h2>
 
               {/* Question 1: Age */}
               {currentQuestionIndex === 0 && (
-                <div className="space-y-4">
-                  <label className="block text-lg text-gray-700">Enter your age:</label>
+                <div className="question-container">
+                  <label className="input-label">Enter your age:</label>
                   <input
                     type="number"
                     min="16"
@@ -293,7 +308,7 @@ const AnimatedSurvey: React.FC<SurveyProps> = ({ onSurveyComplete }) => {
                     value={age}
                     onChange={(e) => setAge(e.target.value)}
                     placeholder="Age (16-100)"
-                    className="w-full p-4 border border-gray-300 rounded-lg text-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    className="input-field"
                     required
                   />
                 </div>
@@ -301,16 +316,13 @@ const AnimatedSurvey: React.FC<SurveyProps> = ({ onSurveyComplete }) => {
 
               {/* Question 2: Gender */}
               {currentQuestionIndex === 1 && (
-                <div className="space-y-4">
-                  <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                <div className="question-container">
+                  <div className="option-grid">
                     {['Men', 'Women', 'Nonbinary'].map((option) => (
                       <button
                         key={option}
                         type="button"
-                        className={`py-4 px-6 text-lg border border-gray-300 rounded-lg transition-all ${gender === option
-                          ? 'bg-blue-500 text-white border-blue-500'
-                          : 'bg-white hover:bg-gray-50'
-                          }`}
+                        className={`option-button ${gender === option ? 'selected' : ''}`}
                         onClick={() => setGender(option)}
                       >
                         {option}
@@ -322,16 +334,13 @@ const AnimatedSurvey: React.FC<SurveyProps> = ({ onSurveyComplete }) => {
 
               {/* Question 3: Sex */}
               {currentQuestionIndex === 2 && (
-                <div className="space-y-4">
-                  <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                <div className="question-container">
+                  <div className="option-grid">
                     {['Male', 'Female', 'Intersex'].map((option) => (
                       <button
                         key={option}
                         type="button"
-                        className={`py-4 px-6 text-lg border border-gray-300 rounded-lg transition-all ${sex === option
-                          ? 'bg-blue-500 text-white border-blue-500'
-                          : 'bg-white hover:bg-gray-50'
-                          }`}
+                        className={`option-button ${sex === option ? 'selected' : ''}`}
                         onClick={() => setSex(option)}
                       >
                         {option}
@@ -343,8 +352,8 @@ const AnimatedSurvey: React.FC<SurveyProps> = ({ onSurveyComplete }) => {
 
               {/* Question 4: Height */}
               {currentQuestionIndex === 3 && (
-                <div className="space-y-4">
-                  <label className="block text-lg text-gray-700">Height ({heightUnit}):</label>
+                <div className="question-container">
+                  <label className="input-label">Height ({heightUnit}):</label>
 
                   {heightUnit === 'cm' ? (
                     <input
@@ -352,17 +361,17 @@ const AnimatedSurvey: React.FC<SurveyProps> = ({ onSurveyComplete }) => {
                       value={height}
                       onChange={handleNumericInput(setHeight)}
                       placeholder="Enter height in cm"
-                      className="w-full p-4 border border-gray-300 rounded-lg text-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                      className="input-field"
                       required
                     />
                   ) : (
-                    <div className="flex space-x-4">
+                    <div className="input-group">
                       <input
                         type="text"
                         value={feet}
                         onChange={handleNumericInput(setFeet)}
                         placeholder="Feet"
-                        className="w-1/2 p-4 border border-gray-300 rounded-lg text-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                        className="input-field half-width"
                         required
                       />
                       <input
@@ -370,7 +379,7 @@ const AnimatedSurvey: React.FC<SurveyProps> = ({ onSurveyComplete }) => {
                         value={inches}
                         onChange={handleNumericInput(setInches)}
                         placeholder="Inches"
-                        className="w-1/2 p-4 border border-gray-300 rounded-lg text-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                        className="input-field half-width"
                         required
                       />
                     </div>
@@ -379,7 +388,7 @@ const AnimatedSurvey: React.FC<SurveyProps> = ({ onSurveyComplete }) => {
                   <button
                     type="button"
                     onClick={toggleHeightUnit}
-                    className="mt-2 py-2 px-4 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300 transition"
+                    className="unit-toggle-button"
                   >
                     Convert to {heightUnit === 'cm' ? 'feet & inches' : 'cm'}
                   </button>
@@ -388,21 +397,21 @@ const AnimatedSurvey: React.FC<SurveyProps> = ({ onSurveyComplete }) => {
 
               {/* Question 5: Weight */}
               {currentQuestionIndex === 4 && (
-                <div className="space-y-4">
-                  <label className="block text-lg text-gray-700">Weight ({weightUnit}):</label>
+                <div className="question-container">
+                  <label className="input-label">Weight ({weightUnit}):</label>
                   <input
                     type="text"
                     value={weight}
                     onChange={handleNumericInput(setWeight)}
                     placeholder={`Enter weight in ${weightUnit}`}
-                    className="w-full p-4 border border-gray-300 rounded-lg text-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    className="input-field"
                     required
                   />
                 
                   <button
                     type="button"
                     onClick={toggleWeightUnit}
-                    className="mt-2 py-2 px-4 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300 transition"
+                    className="unit-toggle-button"
                   >
                     Convert to {weightUnit === 'kg' ? 'lbs' : 'kg'}
                   </button>
@@ -411,44 +420,77 @@ const AnimatedSurvey: React.FC<SurveyProps> = ({ onSurveyComplete }) => {
 
               {/* Question 6: Medical Conditions */}
               {currentQuestionIndex === 5 && (
-                <div className="space-y-4">
-                  <label className="block text-lg text-gray-700">Select any that apply:</label>
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    {['Diabetes', 'Heart Disease', 'Asthma', 'Hypertension', 'None'].map((condition) => (
-                      <label key={condition} className="flex items-center space-x-3">
-                        <input
-                        type="checkbox"
-                        value={condition}
-                        checked={medicalConditions.includes(condition)}
-                        onChange={(e) => {
-                            const value = e.target.value;
-                            setMedicalConditions(prev => {
-                              if (value === 'None') {
-                                return ['None'];
-                              } else if (prev.includes(value)) {
-                                return prev.filter(item => item !== value);
-                              } else {
-                                const newSelection = [...prev.filter(item => item !== 'None'), value];
-                                return newSelection;
+                <div className="question-container">
+                  <label className="input-label">Search and select your conditions:</label>
+
+                  <div className="search-container">
+                    <input
+                      type="text"
+                      className="search-input"
+                      placeholder="Start typing a condition..."
+                      value={searchTerm}
+                      onChange={(e) => {
+                        const value = e.target.value;
+                        setSearchTerm(value);
+
+                        // Filter results
+                        const filtered = allConditions.filter((condition) =>
+                          condition.toLowerCase().includes(value.toLowerCase())
+                        );
+                        setFilteredConditions(filtered);
+                      }}
+                    />
+
+                    {searchTerm && filteredConditions.length > 0 && (
+                      <ul className="search-results">
+                        {filteredConditions.map((condition) => (
+                          <li
+                            key={condition}
+                            className="search-result-item"
+                            onClick={() => {
+                              if (!medicalConditions.includes(condition)) {
+                                setMedicalConditions((prev) => [...prev.filter(c => c !== 'None'), condition]);
                               }
-                            });
-                          }}
-                        className="form-checkbox h-5 w-5 text-blue-600"
-                        />
-                        <span className="text-gray-700">{condition}</span>
-                      </label>
+                              setSearchTerm('');
+                              setFilteredConditions([]);
+                            }}
+                          >
+                            {condition}
+                          </li>
+                        ))}
+                      </ul>
+                    )}
+                  </div>
+
+                  {/* Show selected conditions as tags */}
+                  <div className="tags-container">
+                    {medicalConditions.map((condition) => (
+                      <span
+                        key={condition}
+                        className="condition-tag"
+                      >
+                        {condition}
+                        <button
+                          className="tag-remove-button"
+                          onClick={() =>
+                            setMedicalConditions((prev) => prev.filter((c) => c !== condition))
+                          }
+                        >
+                          ×
+                        </button>
+                      </span>
                     ))}
                   </div>
                 </div>
               )}
 
               {/* Navigation buttons */}
-              <div className="mt-8 flex justify-end">
+              <div className="navigation-buttons">
                 {currentQuestionIndex > 0 && (
                   <button
                     type="button"
                     onClick={handlePrevious}
-                    className="mr-4 py-3 px-6 bg-gray-300 text-gray-700 rounded-lg hover:bg-gray-400 transition"
+                    className="back-button"
                   >
                     Back
                   </button>
@@ -458,23 +500,20 @@ const AnimatedSurvey: React.FC<SurveyProps> = ({ onSurveyComplete }) => {
                   type="button"
                   onClick={currentQuestionIndex === questions.length - 1 ? handleSubmit : handleNext}
                   disabled={!canProceed()}
-                  className={`py-3 px-6 rounded-lg transition ${canProceed()
-                    ? 'bg-blue-500 text-white hover:bg-blue-600'
-                    : 'bg-gray-200 text-gray-500 cursor-not-allowed'
-                    }`}
+                  className={`next-button ${!canProceed() ? 'disabled' : ''}`}
                 >
                   {currentQuestionIndex === questions.length - 1 ? 'Submit' : 'Next'}
                 </button>
               </div>
 
               {/* Progress indicator */}
-              <div className="mt-8">
-                <div className="flex justify-between text-sm text-gray-500">
+              <div className="progress-container">
+                <div className="progress-text">
                   <span>Question {currentQuestionIndex + 1} of {questions.length}</span>
                 </div>
-                <div className="h-2 bg-gray-200 rounded-full overflow-hidden mt-2">
+                <div className="progress-bar-container">
                   <div
-                    className="h-2 bg-blue-500 transition-all duration-700 ease-in-out"
+                    className="progress-bar"
                     style={{ width: `${(currentQuestionIndex / (questions.length - 1)) * 100}%` }}
                   />
                 </div>
@@ -482,14 +521,13 @@ const AnimatedSurvey: React.FC<SurveyProps> = ({ onSurveyComplete }) => {
             </div>
           </div>
         ) : (
-          <div className={`text-center bg-white bg-opacity-90 p-8 rounded-lg shadow-xl transition-all duration-500 ${isAnimating ? 'opacity-0 transform translate-y-8' : 'opacity-100 transform translate-y-0'
-            }`}>
-            <h2 className="text-3xl font-bold mb-4">Thank you for completing the survey!</h2>
-            <p className="text-xl mb-6">Your responses have been recorded.</p>
+          <div className={`summary-card ${isAnimating ? 'animate-exit-up' : 'animate-enter'}`}>
+            <h2 className="summary-title">Thank you for completing the survey!</h2>
+            <p className="summary-description">Your responses have been recorded.</p>
 
-            <div className="bg-gray-100 p-6 rounded-lg mb-6 text-left">
-              <h3 className="text-xl font-semibold mb-4">Survey Summary:</h3>
-              <ul className="space-y-2">
+            <div className="summary-data">
+              <h3 className="summary-subtitle">Survey Summary:</h3>
+              <ul className="summary-list">
                 <li><strong>Age:</strong> {age}</li>
                 <li><strong>Gender:</strong> {gender}</li>
                 <li><strong>Sex:</strong> {sex}</li>
@@ -499,16 +537,16 @@ const AnimatedSurvey: React.FC<SurveyProps> = ({ onSurveyComplete }) => {
               </ul>
             </div>
 
-            <div className="flex justify-center gap-4"> 
+            <div className="summary-buttons"> 
               <button
                 onClick={handleRestart}
-                className="px-6 py-3 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition focus:outline-none focus:ring-2 focus:ring-blue-700"
+                className="summary-button"
               >
                 Take Survey Again
               </button>
               <button
                 onClick={handleSurveyComplete}
-                className="px-6 py-3 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition focus:outline-none focus:ring-2 focus:ring-blue-700"
+                className="summary-button"
               >
                 Confirm
               </button>
