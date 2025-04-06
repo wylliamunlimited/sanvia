@@ -42,7 +42,7 @@ function App() {
           path="/auth/signup"
           element={
             isSignUp ? (
-              <Navigate to="/auth/survey" replace />
+              <Navigate to="/onboarding" replace />
             ) : (
               <SignUp
                 onSignUpSuccess={() => {
@@ -59,7 +59,7 @@ function App() {
           path="/auth/login"
           element={
             user ? (
-              <Navigate to="/" replace />
+              <Navigate to="/home" replace />
             ) : (
               <Login
                 onLoginSuccess={() => {
@@ -70,12 +70,13 @@ function App() {
             ) 
           }
         />
+
         <Route path="/*" element={<Static />} />
 
         
         {/* Survey Route */}
         <Route
-          path="/auth/survey"
+          path="/onboarding"
           element={
             user && isSignUp ? (
               <Survey
@@ -85,7 +86,7 @@ function App() {
                 }}
               />
             ) : (
-              <Navigate to="/" replace />
+              <Navigate to="/home" replace />
             )
           }
         />
