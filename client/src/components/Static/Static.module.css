@@ -21,6 +21,7 @@ background-size:
   30vh 30vh;
   overflow-y: auto;
   background-repeat: no-repeat, no-repeat, no-repeat, no-repeat;
+  background-color: black;
 
 }
 
