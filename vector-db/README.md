@@ -11,6 +11,7 @@ Our minimal approach is to implement GCP VM to host ChromaDB. We simply have to 
 
 ### Setting Up the VM
 To start, the vm has to run the ChromaDB. We used the following startup script.
+The key components are ChromaDB (of course~) and [Cloudflare Tunneling](https://developers.cloudflare.com/cloudflare-one/connections/connect-networks/).
 ``` sh
 sudo apt update && sudo apt install -y python3 python3-pip curl python3.11-venv
 
@@ -48,6 +49,7 @@ nohup cloudflared tunnel run chroma-tunnel > cloudflared.log 2>&1 &
 Then the ChromaDB is up on `https://chroma.sanvia.app`
 
 ### Yaml File Configuration for Tunneling
+Reference (configuration file): [Configuration File](https://developers.cloudflare.com/cloudflare-one/connections/connect-networks/do-more-with-tunnels/local-management/configuration-file/)
 ``` yml
 tunnel: chroma-tunnel
 credentials-file: <your credential json files, probably under .cloudflared>
@@ -58,5 +60,12 @@ ingress:
     - service: http_status:404
 ```
 
+### Access Control
+We added an extra layer of protection using API Key through Cloudflare. Any request going to https://chroma.sanvia.app would require the API key.
 
-
+### Testing
+``` sh
+curl -X GET https://chroma.sanvia.app/api/v2/heartbeat \
+  -H "CF-Access-Client-Id: <client_id>" \
+  -H "CF-Access-Client-Secret: <token-that-you-saved>"
+```
