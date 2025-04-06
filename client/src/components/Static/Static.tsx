@@ -6,40 +6,6 @@ const Static: React.FC = () => {
   const navigate = useNavigate();
   const [showAbout, setShowAbout] = useState(false);
 
-  useEffect(() => {
-    // Set the amber gradient background for the body
-    document.body.style.background = "black";
-    document.body.style.height = "100vh";
-    document.body.style.margin = "0";
-    document.body.style.overflow = "hidden";
-    const isLargeScreen = window.innerWidth > 1000;
-    const specificCircleData = [
-      {
-        width: isLargeScreen ? 70 : 50,
-        left: isLargeScreen ? -20 : -10,
-        top: 0,
-        opacity: 0.8,
-      },
-    ];
-
-    // Remove any existing circles before adding new ones
-    document.querySelectorAll(".random-circle").forEach(circle => circle.remove());
-
-    // Add circles to the body based on specific positions
-    specificCircleData.forEach((circleData, index) => {
-      const circle = document.createElement("img");
-      circle.src = "/images/Ellipse2.png"; // Your circle image source
-      circle.classList.add("random-circle");
-      circle.style.position = "absolute";
-      circle.style.width = `${circleData.width}px`;
-      circle.style.left = `${circleData.left}vw`; // Using specific values (vw)
-      circle.style.top = `${circleData.top}vh`; // Using specific values (vh)
-      circle.style.opacity = `${circleData.opacity}`;
-      circle.style.zIndex = "-1"; // Set behind content
-
-      document.body.appendChild(circle); // Append the circle to the body
-    });
-  }, []);
 
   return (
     <div className={styles.home}>

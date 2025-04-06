@@ -4,7 +4,24 @@
   font-family: Impact, Haettenschweiler, 'Arial Narrow Bold', sans-serif;
   height: 100vh;
   width: 100%;
+  background-image:
+  url('./images/Ellipse4.png'),  /* Upper left corner image */
+  url('./images/Ellipse1.png'),  /* Upper middle corner image */
+  url('./images/Ellipse3.png'),  /* down left image*/
+  url('./images/Ellipse2.png');  /* Upper right corner image */
+background-position:
+  -40vw -10vh,       
+  10vw 40vh,       /* Second image at 0% horizontal (left) and 50% vertical (center) */
+  60vw -30vh,
+  20vw 80vh;    /* right center ellipse */
+background-size:
+  75vw 88vh,
+  20vw 30vh,    /* Second image scaled to 30% of its original size */
+  108vw 120vh,
+  30vh 30vh;
   overflow-y: auto;
+  background-repeat: no-repeat, no-repeat, no-repeat, no-repeat;
+
 }
 
 /* Navigation area design */
@@ -30,7 +47,6 @@
   min-width: 40px;
   margin-top: 11px;
 }
-
 
 .about-page {
   padding: 2vw;
