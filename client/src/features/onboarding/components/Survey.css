@@ -389,3 +389,25 @@
   outline: none;
   box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.5);
 }
+
+.none-button {
+  background-color: #f0f0f0;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  padding: 8px 16px;
+  margin-bottom: 10px;
+  cursor: pointer;
+  font-size: 14px;
+  transition: all 0.2s ease;
+}
+
+.none-button:hover {
+  background-color: #e0e0e0;
+}
+
+.no-results {
+  padding: 10px;
+  color: #666;
+  font-style: italic;
+  text-align: center;
+}

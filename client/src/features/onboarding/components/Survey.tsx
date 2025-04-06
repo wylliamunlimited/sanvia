@@ -3,7 +3,6 @@ import { useNavigate } from "react-router-dom";
 import "./Survey.css";
 import { firestoreApi } from '../../../api/firestoreApi';
 import axios from 'axios';
-
 interface SurveyQuestion {
   id: string;
   text: string;
@@ -22,21 +21,39 @@ const AnimatedSurvey: React.FC<SurveyProps> = ({ onSurveyComplete }) => {
   const [isCompleted, setIsCompleted] = useState(false);
   const [transitionDirection, setTransitionDirection] = useState<'next' | 'prev'>('next');
   const [activeIndices, setActiveIndices] = useState<number[]>([0]);
-  const [allConditions, setAllConditions] = useState([]);
+  //medical serch
+  const [allConditions, setAllConditions] = useState<string[]>([]);
+  const [conditionsMap, setConditionsMap] = useState<Record<string, string>>({});
+  const [isLoadingConditions, setIsLoadingConditions] = useState(false);
+  const [conditionsError, setConditionsError] = useState<string | null>(null);
+
   const [searchTerm, setSearchTerm] = useState('');
-  const [filteredConditions, setFilteredConditions] = useState([]);
-  
+  const [filteredConditions, setFilteredConditions] = useState<string[]>([]);
+  const [medicalConditions, setMedicalConditions] = useState<string[]>([]);
+
+  //medical info
   useEffect(() => {
     const fetchConditions = async () => {
       try {
-        const res = await axios.get('/data/nlm-conditions');
-        setAllConditions(res.data || []);
+        const response = await fetch('/consumer-conditions.json');
+        const data = await response.json();
+        
+        //dropdwon suggestion
+        const conditionNames = Object.keys(data); 
+        setAllConditions(conditionNames);
+        setConditionsMap(data); 
+        setIsLoadingConditions(false);
       } catch (error) {
-        console.error('Failed to fetch conditions:', error);
+        console.error('Error loading conditions:', error);
+        setConditionsError('Failed to load condition data.');
+        setIsLoadingConditions(false);
       }
     };
+  
     fetchConditions();
   }, []);
+  
+
 
   // Form input states
   const [age, setAge] = useState('');
@@ -48,7 +65,6 @@ const AnimatedSurvey: React.FC<SurveyProps> = ({ onSurveyComplete }) => {
   const [weight, setWeight] = useState('');
   const [heightUnit, setHeightUnit] = useState('cm');
   const [weightUnit, setWeightUnit] = useState('kg');
-  const [medicalConditions, setMedicalConditions] = useState<string[]>([]);
 
   // Define questions
   const questions: SurveyQuestion[] = [
@@ -189,7 +205,8 @@ const AnimatedSurvey: React.FC<SurveyProps> = ({ onSurveyComplete }) => {
       gender,
       sex,
       height: heightUnit === 'cm' ? height : `${feet}'${inches}"`,
-      weight: `${weight} ${weightUnit}`,
+      weight: `${weight}` ,
+      weightUnit: `${weightUnit}`,
       medicalConditions
     };
     console.log('Survey submitted:', surveyData);
@@ -423,6 +440,7 @@ const AnimatedSurvey: React.FC<SurveyProps> = ({ onSurveyComplete }) => {
                 <div className="question-container">
                   <label className="input-label">Search and select your conditions:</label>
 
+                  {/* search bar */}
                   <div className="search-container">
                     <input
                       type="text"
@@ -433,15 +451,31 @@ const AnimatedSurvey: React.FC<SurveyProps> = ({ onSurveyComplete }) => {
                         const value = e.target.value;
                         setSearchTerm(value);
 
-                        // Filter results
-                        const filtered = allConditions.filter((condition) =>
-                          condition.toLowerCase().includes(value.toLowerCase())
-                        );
-                        setFilteredConditions(filtered);
+                        //check that allConditions is an array before filtering
+                        if (Array.isArray(allConditions)) {
+                          const filtered = allConditions.filter((condition) =>
+                            typeof condition === 'string' && 
+                            condition.toLowerCase().includes(value.toLowerCase())
+                          );
+                          setFilteredConditions(filtered.slice(0, 10));
+                        } else {
+                          setFilteredConditions([]);
+                          console.error('allConditions is not an array:', allConditions);
+                        }
                       }}
+                      disabled={medicalConditions.includes('None') || isLoadingConditions}
                     />
 
-                    {searchTerm && filteredConditions.length > 0 && (
+                    {isLoadingConditions && (
+                      <div className="loading-indicator">Loading conditions...</div>
+                    )}
+
+                    {conditionsError && (
+                      <div className="error-message">{conditionsError}</div>
+                    )}
+
+                    {/* results area */}
+                    {searchTerm && filteredConditions.length > 0 && !isLoadingConditions && (
                       <ul className="search-results">
                         {filteredConditions.map((condition) => (
                           <li
@@ -454,16 +488,31 @@ const AnimatedSurvey: React.FC<SurveyProps> = ({ onSurveyComplete }) => {
                               setSearchTerm('');
                               setFilteredConditions([]);
                             }}
+                            title={conditionsMap[condition] || 'No URL available'}
                           >
                             {condition}
                           </li>
                         ))}
                       </ul>
                     )}
+
+                    {searchTerm && filteredConditions.length === 0 && !isLoadingConditions && (
+                      <div className="no-results">No matching conditions found</div>
+                    )}
                   </div>
 
                   {/* Show selected conditions as tags */}
                   <div className="tags-container">
+                    {medicalConditions.length === 0 && (
+                      /* declare no issues */
+                      <button 
+                        className="none-button"
+                        onClick={() => setMedicalConditions(['None'])}
+                      >
+                        I have no medical conditions
+                      </button>
+                    )}
+                    
                     {medicalConditions.map((condition) => (
                       <span
                         key={condition}
@@ -472,9 +521,9 @@ const AnimatedSurvey: React.FC<SurveyProps> = ({ onSurveyComplete }) => {
                         {condition}
                         <button
                           className="tag-remove-button"
-                          onClick={() =>
-                            setMedicalConditions((prev) => prev.filter((c) => c !== condition))
-                          }
+                          onClick={() => {
+                            setMedicalConditions((prev) => prev.filter((c) => c !== condition));
+                          }}
                         >
                           ×
                         </button>
