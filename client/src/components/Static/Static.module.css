@@ -2,50 +2,44 @@
 
 .home {
   font-family: Impact, Haettenschweiler, 'Arial Narrow Bold', sans-serif;
-  margin: 0;
-  padding: 0;
   height: 100vh;
+  width: 100%;
   overflow-y: auto;
 }
 
-.header {
-  text-align: center;
-  margin-top: 50px;
-  align-items: flex-end;
-}
-.title {
-  font-family: 'Unbounded', sans-serif;
-  font-size: 5vw;
-  color: #333;
-  margin: 0;
-}
-.brand {
-  font-family: 'Unbounded', sans-serif;
-  font-size: 12vw;
-  color: #0077cc;
-  margin: 0;
-}
-
+/* Navigation area design */
 .navbar {
   display: flex;
   justify-content: space-between;
-  padding: 20px;
-}
-.amber-background {
-  min-height: 100vh;
-  display: flex;
-  align-items: center;
-  justify-content: center;
+  padding: 18px;  
 }
 
 .nav-left a,
 .nav-right a {
-  margin: 0 15px;
+  margin: 0 5px;
   text-decoration: none;
-  color: #000;
+  color: white;
   font-weight: bold;
 }
 
+.line {
+  flex-grow: 1;
+  height: 1px;
+  background-color: white;
+  margin: 0 20px;
+  min-width: 40px;
+  margin-top: 11px;
+}
+
+
+.about-page {
+  padding: 2vw;
+  text-align: left;
+
+}
+
+
+/* title area */
 .content {
   display: flex;
   justify-content: center;
@@ -54,32 +48,28 @@
   gap: 5%;
 }
 
-.button {
-  max-height: 7px;
+.header {
+  text-align: center;
+  margin-top: 50px;
+  align-items: flex-end;
 }
 
-#extra {
-  min-width: 100vw;
-  object-fit: cover;
+.title {
+  font-family: 'Unbounded', sans-serif;
+  font-size: 5vw;
+  color: #ffffff;
+  margin: 0;
+  font-weight: 250;
+
 }
 
-.promise {
-  max-height: 200px;
-  text-align: left;
-  overflow-y: auto;
-  padding-right: 10px; 
-  padding-left: 10px; 
-}
+.brand {
+  font-family: 'Unbounded', sans-serif;
+  font-size: 12vw;
+  color: #ffffff;
+  margin: 0;
+  font-weight: 350;
 
-h1 {
-  font-size: 48px;
-  font-weight: 400;
-}
-
-.highlight {
-  font-size: 80px;
-  font-weight: 700;
-  color: white;
 }
 
 .get-started {
@@ -99,11 +89,11 @@ h1 {
   margin-bottom: 5vh;
 }
 
-
 .get-started:hover {
   background-color: #3b63cc;
 }
 
+/* The three boxes area */
 .info-section {
   display: flex;
   justify-content: center;
@@ -121,27 +111,17 @@ h1 {
   display: flex;
   align-items: center;
   justify-content: center;
-
   box-shadow: 0 4px 16px rgba(0,0,0,0.1);
   overflow: hidden;
 }
 
-.icon {
-  font-size: 80px;
-  font-weight: bold;
-  color: #4f7bff;
-}
-
-h3 {
-  font-size: 18px;
-  font-weight: 600;
-  margin-bottom: 10px;
-}
-
-p {
-  font-size: 14px;
-  color: #555;
-  line-height: 1.6;
+.promise {
+  max-height: 250px;
+  text-align: left;
+  overflow-y: auto;
+  padding-right: 10px; 
+  padding-left: 10px; 
+  color: white;
 }
 
 .read-more {
@@ -156,8 +136,30 @@ p {
   text-decoration: underline;
 }
 
-.about-page {
-  padding: 2vw;
-  text-align: left;
-
+.card2 {
+  width: calc(200px + 12.5vw);
+  height: 300px;
+  border-radius: 16px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 4px 16px rgba(0,0,0,0.1);
+  overflow: hidden;
 }
+
+h3 {
+  font-size: 18px;
+  font-weight: 600;
+  margin-bottom: 10px;
+  color: #b4acac;
+}
+
+p {
+  font-size: 14px;
+  line-height: 1.6;
+}
+
+
+
+
+
