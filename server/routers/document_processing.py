@@ -26,8 +26,7 @@ from dependencies.firebase_dependencies import (
 from constants.credentials import FIREBASE_ADMIN_API_KEY
 from dependencies.ai_dependencies import *
 from dependencies.rag_dependencies import (
-    process_and_store_document,
-    retrieve_relevant_chunks,
+    upload_document_to_chroma
 )
 
 from constants.utils import POPPLER_PATH
@@ -122,18 +121,26 @@ async def upload_document(
         file_bytes.seek(0)  # Reset pointer for OCR processing
         extracted_text = extract_text_with_ocr(file_bytes)
 
+        ########### ########### [START] RAG [START] ########### ###########
+
+        # Prepare base metadata
+        prechroma_metadata = {
+            "gcs_url": gcs_url,
+            "document_id": document_id,
+            "user_id": user_id,
+            "gcs_path": gcs_path,
+            "upload_date": upload_date,
+            "filename": file.filename
+        }
+
         # Process document with RAG
-        rag_metadata = process_and_store_document(
-            text=extracted_text,
-            user_id=user_id,
-            document_id=document_id,
-            metadata={
-                "filename": file.filename,
-                "upload_date": upload_date,
-                "gcs_path": gcs_path,
-                "gcs_url": gcs_url,
-            },
+        _ids, _texts, _vectors, _metadatas = upload_document_to_chroma(
+            content=extracted_text,
+            metadata=prechroma_metadata
         )
+        
+        ########### ########### [END] RAG [END] ########### ###########
+
 
         # Save metadata + extracted text in Firestore
         db = get_firestore_client()
@@ -152,8 +159,8 @@ async def upload_document(
             "gcs_path": gcs_path,
             "gcs_url": gcs_url,
             "extracted_text": extracted_text,  # Store OCR text in Firestore
-            "category": rag_metadata["category"],  # Add document category
-            "num_chunks": rag_metadata["num_chunks"],  # Add number of chunks
+            "num_chunks": len(_ids),  # Add number of chunks
+            "chunk_ids": _ids # ids of the chunks, convenient for future operations
         }
 
         doc_ref.set(metadata)
@@ -165,8 +172,8 @@ async def upload_document(
             "msg": "File uploaded, processed, and stored successfully",
             "upload_date": upload_date,
             "gcs_url": gcs_url,
-            "category": rag_metadata["category"],
-            "num_chunks": rag_metadata["num_chunks"],
+            "num_chunks": len(_ids),
+            "chunk_ids": _ids,
             "extracted_text": extracted_text[
                 :500
             ],  # Return only first 500 chars for preview
