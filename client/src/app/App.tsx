@@ -71,9 +71,9 @@ function App() {
           }
         />
 
+        {/* Landing Route */}
         <Route path="/*" element={<Static />} />
 
-        
         {/* Survey Route */}
         <Route
           path="/onboarding"
