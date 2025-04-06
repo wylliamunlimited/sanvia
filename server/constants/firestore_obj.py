@@ -54,3 +54,11 @@ class Survey:
     def __repr__(self):
         return (f'Survey(age={self.age}, gender={self.gender}, sex={self.sex}, height={self.height}, weight={self.weight},' 
                 f'conditions={self.conditions}, medications={self.medications}, onboarding={self.onboarding})')
+    
+    def contextualize(self):
+        f"""Patient Profile:
+                Age: {self.age}
+                Gender: {self.gender}
+                Sex: {self.sex}
+                Height: {self.height} cm
+                Weight: {self.weight} kg"""
