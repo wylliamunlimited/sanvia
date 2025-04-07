@@ -16,7 +16,6 @@ from dependencies.firebase_dependencies import (
     get_profile,
 )
 from constants.firestore_obj import Survey
-from dependencies.survey_rag import store_survey_embeddings
 
 router = APIRouter()
 
