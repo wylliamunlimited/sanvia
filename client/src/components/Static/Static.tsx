@@ -6,7 +6,6 @@ const Static: React.FC = () => {
   const navigate = useNavigate();
   const [showAbout, setShowAbout] = useState(false);
 
-
   return (
     <div className={styles.home}>
       {/* Top navigation */}
