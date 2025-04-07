@@ -2,7 +2,6 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate } from "react-router-dom";
 import "./Survey.css";
 import { firestoreApi } from '../../../api/firestoreApi';
-import axios from 'axios';
 interface SurveyQuestion {
   id: string;
   text: string;
@@ -214,7 +213,7 @@ const AnimatedSurvey: React.FC<SurveyProps> = ({ onSurveyComplete }) => {
     // Upload to Firestore
     try {
       const response = await firestoreApi.uploadProfile(
-        age, gender, sex, height, weight
+        age, gender, sex, height, weight, medicalConditions, []
       )  // Change to chatApi.sendMessage once auth is implemented
       console.log(`Uploaded survey data onto Firestore, ${response}`);
 
