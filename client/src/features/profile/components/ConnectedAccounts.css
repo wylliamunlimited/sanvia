@@ -1,0 +1,73 @@
+.connected-accounts-header {
+  font-size: 1.25rem;
+  font-weight: 600;
+  color: #333;
+  margin: 0 0 8px;
+}
+
+.connected-accounts-description {
+  color: #666;
+  font-size: 14px;
+  margin: 0 0 24px;
+  line-height: 1.5;
+}
+
+.connected-accounts {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.account-connection-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 16px;
+  background-color: white;
+  border-radius: 8px;
+  border: 1px solid #E4E9F2;
+}
+
+.service-info {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.service-logo {
+  width: 32px;
+  height: 32px;
+  border-radius: 6px;
+  background-size: contain;
+  background-repeat: no-repeat;
+  background-position: center;
+  border: 1px solid #E4E9F2;
+  overflow: hidden;
+}
+
+.whoop-logo {
+  background-color: #fff;
+  background-image: url("https://play-lh.googleusercontent.com/RpXxly7Gn0C_MjCHbynE9QxhMgC2D3PI4CAC7E2ujha2GRqepYWgH9IletL1x5facA");
+}
+
+.service-name {
+  font-size: 16px;
+  font-weight: 500;
+  color: #333;
+}
+
+.connect-button {
+  background-color: white;
+  color: var(--primary);
+  border: 1px solid var(--primary);
+  padding: 8px 16px;
+  border-radius: 6px;
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.connect-button:hover {
+  background-color: #F2F5FC;
+} 

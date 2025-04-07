@@ -2,8 +2,8 @@ import { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
 import './History.css'
 import Header from '../../../shared/components/Header'
-import chatApi from '../../../api/chatApi'
-import { formatHistoryTime, groupSessionsByDate, ChatSession } from '../utils/dateUtils'
+import { formatHistoryTime, groupSessionsByDate } from '../utils/dateUtils'
+import { ChatSession, fetchChatThreads } from '../services/historyService'
 
 const History = () => {
   const navigate = useNavigate()
@@ -12,31 +12,22 @@ const History = () => {
   const [isLoading, setIsLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
 
-  // Fetch chat threads on component mount
   useEffect(() => {
-    const fetchChatThreads = async () => {
+    const loadChatThreads = async () => {
       setIsLoading(true)
       setError(null)
       
       try {
-        const threads = await chatApi.getAllChatThreads()
-        
-        const sessions = threads.map(thread => ({
-          id: thread.thread_id,
-          title: thread.title || 'Untitled Chat',
-          timestamp: new Date(thread.last_updated_at + 'Z')
-        }))
-        
+        const sessions = await fetchChatThreads()
         setChatSessions(sessions)
       } catch (err) {
-        console.error('Error fetching chat history:', err)
         setError('Failed to load chat history.')
       } finally {
         setIsLoading(false)
       }
     }
     
-    fetchChatThreads()
+    loadChatThreads()
   }, [])
 
   // Handle navigation to chat thread
@@ -88,7 +79,7 @@ const History = () => {
         </div>
       </div>
 
-      <div className="history-area">
+      <div className="history-area scrollable-area">
         {error && (
           <div className="error-message">{error}</div>
         )}

@@ -1,6 +1,4 @@
-:root {
-  --scrollbar-width: 0px; /* Will be set by JS */
-}
+@import '../../../shared/styles/scrollbar.css';
 
 .documents-content {
   flex: 1;
@@ -8,15 +6,10 @@
   flex-direction: column;
   height: 100vh;
   position: relative;
-  transition: padding-right 0.3s ease;
   width: 100%;
   max-width: 100%;
   box-sizing: border-box;
   padding: 0;
-}
-
-.documents-content.sidebar-open {
-  padding-right: 399px;
 }
 
 .documents-subheader {
@@ -27,34 +20,8 @@
   color: #333;
 }
 
-.documents-area {
-  flex: 1;
-  overflow-y: auto;
-  padding: 1rem calc(max(1rem, (100% - 768px) / 2));
-  padding-right: calc(max(1rem, (100% - 768px) / 2) - var(--scrollbar-width));
-  display: flex;
-  flex-direction: column;
-  max-width: 100%;
-  box-sizing: border-box;
-  scrollbar-gutter: stable;
-  width: 100%;
-  gap: 1.5rem;
-}
-
-.documents-area::-webkit-scrollbar {
-  width: 8px;
-}
-
-.documents-area::-webkit-scrollbar-track {
-  background: transparent;
-}
-
-.documents-area::-webkit-scrollbar-thumb {
-  background-color: rgba(0, 0, 0, 0.1);
-  border-radius: 4px;
-}
-
 .upload-zone {
+  margin: 1rem calc(max(1rem, (100% - 768px) / 2));
   border: 2px dashed #ddd;
   border-radius: 12px;
   padding: 2rem;
@@ -95,6 +62,21 @@
   background-color: #f0f0f0;
 }
 
+.documents-area {
+  flex: 1;
+  overflow-y: auto;
+  padding: 1rem calc(max(1rem, (100% - 768px) / 2));
+  display: flex;
+  flex-direction: column;
+  max-width: 100%;
+  box-sizing: border-box;
+  width: 100%;
+}
+
+.documents-area.scrollable-area {
+  padding-right: calc(max(1rem, (100% - 768px) / 2) - var(--scrollbar-width));
+}
+
 .documents-list {
   display: flex;
   flex-direction: column;
@@ -105,6 +87,7 @@
   display: flex;
   align-items: center;
   gap: 1rem;
+  animation: fadeIn 0.2s ease-in-out;
   padding: 1rem;
   background-color: white;
   border-radius: 8px;
@@ -247,6 +230,10 @@
   left: 0;
   right: 0;
   bottom: 0;
+  border: none;
+  display: block;
+  width: 100%;
+  height: 100%;
   opacity: 0;
 }
 
@@ -315,4 +302,13 @@
 .preview-loading .spinner {
   width: 32px;
   height: 32px;
+}
+
+.error-message {
+  background-color: rgba(255, 0, 0, 0.1);
+  border-radius: 0.5rem;
+  padding: 0.75rem 1rem;
+  margin: 1rem calc(max(1rem, (100% - 768px) / 2));
+  color: rgb(200, 30, 30);
+  font-size: 0.9rem;
 } 

@@ -1,14 +1,9 @@
-:root {
-  --scrollbar-width: 0px; /* Will be set by JS */
-}
-
 .new-chat-content {
   flex: 1;
   display: flex;
   flex-direction: column;
   height: 100vh;
   position: relative;
-  transition: padding-right 0.3s ease;
   width: 100%;
   max-width: 100%;
   box-sizing: border-box;
@@ -22,20 +17,14 @@
   z-index: 10;
 }
 
-.new-chat-content.sidebar-open {
-  padding-right: 399px;
-}
-
 .new-chat-content .new-chat-container {
   display: flex;
   flex-direction: column;
   justify-content: center;
   align-items: center;
   padding: 0 calc(max(1rem, (100% - 768px) / 2));
-  padding-right: calc(max(1rem, (100% - 768px) / 2) - var(--scrollbar-width));
   max-width: 100%;
   box-sizing: border-box;
-  scrollbar-gutter: stable;
   width: 100%;
   position: absolute;
   top: 50%;

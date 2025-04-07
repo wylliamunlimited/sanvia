@@ -1,7 +1,7 @@
 import { useState, useRef, useEffect } from 'react'
 import { useParams, useNavigate } from 'react-router-dom'
 import './Chat.css'
-import { getScrollbarWidth } from '../utils/scrollbar'
+import { getScrollbarWidth } from '../../../shared/utils/scrollbar'
 import chatApi, { SourceItem } from '../../../api/chatApi'
 import Header from '../../../shared/components/Header'
 import SourcesSidebar from '../components/SourcesSidebar'
@@ -245,7 +245,7 @@ const Chat = () => {
 
       <div 
         ref={messageAreaRef}
-        className="message-area"
+        className={`message-area ${isSourcesSidebarOpen ? 'sidebar-open' : ''} scrollable-area`}
         onScroll={handleScroll}
       >
         {!isLoading && messages.map(message => (

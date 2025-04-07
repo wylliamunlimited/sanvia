@@ -1,10 +1,8 @@
 import { useState, useEffect } from 'react'
 import './Documents.css'
 import Header from '../../../shared/components/Header'
-import documentApi, { DocumentMetadata } from '../../../api/documentApi'
-import { getScrollbarWidth } from '../../chat/utils/scrollbar'
-
-type Document = DocumentMetadata
+import { getScrollbarWidth } from '../../../shared/utils/scrollbar'
+import { Document, fetchDocuments, uploadDocuments, getPreviewUrl } from '../services/documentService'
 
 const Documents = () => {
   const [documents, setDocuments] = useState<Document[]>([])
@@ -13,7 +11,6 @@ const Documents = () => {
   const [previewUrl, setPreviewUrl] = useState<string | null>(null)
   const [error, setError] = useState<string | null>(null)
   const [isUploading, setIsUploading] = useState(false)
-  // const [isPreviewLoading, setIsPreviewLoading] = useState(false)
   const [isIframeLoaded, setIsIframeLoaded] = useState(false)
 
   useEffect(() => {
@@ -21,17 +18,16 @@ const Documents = () => {
   }, [])
 
   useEffect(() => {
-    const fetchDocuments = async () => {
+    const loadDocuments = async () => {
       try {
-        const response = await documentApi.getAllDocuments()
-        setDocuments(response.documents)
+        const docs = await fetchDocuments()
+        setDocuments(docs)
       } catch (err) {
-        console.error('Error fetching documents:', err)
         setError('Failed to load documents. Please refresh the page.')
       }
     }
 
-    fetchDocuments()
+    loadDocuments()
   }, [])
 
   const handleDragOver = (e: React.DragEvent) => {
@@ -61,19 +57,10 @@ const Documents = () => {
     setIsUploading(true)
 
     try {
-      const newDocuments = await Promise.all(files.map(async file => {
-        try {
-          return await documentApi.uploadDocument(file)
-        } catch (err) {
-          console.error(`Error uploading ${file.name}:`, err)
-          throw new Error(`Failed to upload ${file.name}`)
-        }
-      }))
-
+      const newDocuments = await uploadDocuments(files)
       setDocuments(prev => [...prev, ...newDocuments])
     } catch (err) {
-      console.error('Error handling files:', err)
-      setError('Failed to upload one or more files. Please try again.')
+      setError(err instanceof Error ? err.message : 'Failed to upload one or more files. Please try again.')
     } finally {
       setIsUploading(false)
     }
@@ -81,11 +68,10 @@ const Documents = () => {
 
   const handlePreview = async (doc: Document) => {
     try {
-      // setIsPreviewLoading(true)
       setIsIframeLoaded(false)
       setPreviewDoc(doc)
-      const { signed_url } = await documentApi.getFreshSignedUrl(doc.document_id)
-      setPreviewUrl(signed_url)
+      const signedUrl = await getPreviewUrl(doc.document_id)
+      setPreviewUrl(signedUrl)
     } catch {
       setError('Failed to load document preview. Please try again.')
       setPreviewDoc(null)
@@ -96,7 +82,6 @@ const Documents = () => {
   const handleIframeLoad = () => {
     setTimeout(() => {
       setIsIframeLoaded(true)
-      // setIsPreviewLoading(false)
     }, 500)
   }
 
@@ -115,48 +100,48 @@ const Documents = () => {
 
       <h2 className="documents-subheader">Your documents</h2>
 
-      <div className="documents-area">
-        <div 
-          className={`upload-zone ${isDragging ? 'dragging' : ''} ${isUploading ? 'uploading' : ''}`}
-          onDragOver={handleDragOver}
-          onDragLeave={handleDragLeave}
-          onDrop={handleDrop}
-        >
-          {isUploading ? (
-            <>
-              <svg className="spinner" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                <path d="M21 12a9 9 0 1 1-6.219-8.56"/>
-              </svg>
-              <p>Uploading files...</p>
-            </>
-          ) : (
-            <>
-              <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
-                <polyline points="17 8 12 3 7 8"/>
-                <line x1="12" y1="3" x2="12" y2="15"/>
-              </svg>
-              <p>Drag and drop files here or</p>
-              <label className="upload-button">
-                <input 
-                  type="file" 
-                  multiple 
-                  onChange={handleFileInput}
-                  accept=".pdf"
-                  disabled={isUploading}
-                />
-                Choose files
-              </label>
-            </>
-          )}
-        </div>
-
-        {error && (
-          <div className="error-message">
-            {error}
-          </div>
+      <div 
+        className={`upload-zone ${isDragging ? 'dragging' : ''} ${isUploading ? 'uploading' : ''}`}
+        onDragOver={handleDragOver}
+        onDragLeave={handleDragLeave}
+        onDrop={handleDrop}
+      >
+        {isUploading ? (
+          <>
+            <svg className="spinner" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+              <path d="M21 12a9 9 0 1 1-6.219-8.56"/>
+            </svg>
+            <p>Uploading files...</p>
+          </>
+        ) : (
+          <>
+            <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+              <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+              <polyline points="17 8 12 3 7 8"/>
+              <line x1="12" y1="3" x2="12" y2="15"/>
+            </svg>
+            <p>Drag and drop files here or</p>
+            <label className="upload-button">
+              <input 
+                type="file" 
+                multiple 
+                onChange={handleFileInput}
+                accept=".pdf"
+                disabled={isUploading}
+              />
+              Choose files
+            </label>
+          </>
         )}
+      </div>
 
+      {error && (
+        <div className="error-message">
+          {error}
+        </div>
+      )}
+
+      <div className="documents-area scrollable-area">
         <div className="documents-list">
           {documents.map(doc => (
             <div 
