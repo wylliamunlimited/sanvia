@@ -10,12 +10,7 @@ from dependencies.firebase_dependencies import get_firestore_client
 
 def get_survey_context(survey_data: Dict) -> str:
     """Convert survey data into a structured text format for embedding."""
-    return f"""Patient Profile:
-                Age: {survey_data['Age']}
-                Gender: {survey_data['Gender']}
-                Sex: {survey_data['Sex']}
-                Height: {survey_data['Height']} cm
-                Weight: {survey_data['Weight']} kg"""
+    return f"""Patient Profile: Age: {survey_data['Age']} Gender: {survey_data['Gender']} Sex: {survey_data['Sex']} Height: {survey_data['Height']}cm Weight: {survey_data['Weight']}kg"""
 
 
 ######## ######## ######## Pausing on the Survey RAG, focusing on Document First ######### ######### #########
