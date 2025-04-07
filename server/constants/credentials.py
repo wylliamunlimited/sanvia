@@ -52,6 +52,24 @@ else:
     raise ValueError("Tavily API key is missing. Check your .env file.")
 
 
+CHROMA_DB_ACCESS_CLIENT_ID = os.getenv("CHROMA_DB_ACCESS_CLIENT_ID")
+
+if CHROMA_DB_ACCESS_CLIENT_ID:
+    print(f"✅ CHROMA_DB_ACCESS_CLIENT_ID is Detected")
+else:
+    print("❌ CHROMA_DB_ACCESS_CLIENT_ID is NOT set.")
+    raise ValueError("CHROMA DB API Client ID is missing. Check your .env file.")
+
+    
+CHROMA_DB_ACCESS_SECRET = os.getenv("CHROMA_DB_ACCESS_SECRET")
+
+if CHROMA_DB_ACCESS_SECRET:
+    print(f"✅ CHROMA_DB_ACCESS_SECRET is Detected")
+else:
+    print("❌ CHROMA_DB_ACCESS_SECRET is NOT set.")
+    raise ValueError("CHROMA DB API Client Secret is missing. Check your .env file.")
+
+
 JWT_HASH_KEY = os.getenv("JWT_HASH_KEY")
 
 if JWT_HASH_KEY:

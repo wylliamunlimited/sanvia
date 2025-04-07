@@ -3,6 +3,8 @@ from typing import TypedDict, List, Dict
 
 class AIBrain(TypedDict):
     thread_id: str ## thread id for the current conversation
+    user_id: str ## user id
+    
     prompt_chain: List[Dict[str, str]] = [{
                 "role": "system",
                 "content": (
