@@ -399,7 +399,7 @@ async def create_chat_session(
         if user["uid"] in states:
             states.pop(user["uid"])
         
-        raise HTTPException(status=400, detail=f"Chat Creation Failed, error: {e}")
+        raise HTTPException(status_code=400, detail=f"Chat Creation Failed, error: {e}")
 
 @router.get("/get-states")
 async def getStates(key: str):

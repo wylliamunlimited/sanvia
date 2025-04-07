@@ -22,7 +22,7 @@ def get_llm():
     """Return the LLM."""
     try:
         return ChatOpenAI(
-            model="gpt-4o-mini",
+            model="gpt-4o",
             temperature=0,
             api_key=OPENAI_API_KEY,
             max_retries=3,
@@ -33,47 +33,59 @@ def get_llm():
 
 
 def determine_relevance(thoughts: AIBrain) -> AIBrain:
-    """DECISION POINT FOR RELEVANCE
-
-    Description
-    -----------
-    This node is responsible for determining if user's query is regarding to health.
+    """RELEVANCE DECISION NODE
+    Determines how relevant the user's message is to health-related topics, using a float score.
 
     Parameters
     ----------
     thoughts : AIBrain
-        state of LangGraph Agent
+        LangGraph Agent state.
 
     Returns
     -------
     AIBrain
-        state of LangGraph Agent
+        Updated state with `relevance` score and `health_mode` toggle.
     """
-    
+
     thoughts["data_extraction_completed"] = False
+    session_history = thoughts.get("prompt_chain", [])
 
-    session_history = thoughts["prompt_chain"]
+    # Get the last user message for focused evaluation
+    last_user_msg = next((m["content"] for m in reversed(session_history) if m["role"] == "user"), "")
 
-    reconstructed_prompt = session_history + [
+    evaluation_prompt = session_history + [
         {
-            "role": "user",
+            "role": "system",
             "content": (
-                "Determine the relevance of the last user message to health, considering the conversation history.\n"
-                "1. If the latest message is **explicitly about health**, return a relevance score between 0.5 and 1.\n"
-                "2. If the latest message is **not health-related but follows a prior health discussion logically**, return a moderate score (0.3 - 0.6).\n"
-                "3. If the latest message is **completely unrelated to health**, return a low score (0 - 0.3).\n"
-                "4. If the latest message is a phatic expression ('hi', 'thank you', 'okay', 'how are you', etc.), return -1.\n"
-                "Return **only a decimal value between 0 and 1**, with no additional text."
-            ),
+                "You are a relevance-scoring assistant. Your task is to evaluate how related the last user message is to health topics.\n"
+                "\n"
+                "Scoring Rules:\n"
+                "1. If the latest message is **explicitly about health**, return a score between 0.5 and 1.\n"
+                "2. If it is **not health-related but logically follows a prior health conversation**, return 0.3–0.6.\n"
+                "3. If it is **completely unrelated to health**, return a score between 0 and 0.3.\n"
+                "4. If it is a polite or phatic message like 'thanks', 'okay', 'hi', etc., return -1.\n"
+                "\n"
+                "Examples:\n"
+                "'I feel dizzy in the morning' → 0.8\n"
+                "'Thanks, bye!' → -1\n"
+                "'What’s your favorite movie?' → 0.1\n"
+                "\n"
+                f"Evaluate this message: \"{last_user_msg}\"\n"
+                "\nReturn **only** the decimal score (no explanation)."
+            )
         }
     ]
 
-    decision = get_llm().invoke(reconstructed_prompt)
+    decision = get_llm().invoke(evaluation_prompt)
 
-    relevance_score = float(decision.content)
+    try:
+        relevance_score = float(decision.content.strip())
+    except ValueError:
+        relevance_score = 0.0  # fallback safety
+
     thoughts["relevance"] = relevance_score
 
-    # Track health mode
+    # Toggle health mode
     if relevance_score >= 0.5:
         thoughts["health_mode"] = True
     elif relevance_score < 0.3:
@@ -82,41 +94,46 @@ def determine_relevance(thoughts: AIBrain) -> AIBrain:
     return thoughts
 
 
+
 def respond_manner(thoughts: AIBrain) -> AIBrain:
-    """DECISION POINT FOR RESPONDING MANNER
+    """Gracefully handle polite messages with context-aware redirection."""
 
-    Description
-    -----------
-    This node is responsible for responding to polite message, like thank you or greetings.
+    # Extract last user message
+    last_user_msg = ""
+    for msg in reversed(thoughts["prompt_chain"]):
+        if msg["role"] == "user":
+            last_user_msg = msg["content"].lower()
+            break
 
-    Parameters
-    ----------
-    thoughts : AIBrain
-        state of LangGraph Agent
+    # Basic keyword logic for tailoring response type
+    if any(greet in last_user_msg for greet in ["hi", "hello", "good morning", "hey"]):
+        tone = "greeting"
+    elif any(bye in last_user_msg for bye in ["thank", "bye", "see you", "take care"]):
+        tone = "farewell"
+    else:
+        tone = "generic"
 
-    Returns
-    -------
-    AIBrain
-        state of LangGraph Agent
-    """
+    # Construct contextual system prompt
+    system_prompt = {
+        "role": "system",
+        "content": (
+            "You are a friendly, helpful assistant. If the user greeted you, greet them warmly and ask what health concern they’d like to discuss. "
+            "If they thanked you or ended the conversation, respond kindly and let them know you’re here if they need anything else. "
+            "Keep it natural, short, and respectful."
+        )
+    }
 
-    # print(f"🧠 AGENT: DECISION POINT - Responding to polite message 🧠")
+    user_prompt = {
+        "role": "user",
+        "content": f"The user just said: \"{last_user_msg}\". Respond appropriately."
+    }
 
-    tmp_prompt = thoughts["prompt_chain"] + [
-        {
-            "role": "user",
-            "content": (
-                "Ask me what I need, but consider the context and health focus."
-            ),
-        }
-    ]
-
-    ai_question = get_llm().invoke(tmp_prompt)
+    ai_response = get_llm().invoke([system_prompt, user_prompt])
 
     thoughts["prompt_chain"].append(
         {
             "role": "assistant",
-            "content": ai_question.content,
+            "content": ai_response.content,
             "references": thoughts.get("shortterm_knowledge", []),
         }
     )
@@ -126,194 +143,186 @@ def respond_manner(thoughts: AIBrain) -> AIBrain:
 
 def refocus_medicine(thoughts: AIBrain) -> AIBrain:
     """REFOCUS NODE
-    Description
-    -----------
-    This node is responsible for refocusing the LangGraph Agent to ask user to be more relevant to medicine.
+    Prompts the user to steer the conversation back toward a medically relevant topic.
 
     Parameters
     ----------
     thoughts : AIBrain
-        state of LangGraph Agent
+        State of the LangGraph Agent.
+
     Returns
     -------
     AIBrain
-        state of LangGraph Agent
+        Updated agent state.
     """
-    thoughts["prompt_chain"].append(
-        {
-            "role": "assistant",
-            "content": "Let's circle back to medicine. What specific health-related question do you have?",
-            "references": [],
-        }
-    )
 
+    refocus_prompt = {
+        "role": "assistant",
+        "content": (
+            "Let's circle back to health. What specific health-related question or concern would you like to explore?"
+        ),
+        "references": [],
+    }
+
+    thoughts["prompt_chain"].append(refocus_prompt)
     return thoughts
-
 
 def enough_info_dec_pt(thoughts: AIBrain) -> AIBrain:
-    """Decision Point for determining if there is enough information to proceed with the next steps.
+    """Early Decision Node: Check if user input and dialogue are sufficient to proceed."""
 
-    Parameters
-    ----------
-    thoughts : AIBrain
-        State of the LangGraph Agent.
+    prompt_chain = thoughts.get("prompt_chain", [])
 
-    Returns
-    -------
-    AIBrain
-        State of the LangGraph Agent.
-    """
+    def extract_recent_dialogue(chain, max_pairs=3):
+        assistant_msgs = [m["content"] for m in chain if m["role"] == "assistant" and "?" in m["content"]][-max_pairs:]
+        user_msgs = [m["content"] for m in chain if m["role"] == "user" and len(m["content"].split()) > 5][-max_pairs:]
 
-    session_history = thoughts["prompt_chain"]
-    user_messages = [
-        message_obj for message_obj in session_history if message_obj["role"] == "user"
-    ]
-    stringified_user_messages = "\n".join(
-        [message_obj["content"] for message_obj in user_messages]
-    )
-    
-    reconstructed_prompt = [
+        dialogue = []
+        for a, u in zip(assistant_msgs, user_msgs):
+            dialogue.append(f"Assistant: {a}\nUser: {u}")
+        return "\n\n".join(dialogue)
+
+    conversation_context = extract_recent_dialogue(prompt_chain)
+
+    decision_prompt = [
+        {
+            "role": "system",
+            "content": (
+                "You are a reasoning agent tasked with determining if there is enough context to begin medical summarization.\n"
+                "You must consider both the assistant's clarifying questions and the user's replies.\n"
+                "Reply with one word only: 'yes' or 'no'."
+            )
+        },
         {
             "role": "user",
             "content": (
-                stringified_user_messages
-                + "\n"
-                + "Is there enough information to proceed with a confident conclusion? "
-                "Only answer strictly (without punctuation or space) 'yes' or 'no'. "
-            ),
+                f"Conversation So Far:\n\n{conversation_context or 'None'}\n\n"
+                "Is there enough detail to proceed with a medically-informed answer?"
+            )
         }
     ]
 
-    decision = get_llm().invoke(reconstructed_prompt)
-
-    if decision.content == "yes":
-        # print("🧠 AGENT: DECISION POINT - Proceeding with the next steps 🧠")
-        thoughts["proceed"] = True
-    elif decision.content == "no":
-        # print("🧠 AGENT: DECISION POINT - Not enough information to proceed 🧠")
-        # print(f"🧠 AGENT:       Evaluated {stringified_user_messages} 🧠")
-        thoughts["proceed"] = False
-    else:
-        # print(
-        #     "🧠 AGENT: DECISION POINT - Invalid response. Defaulting to not proceed. Value: ",
-        #     decision.content,
-        #     " 🧠",
-        # )
-        thoughts["proceed"] = False
+    decision = get_llm().invoke(decision_prompt)
+    normalized = decision.content.strip().lower()
+    thoughts["proceed"] = normalized == "yes"
 
     return thoughts
+
 
 def enough_info_dec_pt_post_extract(thoughts: AIBrain) -> AIBrain:
-    """Decision Point for determining if there is enough information (After system information retrieval) to proceed with the next steps.
-
-    Parameters
-    ----------
-    thoughts : AIBrain
-        State of the LangGraph Agent.
-
-    Returns
-    -------
-    AIBrain
-        State of the LangGraph Agent.
+    """Decision Point: Assess if enough medical context has been gathered to proceed.
+    Uses patient profile, document context, and conversational history.
     """
 
-    session_history = thoughts["prompt_chain"]
-    user_messages = [
-        message_obj for message_obj in session_history if message_obj["role"] == "user"
-    ]
-    stringified_user_messages = "\n".join(
-        [message_obj["content"] for message_obj in user_messages]
-    )
-    total_content = ('User portfolio: ' +thoughts["data"]["survey_context"] + '\n' if thoughts["data"]["survey_context"] else "") + ('Documents: ' + thoughts["data"]["doc_context"] + '\n' if thoughts["data"]["doc_context"] else "") + stringified_user_messages
-    
-    reconstructed_prompt = [
+    prompt_chain = thoughts.get("prompt_chain", [])
+    survey_data = thoughts["data"].get("survey_context", "")
+    doc_data = thoughts["data"].get("doc_context", "")
+
+    # --- Collect informative user messages (skip 'yes', 'okay', etc.) ---
+    def extract_useful_user_messages(chain, min_words=6, max_messages=12):
+        return [
+            m["content"] for m in chain
+            if m["role"] == "user" and len(m["content"].split()) >= min_words
+        ][-max_messages:]
+
+    # --- Optionally include last assistant clarification question ---
+    def extract_relevant_ai_prompt(chain):
+        for m in reversed(chain):
+            if m["role"] == "assistant" and "?" in m["content"]:
+                return m["content"]
+        return ""
+
+    filtered_user_msgs = extract_useful_user_messages(prompt_chain)
+    last_ai_prompt = extract_relevant_ai_prompt(prompt_chain)
+
+    user_text = "\n".join(filtered_user_msgs)
+
+    # --- Build prompt ---
+    decision_prompt = [
+        {
+            "role": "system",
+            "content": (
+                "You are a reasoning assistant that decides whether there is enough information to provide a helpful, medically grounded insight.\n"
+                "Only respond with one word: 'yes' or 'no'. No explanations."
+            )
+        },
         {
             "role": "user",
             "content": (
-                total_content
-                + "\n"
-                + "Is there enough information to proceed with a confident conclusion? "
-                "Only answer strictly (without punctuation or space) 'yes' or 'no'. "
-            ),
+                f"Patient Profile:\n{survey_data or 'None'}\n\n"
+                f"Document Context:\n{doc_data or 'None'}\n\n"
+                f"Assistant Prompt:\n{last_ai_prompt or 'None'}\n\n"
+                f"User Responses:\n{user_text or 'None'}\n\n"
+                "Is this enough to proceed with health insight?"
+            )
         }
     ]
 
-    decision = get_llm().invoke(reconstructed_prompt)
-
-    if decision.content == "yes":
-        # print("🧠 AGENT: DECISION POINT - Proceeding with the next steps after Data Extract 🧠")
-        thoughts["proceed"] = True
-    elif decision.content == "no":
-        # print("🧠 AGENT: DECISION POINT - Not enough information to proceed after Data Extract 🧠")
-        # print(f"🧠 AGENT:       Evaluated {total_content} 🧠")
-        thoughts["proceed"] = False
-    else:
-        # print(
-        #     "🧠 AGENT: DECISION POINT - Invalid response. Defaulting to not proceed. Value: ",
-        #     decision.content,
-        #     " 🧠",
-        # )
-        thoughts["proceed"] = False
+    # --- Evaluate LLM output ---
+    decision = get_llm().invoke(decision_prompt)
+    normalized = decision.content.strip().lower()
+    thoughts["proceed"] = normalized == "yes"
 
     return thoughts
+
 
 def generate_question(thoughts: AIBrain) -> AIBrain:
     """QUESTION GENERATION NODE
-    Description
-    -----------
-    This node is responsible for generating a question to ask the user if there is not enough information to proceed.
-
-    Parameters
-    ----------
-    thoughts : AIBrain
-        state of LangGraph Agent
-
-    Returns
-    -------
-    AIBrain
-        state of LangGraph Agent
+    ---------------------------
+    Generates clarifying or follow-up questions when not enough information is present.
     """
     
-    prefix_prompt = []
-    if thoughts["data"]["survey_context"]:
-        survey = {
-            "role": "system",
-            "content": thoughts["data"]["survey_context"],
-        }
-        prefix_prompt += [survey]
+    survey_data = thoughts["data"].get("survey_context", "")
+    doc_data = thoughts["data"].get("doc_context", "")
+    prompt_chain = thoughts["prompt_chain"]
+    
+    # Ensure profile context is present in system prompt
+    if "Patient Profile:" not in prompt_chain[0].get("content", ""):
+        prompt_chain[0]["content"] += (
+            "\n\nYou must consider the patient’s profile and history in all your reasoning.\n"
+            f"Patient Profile:\n{survey_data or 'None'}"
+        )
         
-    if thoughts["data"]["doc_context"]:
-        doc = {
-            "role": "system",
-            "content": thoughts["data"]["doc_context"],
-        }
-        prefix_prompt += [doc]
-
-    tmp_prompt =  prefix_prompt + thoughts["prompt_chain"] + [
+    # Add user message context for document content
+    tmp_prompt = prompt_chain + [
         {
             "role": "user",
             "content": (
-                "Given my health context above, what other details do you need from me? Give me one question."
-            ),
+                "Below are relevant medical documents or notes for this user:\n\n"
+                f"{doc_data or 'None'}\n\n"
+                "Please use this context to guide your follow-up."
+            )
+        },
+        {
+            "role": "user",
+            "content": (
+                "If the user's last message was a quick clarification question "
+                "(e.g., 'Is that bad?', 'Should I avoid this?'), respond to it briefly "
+                "**first** (1–2 clear sentences).\n\n"
+                "Then, ask 1–3 simple follow-up questions to better understand their condition.\n"
+                "The questions should be short, friendly, and easy to understand.\n"
+                "**Highlight** the questions in bold, but do not number or bullet-point them."
+            )
         }
     ]
     
+    # Debug logging
     print()
     print(
-        f"- - - - - - - 🧠 [START] AGENT {thoughts['thread_id']}: 'Summarize' Prompt [START] 🧠 - - - - - - -\n{json.dumps(tmp_prompt, indent=4)}\n- - - - - - - 🧠 [END] AGENT {thoughts['thread_id']}: 'Summarize' Prompt [END] 🧠 - - - - - - -"
+        f"- - - - - - - 🧠 [START] AGENT {thoughts['thread_id']}: 'Generate Question' Prompt [START] 🧠 - - - - - - -\n"
+        f"{json.dumps(tmp_prompt, indent=4)}\n"
+        f"- - - - - - - 🧠 [END] AGENT {thoughts['thread_id']}: 'Generate Question' Prompt [END] 🧠 - - - - - - -"
     )
     print()
 
+    # LLM call
     ai_question = get_llm().invoke(tmp_prompt)
 
-    thoughts["prompt_chain"].append(
-        {
-            "role": "assistant",
-            "content": ai_question.content,
-            "references": thoughts.get("shortterm_knowledge", []),
-        }
-    )
-    
+    # Store assistant response
+    thoughts["prompt_chain"].append({
+        "role": "assistant",
+        "content": ai_question.content,
+        "references": thoughts.get("shortterm_knowledge", [])
+    })
 
     return thoughts
 
@@ -324,119 +333,108 @@ def generate_question(thoughts: AIBrain) -> AIBrain:
 ##                                              LLM tried to retrieve but failed
 def data_extract(thoughts: AIBrain) -> AIBrain:
     """DATA EXTRACTION NODE
-    Description
-    -----------
-    This node is responsible for searching across various system for user's health data.
-
-    Parameters
-    ----------
-    thoughts : AIBrain
-        state of LangGraph Agent
-
-    Returns
-    -------
-    AIBrain
-        state of LangGraph Agent
+    ------------------------
+    Searches internal systems (Firestore, ChromaDB) for the user's health data and stores relevant context in the agent's state.
     """
-    # Get user's documents from Firestore
-    db = get_firestore_client()
-    user_id = thoughts.get('user_id')
-    if not user_id:
-        print(f"User ID is not present -> {user_id}")
-        raise 
     
-    survey_data = get_profile(user_id=user_id)
+    user_id = thoughts.get("user_id")
 
-    # Get survey data context
-    survey_context = get_survey_context(survey_data=survey_data) ## stringified survey content
+    if not user_id:
+        raise ValueError("🧠 User ID missing from thoughts.")
+    
+    # Retrieve profile data and convert into usable string context
+    survey_data = get_profile(user_id=user_id)
+    survey_context = get_survey_context(survey_data=survey_data)
     if survey_context:
         thoughts["data"]["survey_context"] = survey_context
     
-    # Get last message
-    last_mess_content = thoughts["prompt_chain"][-1]["content"]
+    # Use latest user input to query document knowledge
+    last_message = thoughts["prompt_chain"][-1].get("content", "")
+    relevant_docs = query_docs_from_chroma(prompt=last_message, premise={"user_id": user_id})
     
-    # Get top 5 relevant document data from last message 
-    relevant_docs = query_docs_from_chroma(
-        prompt=last_mess_content,
-        premise={
-            "user_id": user_id
-        }
-    )
-    
-    # Flatten content of queried documents
-    content = ' '.join([doc[0] for doc in relevant_docs["documents"]])
-    if len(content.strip()) > 0:
-        thoughts["data"]["doc_context"] = content
-        
-    # print(f" ===LANGGRAPH=== Doc Data: {thoughts['data']['doc_context']}")
-        
-        
-    # print(
-    #     f"- - - - - - - 🧠 [START] AGENT {thoughts['thread_id']}: context [START] 🧠 - - - - - - -\n{json.dumps(thoughts['data'])}\n- - - - - - - 🧠 [END] AGENT {thoughts['thread_id']}: context [END] 🧠 - - - - - - -"
-    # )
+    # Join flattened text chunks into a single context string
+    doc_content = " ".join([doc[0] for doc in relevant_docs.get("documents", [])])
+    if doc_content.strip():
+        thoughts["data"]["doc_context"] = doc_content
 
     return thoughts
 
 
 def knowledge_gathering(thoughts: AIBrain) -> AIBrain:
-    """INFORMATION GATHERING NODE
-
-    Description
-    -----------
-    This node is responsible for gathering information from the internet to enrich the LangGraph Agent's knowledge base.
-
-    Parameters
-    ----------
-    thoughts : AIBrain
-        state of LangGraph Agent
-
-    Returns
-    -------
-    AIBrain
-        state of LangGraph Agent
+    """
+    INFORMATION GATHERING NODE
+    ---------------------------
+    Uses the conversation history to generate a search query and category, then enriches the agent's short-term memory
+    with Tavily-powered knowledge lookup.
     """
 
-    search_prompt = get_llm().invoke(
-        thoughts["prompt_chain"]
-        + [
+    thread_id = thoughts.get("thread_id", "UNKNOWN")
+    prompt_chain = thoughts.get("prompt_chain", [])
+
+    # Generate a concise search query from the conversation
+    query_response = get_llm().invoke(
+        prompt_chain + [
             {
                 "role": "user",
                 "content": (
                     "Summarize the key points into a search query with a maximum of 400 characters. "
                     "This query will be used to search for relevant information on the internet."
-                ),
+                )
             }
         ]
     )
+    
+    search_query = query_response.content.strip()
+    if not search_query:
+        print(f"❌ [thread {thread_id}] No search query generated.")
+        return thoughts
 
-    search_category = get_llm().invoke(
-        thoughts["prompt_chain"]
-        + [
+    # Classify the category of the query
+    category_response = get_llm().invoke(
+        prompt_chain + [
             {
                 "role": "user",
                 "content": (
                     "Determine the category of the search query. "
                     "Strictly respond with one of the following categories: 'diagnosis', 'next_steps', 'research_papers'."
-                ),
+                )
             }
         ]
     )
+    
+    search_category = category_response.content.strip().lower()
+    if search_category not in ["diagnosis", "next_steps", "research_papers"]:
+        print(f"❌ [thread {thread_id}] Invalid search category: {search_category}")
+        return thoughts
+
+    print(f"🌐 [thread {thread_id}] Query: {search_query}")
+    print(f"📂 [thread {thread_id}] Category: {search_category}")
+
 
     # print(f"AGENT: search metadata => {search_prompt.content}, {search_category.content}")
 
-    search_result = tavily_intense_search(
-        query=search_prompt.content, search_category=search_category.content
-    )
+    # Perform external search
+    try:
+        search_result = tavily_intense_search(
+            query=search_query, search_category=search_category
+        )
+    except Exception as e:
+        print(f"❌ [thread {thread_id}] Tavily search failed: {e}")
+        return thoughts
 
-    thoughts["knowledge"] += search_result["results"]
-    thoughts["shortterm_knowledge"] = search_result["results"]
+    results = search_result.get("results", [])
 
-    print()
+
+    # Save into thoughts
+    thoughts["knowledge"] += results
+    thoughts["shortterm_knowledge"] = results
+
     print(
-        f"- - - - - - - 🧠 [START] AGENT {thoughts['thread_id']}: knowledge - {search_category} [START] 🧠 - - - - - - -\n{json.dumps(thoughts['knowledge'], indent=4)}\n- - - - - - - 🧠 [END] AGENT {thoughts['thread_id']}: knowledge - {search_category} [END] 🧠 - - - - - - -"
+        f"\n- - - - - - - 🧠 [START] AGENT {thread_id}: knowledge - {search_category} 🧠 - - - - - - -\n"
+        f"{json.dumps(results, indent=4)}\n"
+        f"- - - - - - - 🧠 [END] AGENT {thread_id}: knowledge - {search_category} 🧠 - - - - - - -\n"
     )
-    print()
-    # print(f"AGENT: shortterm_knowledge ==> {thoughts['shortterm_knowledge']}")
+
     return thoughts
 
 
@@ -453,90 +451,87 @@ def summarize(thoughts: AIBrain) -> AIBrain:
     AIBrain
         state of LangGraph Agent
     """
-    # Get relevant chunks from data
-    doc_context = thoughts.get("data", {}).get("doc_context")
-    survey_context = thoughts.get("data", {}).get("survey_context")
+    
+    # Get user context
+    survey_data = thoughts["data"].get("survey_context", "")
+    doc_data = thoughts["data"].get("doc_context", "")
+    knowledge_data = thoughts.get("knowledge", [])
+    chunk_context = thoughts["data"].get("chunk_context", "")
 
-    # Add survey context if available
-    if survey_context:
-        chunk_context = f"[PATIENT PROFILE]\n{survey_context}\n\n[RELEVANT DOCUMENTS]\n{doc_context}"
+    # Append structured patient profile to the last user-facing instruction
+    processed_prompt_chain = thoughts["prompt_chain"]
+    processed_prompt_chain[0]["content"] += (
+        "\n\nYou must consider the patient’s profile and history in all your reasoning.\n"
+        f"Patient Profile:\n{survey_data or 'None'}"
+    )
 
-    ## APPENDING RESEARCH RESULT INTO PROMPT
-    if thoughts["knowledge"] == [] and not chunk_context:
-        print(f"🧠 no knowledge is included")
-        prompt = thoughts["prompt_chain"] + [
-            {
-                "role": "user",
-                "content": (
-                    "**MUST EXPLAIN EVERYTHING IN GENERALIZED PHRASES**, like 'people with [user's health context] are also struggling with [your proposed conclusion]' or similar"
-                    "Respond in sections: an explanation of what this means in context, what user should look out for (symptoms, potential diagnosis, next steps, if any), and side notes (if any)."
-                ),
-            }
-        ]
+    # RAG + Doc context section
+    knowledge_context = "\n\n".join(
+        f"{k['content']} (Source: {k['title']})" for k in knowledge_data
+    ) if knowledge_data else ""
+
+    doc_context_block = f"[User's Medical Documents]\n{doc_data or 'None'}\n[End of User's Medical Documents]"
+    knowledge_block = f"[BEGIN OF KNOWLEDGE]\n{knowledge_context}\n[END OF KNOWLEDGE]" if knowledge_context else ""
+
+    if not knowledge_context and not chunk_context:
+        print("🧠 No knowledge is included")
+        user_instruction = (
+            "**MUST EXPLAIN EVERYTHING IN GENERALIZED PHRASES**, like "
+            "'people with [user's health context] are also struggling with [your proposed conclusion]' or similar.\n\n"
+            "Respond in sections:\n"
+            "1. Explanation of what this means in context\n"
+            "2. What user should look out for (symptoms, potential diagnosis, next steps)\n"
+            "3. Side notes (if any)"
+        )
     else:
-        if not chunk_context:
-            chunk_context = ""
-        # Combine external knowledge with document chunks
-        knowledge_context = (
-            "\n\n".join(
-                [
-                    search_["content"] + " Title: " + search_["title"]
-                    for search_ in thoughts["knowledge"]
-                ]
-            )
-            if thoughts["knowledge"]
-            else ""
+        user_instruction = (
+            "Based on the information I provided, please summarize the key points and provide any relevant insights or recommendations.\n\n"
+            f"{doc_context_block}\n\n"
+            f"{knowledge_block}\n\n"
+            "Summarize the information and use phrases like 'according to [insert source title]' to indicate the source of the information. "
+            "**MUST EXPLAIN EVERYTHING IN GENERALIZED PHRASES SO YOU ARE NOT GIVING SPECIFIC MEDICAL DECISIONS**, like "
+            "'people with [user's health context] are also struggling with [your proposed conclusion]' or similar.\n\n"
+            "Respond in sections:\n"
+            "1. Explanation of what this means in context\n"
+            "2. What user should look out for (symptoms, potential diagnosis, next steps)\n"
+            "3. Side notes (if any)"
+            "You can highlight or bold phrases if they are keywords, like medical terminology."
         )
 
-        prompt = thoughts["prompt_chain"] + [
-            {
-                "role": "user",
-                "content": (
-                    "Based on the information I provided, please summarize the key points and provide "
-                    "any relevant insights or recommendations. "
-                    "Reference the information here:\n\n"
-                    + (
-                        f"[BEGIN OF DOCUMENT CHUNKS]\n{chunk_context}\n[END OF DOCUMENT CHUNKS]\n\n"
-                        if chunk_context
-                        else ""
-                    )
-                    + (
-                        f"[BEGIN OF KNOWLEDGE]\n{knowledge_context}\n[END OF KNOWLEDGE]\n\n"
-                        if knowledge_context
-                        else ""
-                    )
-                    + "Summarize the information and use phrases like 'according to [insert source title]' to indicate the source of the information. "
-                    "**MUST EXPLAIN EVERYTHING IN GENERALIZED PHRASES**, like 'people with [user's health context] are also struggling with [your proposed conclusion]' or similar"
-                    "Respond in sections: an explanation of what this means in context, what user should look out for (symptoms, potential diagnosis, next steps, if any), and side notes (if any)."
-                ),
-            }
-        ]
+    # Append the new user instruction
+    prompt = processed_prompt_chain + [{"role": "user", "content": user_instruction}]
 
     print()
     print(
-        f"- - - - - - - 🧠 [START] AGENT {thoughts['thread_id']}: 'Summarize' Prompt [START] 🧠 - - - - - - -\n{json.dumps(prompt, indent=4)}\n- - - - - - - 🧠 [END] AGENT {thoughts['thread_id']}: 'Summarize' Prompt [END] 🧠 - - - - - - -"
+        f"- - - - - - - 🧠 [START] AGENT {thoughts['thread_id']}: 'Summarize' Prompt [START] 🧠 - - - - - - -\n"
+        f"{json.dumps(prompt, indent=4)}\n"
+        f"- - - - - - - 🧠 [END] AGENT {thoughts['thread_id']}: 'Summarize' Prompt [END] 🧠 - - - - - - -"
     )
     print()
 
-    ## COUNTING THE NUMBER OF TOKENS FOR LOGGING
+    # === TOKEN COUNT ESTIMATION ===
     token_count = (
-        len(" ".join([pt["content"] for pt in prompt]).split(" ")) / 1500.0
+        len(" ".join([pt["content"] for pt in prompt]).split()) / 1500.0
     ) * 2048
+    print(f" 🧠 ===OPENAI=== Token Count Estimate: {token_count:.2f} 🧠 ")
 
-    print(f" 🧠 ===OPENAI=== Token Count Estimate: {token_count} 🧠 ")
+    # === GET AI RESPONSE ===
+    try:
+        final_response = get_llm().invoke(prompt)
+    except Exception as e:
+        print(f"❌ Error invoking LLM in 'Summarize' node: {e}")
+        raise
 
-    ## GET AI RESPONSE
-    final_response = get_llm().invoke(prompt)
-
+    # === FORMAT RESPONSE INTO CHAIN ===
     prompt_chain_ai_obj = {
         "role": "assistant",
         "content": final_response.content,
-        "references": thoughts["shortterm_knowledge"],
-        "data": thoughts["data"]
+        "references": thoughts.get("shortterm_knowledge", []),
+        "data": thoughts.get("data", {}),
     }
 
-    ## adding the response to the chain too
     thoughts["prompt_chain"].append(prompt_chain_ai_obj)
+
     return thoughts
 
 
@@ -556,47 +551,29 @@ def initializeGraph(with_state: bool = True, prompt_chain: list = [], user_id: s
         the state of LangGraph, one for each chat / thread
     """
 
-    # init_state = AIBrain(
-    #     prompt_chain=[{
-    #             "role": "system",
-    #             "content": (
-    #                 "You are a medical assistant, but not a licensed medical professional. "
-    #                 "You will provide insights based on the information and any patient data you have gathered. "
-    #                 "You will not provide any explicit medical advice or diagnosis, but you can talk about the generic knowledge related to the prompt. " ## NEED FURTHER TUNING
-    #             )
-    #         }],
-    #     data={},
-    #     risk_level=0,
-    #     knowledge=[],
-    #     category_focus=None
-    # )
-
     memory = MemorySaver()
-    # print(f"Initializing with user {user_id}")
+    
     
     if with_state:
+        # Initialize assistant prompt
+        default_prompt = [
+            {
+                "role": "system",
+                "content": (
+                    "You are a kind, helpful health assistant. You are not a licensed medical professional and cannot give direct medical advice, but you can provide insights based on provided health records and user responses. "
+                    "If you do not have enough information to give useful insight, you will ask the user 1–3 follow-up questions to gather it. Always write your questions in **simple, easy-to-understand language** suitable for someone without medical training. "
+                    "You may highlight or bold the phrases (particularly questions or key terminology) for readability. "
+                    "If the user’s last message contains a **quick clarification question** (e.g., “Does that mean it’s the milk?”, “Should I be worried about that?”), respond to that in 1–2 brief, clear sentences **first**, then continue asking follow-up questions afterward — all in the same message. "
+                    "Do not repeat questions the user has already answered. Your goal is to keep the conversation helpful, informative, and easy to follow."
+                ),
+            }
+        ]
+
         state = AIBrain(
             thread_id="",
-            user_id=user_id, ## only needed when with_state is True
-            prompt_chain=(
-                [
-                    {
-                        "role": "system",
-                        "content": (
-                            "You are a medical assistant, but not a licensed medical professional. "
-                            "You will provide insights but not direct diagnosis, based on the information and any patient data you have gathered. "
-                            "You will ask question about users' condition if you need more information for judgements. You always ask more questions if you need more information. "
-                            "You will response in the format of suspected condition, next steps, and disclaimers that clarify you are not diagnosing."
-                        ),
-                    }
-                ]
-                if prompt_chain == []
-                else prompt_chain
-            ),
-            data={
-                "survey_context": "",
-                "doc_context": ""
-                },
+            user_id=user_id,
+            prompt_chain=prompt_chain if prompt_chain else default_prompt,
+            data={"survey_context": "", "doc_context": ""},
             risk_level=0,
             knowledge=[],
             relevance=0,
@@ -606,87 +583,55 @@ def initializeGraph(with_state: bool = True, prompt_chain: list = [], user_id: s
             needs_documents=False,
         )
 
+    # Setup graph
     workflow = StateGraph(AIBrain)
-
-    # workflow.add_node("risk_assessment")
     workflow.add_node("determine_relevance", determine_relevance)
     workflow.add_node("refocus_medicine", refocus_medicine)
     workflow.add_node("summarize", summarize)
-    
-    workflow.add_node("enough_info_dec_pt", enough_info_dec_pt) ## simply evaluate if it has enough information
-    workflow.add_node("enough_info_dec_pt_post_extract", enough_info_dec_pt_post_extract) ## evaluate if it has enough information AFTER DATA EXTRACTION
-    
+    workflow.add_node("enough_info_dec_pt", enough_info_dec_pt)
+    workflow.add_node("enough_info_dec_pt_post_extract", enough_info_dec_pt_post_extract)
     workflow.add_node("generate_question", generate_question)
     workflow.add_node("knowledge_gathering", knowledge_gathering)
     workflow.add_node("respond_manner", respond_manner)
     workflow.add_node("data_extract", data_extract)
 
+    # Conditional decision functions
     def enough_user_provided_info_conditional(thoughts: AIBrain) -> str:
-        """Decision Point for determining if user provided enough information to proceed with the next steps."""
-        if not thoughts["proceed"]:
-            return "data_extract" ## Scrape from what we have
-        else:
-            return "knowledge_gathering" ## Enrich knowledge
-        
-    def enough_scraped_info_conditional(thoughts: AIBrain) -> str:
-        """Decision Point for determining if scraped information provided enough information to proceed with next steps."""
-        if not thoughts["proceed"]:
-            return "generate_question" ## Nothing we could find, ask question
-        else:
-            return "knowledge_gathering" ## Enrich knowledge
+        return "data_extract" if not thoughts["proceed"] else "knowledge_gathering"
 
+    def enough_scraped_info_conditional(thoughts: AIBrain) -> str:
+        return "generate_question" if not thoughts["proceed"] else "knowledge_gathering"
 
     def discussion_relevance_conditional(thoughts: AIBrain) -> str:
-        """Decision Point for determining if the discussion is relevant to medicine."""
         if thoughts["relevance"] == -1.0:
-            return "respond_manner"  # Handle greetings or thank you messages
+            return "respond_manner"
         elif thoughts["relevance"] < 0.5:
             return "refocus_medicine"
-        else:
-            return "enough_info_dec_pt"  # Proceed to check for enough information
+        return "enough_info_dec_pt"
 
-
+    # Add workflow edges
     workflow.add_edge(START, "determine_relevance")
-    
-    
-    workflow.add_conditional_edges(
-        "enough_info_dec_pt",
-        enough_user_provided_info_conditional,
-        [
-            "data_extract",
-            "knowledge_gathering"
-        ]
-    )
-    
-    workflow.add_conditional_edges(
-        "enough_info_dec_pt_post_extract",
-        enough_scraped_info_conditional,
-        [
-            "generate_question",
-            "knowledge_gathering"
-        ]
-    )
-    
     workflow.add_edge("data_extract", "enough_info_dec_pt_post_extract")
     workflow.add_edge("knowledge_gathering", "summarize")
+
     workflow.add_conditional_edges(
         "determine_relevance",
         discussion_relevance_conditional,
-        [
-            "refocus_medicine",
-            "enough_info_dec_pt",
-            "respond_manner",
-        ],
+        ["refocus_medicine", "enough_info_dec_pt", "respond_manner"]
+    )
+    workflow.add_conditional_edges(
+        "enough_info_dec_pt",
+        enough_user_provided_info_conditional,
+        ["data_extract", "knowledge_gathering"]
+    )
+    workflow.add_conditional_edges(
+        "enough_info_dec_pt_post_extract",
+        enough_scraped_info_conditional,
+        ["generate_question", "knowledge_gathering"]
     )
 
-    # workflow.set_entry_point("summarize")
-
     app = workflow.compile(checkpointer=memory)
-    if with_state:
-        # print(f"Initialized with state ==> {state}")
-        return app, state
-    else:
-        return app
+    return (app, state) if with_state else app
 
 
 def trigger_response(graph, user_state: AIBrain) -> AIBrain:
