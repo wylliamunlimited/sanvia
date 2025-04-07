@@ -223,43 +223,54 @@ def enough_info_dec_pt_post_extract(thoughts: AIBrain) -> AIBrain:
         State of the LangGraph Agent.
     """
 
-    session_history = thoughts["prompt_chain"]
-    user_messages = [
-        message_obj for message_obj in session_history if message_obj["role"] == "user"
-    ]
-    stringified_user_messages = "\n".join(
-        [message_obj["content"] for message_obj in user_messages]
-    )
-    total_content = ('User portfolio: ' +thoughts["data"]["survey_context"] + '\n' if thoughts["data"]["survey_context"] else "") + ('Documents: ' + thoughts["data"]["doc_context"] + '\n' if thoughts["data"]["doc_context"] else "") + stringified_user_messages
-    
-    reconstructed_prompt = [
+    prompt_chain = thoughts.get("prompt_chain", [])
+    survey_data = thoughts["data"].get("survey_context", "")
+    doc_data = thoughts["data"].get("doc_context", "")
+
+    # --- Collect informative user messages (skip 'yes', 'okay', etc.) ---
+    def extract_useful_user_messages(chain, min_words=6, max_messages=12):
+        return [
+            m["content"] for m in chain
+            if m["role"] == "user" and len(m["content"].split()) >= min_words
+        ][-max_messages:]
+
+    # --- Optionally include last assistant clarification question ---
+    def extract_relevant_ai_prompt(chain):
+        for m in reversed(chain):
+            if m["role"] == "assistant" and "?" in m["content"]:
+                return m["content"]
+        return ""
+
+    filtered_user_msgs = extract_useful_user_messages(prompt_chain)
+    last_ai_prompt = extract_relevant_ai_prompt(prompt_chain)
+
+    user_text = "\n".join(filtered_user_msgs)
+
+    # --- Build prompt ---
+    decision_prompt = [
+        {
+            "role": "system",
+            "content": (
+                "You are a reasoning assistant that decides whether there is enough information to provide a helpful, medically grounded insight.\n"
+                "Only respond with one word: 'yes' or 'no'. No explanations."
+            )
+        },
         {
             "role": "user",
             "content": (
-                total_content
-                + "\n"
-                + "Is there enough information to proceed with a confident conclusion? "
-                "Only answer strictly (without punctuation or space) 'yes' or 'no'. "
-            ),
+                f"Patient Profile:\n{survey_data or 'None'}\n\n"
+                f"Document Context:\n{doc_data or 'None'}\n\n"
+                f"Assistant Prompt:\n{last_ai_prompt or 'None'}\n\n"
+                f"User Responses:\n{user_text or 'None'}\n\n"
+                "Is this enough to proceed with health insight?"
+            )
         }
     ]
 
-    decision = get_llm().invoke(reconstructed_prompt)
-
-    if decision.content == "yes":
-        # print("🧠 AGENT: DECISION POINT - Proceeding with the next steps after Data Extract 🧠")
-        thoughts["proceed"] = True
-    elif decision.content == "no":
-        # print("🧠 AGENT: DECISION POINT - Not enough information to proceed after Data Extract 🧠")
-        # print(f"🧠 AGENT:       Evaluated {total_content} 🧠")
-        thoughts["proceed"] = False
-    else:
-        # print(
-        #     "🧠 AGENT: DECISION POINT - Invalid response. Defaulting to not proceed. Value: ",
-        #     decision.content,
-        #     " 🧠",
-        # )
-        thoughts["proceed"] = False
+    # --- Evaluate LLM output ---
+    decision = get_llm().invoke(decision_prompt)
+    normalized = decision.content.strip().lower()
+    thoughts["proceed"] = normalized == "yes"
 
     return thoughts
 
@@ -312,12 +323,6 @@ def enough_info_dec_pt_post_extract(thoughts: AIBrain) -> AIBrain:
             )
         }
     ]
-    
-    print()
-    print(
-        f"- - - - - - - 🧠 [START] AGENT {thoughts['thread_id']}: 'Summarize' Prompt [START] 🧠 - - - - - - -\n{json.dumps(tmp_prompt, indent=4)}\n- - - - - - - 🧠 [END] AGENT {thoughts['thread_id']}: 'Summarize' Prompt [END] 🧠 - - - - - - -"
-    )
-    print()
 
     # --- Evaluate LLM output ---
     decision = get_llm().invoke(decision_prompt)
