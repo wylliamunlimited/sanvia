@@ -8,7 +8,6 @@ sys.path.insert(2, "../constants")
 from fastapi import APIRouter, Depends, HTTPException
 from typing import Annotated
 import requests
-from firebase_admin import auth
 from dependencies.firebase_dependencies import (
     get_firebase_user_from_token,
     update_survey_entry,
@@ -17,7 +16,6 @@ from dependencies.firebase_dependencies import (
     get_profile,
 )
 from constants.firestore_obj import Survey
-from dependencies.survey_rag import store_survey_embeddings
 
 router = APIRouter()
 

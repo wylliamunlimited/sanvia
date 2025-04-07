@@ -1,7 +1,5 @@
 from typing import List, Annotated
 import sys
-import json
-from dask.dataframe.dask_expr._categorical import Categorize
 
 # caution: path[0] is reserved for script path (or '' in REPL)
 sys.path.insert(1, "../dependencies")
@@ -138,6 +136,8 @@ async def upload_document(
             content=extracted_text,
             metadata=prechroma_metadata
         )
+        
+        print(f"====CHROMA==== Document uploaded: {_ids}")
         
         ########### ########### [END] RAG [END] ########### ###########
 
