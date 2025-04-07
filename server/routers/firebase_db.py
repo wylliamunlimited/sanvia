@@ -84,7 +84,7 @@ async def get_user_profile(
             status_code=500,
             detail="Failed to retrieve user profile. Please try again later.",
         )
-
+        
 @router.get("/firestore-health")
 async def health_check():
     """Checks the connection to Firebase Auth and Firestore."""
