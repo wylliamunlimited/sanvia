@@ -39,14 +39,16 @@ api.interceptors.request.use((config) => {
 });
 
 export const firestoreApi = {
-    uploadProfile: async (age: string, gender: string, sex: string, height: string, weight: string): Promise<any> => {
+    uploadProfile: async (age: string, gender: string, sex: string, height: string, weight: string, conditions: string[], medications: []): Promise<any> => {
         try {
             const response = await api.post<any>('/survey', { 
                 "age": age,
                 "gender": gender,
                 "sex": sex,
                 "height": height,
-                "weight": weight
+                "weight": weight,
+                "conditions": conditions,
+                "medications": medications
             });
             return response.data;
         } catch (error) {

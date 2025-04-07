@@ -24,23 +24,21 @@ router = APIRouter()
 async def submit_survey(
     user: Annotated[dict, Depends(get_firebase_user_from_token)], survey_data: dict
 ):
-    """Submits or updates a user's survey entry in Firestore and processes it with RAG."""
-    try:
-        # Create Survey object
-        survey = Survey(
-            age=survey_data["age"],
-            gender=survey_data["gender"],
-            sex=survey_data["sex"],
-            height=survey_data["height"],
-            weight=survey_data["weight"],
+    """Submits or updates a user's survey entry in Firestore."""
+    try: 
+        update_survey_entry(user["uid"], Survey(
+            age=survey_data['age'], gender=survey_data['gender'], sex=survey_data['sex'], height=survey_data['height'], 
+            weight=survey_data['weight'], conditions=survey_data['conditions'], medications=survey_data['medications'],
+        ))
+        return {"msg": "Survey updated successfully"}
+    except KeyError as ke:
+        raise HTTPException(
+            status_code=400, detail=("Invalid survey data format. Required Fields: age, "
+                                     "gender, sex, height, weight, conditions, medications."
+                                     "Please pass them in using JSON.")
         )
-
-        # Update survey in Firestore
-        update_survey_entry(user["uid"], survey)
-
-        print(f"✅ Survey data processed and stored for user {user['uid']}")
-        return {"msg": "Survey updated and processed successfully"}
     except Exception as e:
+        print(f"❌ Error submitting survey: {str(e)}")
         raise HTTPException(
             status_code=400, detail=f"Survey data upload failed: {str(e)}"
         )
@@ -54,14 +52,13 @@ async def upload_names(
 ):
     """Upload user's first & last name in Firestore."""
     try:
-        update_name_entry(
-            user_id=user["uid"], first_name=first_name, last_name=last_name
-        )
-        print(user["uid"])
+        update_name_entry(user_id=user['uid'], first_name=first_name, last_name=last_name)
         return {"msg": "Names updated successfully"}
     except Exception as e:
-        raise HTTPException(status_code=400, detail=f"name data upload failed.")
-
+        print(f"❌ Error uploading names: {str(e)}")
+        raise HTTPException(
+            status_code=400, detail=f"name data upload failed."
+        )
 
 @router.get("/get-profile")
 async def get_user_profile(

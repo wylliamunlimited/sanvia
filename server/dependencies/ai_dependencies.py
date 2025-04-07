@@ -46,6 +46,8 @@ def determine_relevance(thoughts: AIBrain) -> AIBrain:
     AIBrain
         Updated state with `relevance` score and `health_mode` toggle.
     """
+    
+    thoughts["data_extraction_completed"] = False
 
     thoughts["data_extraction_completed"] = False
     session_history = thoughts.get("prompt_chain", [])
@@ -175,7 +177,6 @@ def enough_info_dec_pt(thoughts: AIBrain) -> AIBrain:
     def extract_recent_dialogue(chain, max_pairs=3):
         assistant_msgs = [m["content"] for m in chain if m["role"] == "assistant" and "?" in m["content"]][-max_pairs:]
         user_msgs = [m["content"] for m in chain if m["role"] == "user" and len(m["content"].split()) > 5][-max_pairs:]
-
         dialogue = []
         for a, u in zip(assistant_msgs, user_msgs):
             dialogue.append(f"Assistant: {a}\nUser: {u}")
@@ -205,8 +206,62 @@ def enough_info_dec_pt(thoughts: AIBrain) -> AIBrain:
     normalized = decision.content.strip().lower()
     thoughts["proceed"] = normalized == "yes"
 
+
     return thoughts
 
+def enough_info_dec_pt_post_extract(thoughts: AIBrain) -> AIBrain:
+    """Decision Point for determining if there is enough information (After system information retrieval) to proceed with the next steps.
+
+    Parameters
+    ----------
+    thoughts : AIBrain
+        State of the LangGraph Agent.
+
+    Returns
+    -------
+    AIBrain
+        State of the LangGraph Agent.
+    """
+
+    session_history = thoughts["prompt_chain"]
+    user_messages = [
+        message_obj for message_obj in session_history if message_obj["role"] == "user"
+    ]
+    stringified_user_messages = "\n".join(
+        [message_obj["content"] for message_obj in user_messages]
+    )
+    total_content = ('User portfolio: ' +thoughts["data"]["survey_context"] + '\n' if thoughts["data"]["survey_context"] else "") + ('Documents: ' + thoughts["data"]["doc_context"] + '\n' if thoughts["data"]["doc_context"] else "") + stringified_user_messages
+    
+    reconstructed_prompt = [
+        {
+            "role": "user",
+            "content": (
+                total_content
+                + "\n"
+                + "Is there enough information to proceed with a confident conclusion? "
+                "Only answer strictly (without punctuation or space) 'yes' or 'no'. "
+            ),
+        }
+    ]
+
+    decision = get_llm().invoke(reconstructed_prompt)
+
+    if decision.content == "yes":
+        # print("🧠 AGENT: DECISION POINT - Proceeding with the next steps after Data Extract 🧠")
+        thoughts["proceed"] = True
+    elif decision.content == "no":
+        # print("🧠 AGENT: DECISION POINT - Not enough information to proceed after Data Extract 🧠")
+        # print(f"🧠 AGENT:       Evaluated {total_content} 🧠")
+        thoughts["proceed"] = False
+    else:
+        # print(
+        #     "🧠 AGENT: DECISION POINT - Invalid response. Defaulting to not proceed. Value: ",
+        #     decision.content,
+        #     " 🧠",
+        # )
+        thoughts["proceed"] = False
+
+    return thoughts
 
 def enough_info_dec_pt_post_extract(thoughts: AIBrain) -> AIBrain:
     """Decision Point: Assess if enough medical context has been gathered to proceed.
@@ -216,6 +271,7 @@ def enough_info_dec_pt_post_extract(thoughts: AIBrain) -> AIBrain:
     prompt_chain = thoughts.get("prompt_chain", [])
     survey_data = thoughts["data"].get("survey_context", "")
     doc_data = thoughts["data"].get("doc_context", "")
+
 
     # --- Collect informative user messages (skip 'yes', 'okay', etc.) ---
     def extract_useful_user_messages(chain, min_words=6, max_messages=12):
@@ -256,6 +312,12 @@ def enough_info_dec_pt_post_extract(thoughts: AIBrain) -> AIBrain:
             )
         }
     ]
+    
+    print()
+    print(
+        f"- - - - - - - 🧠 [START] AGENT {thoughts['thread_id']}: 'Summarize' Prompt [START] 🧠 - - - - - - -\n{json.dumps(tmp_prompt, indent=4)}\n- - - - - - - 🧠 [END] AGENT {thoughts['thread_id']}: 'Summarize' Prompt [END] 🧠 - - - - - - -"
+    )
+    print()
 
     # --- Evaluate LLM output ---
     decision = get_llm().invoke(decision_prompt)
@@ -325,6 +387,7 @@ def generate_question(thoughts: AIBrain) -> AIBrain:
     })
 
     return thoughts
+
 
 ## IMPORTANT: this data extraction is conditional, depending on what is in "data" and what the user is asking
 ## there is also foundational data needed, so another separate logic is to find out which foundational data
@@ -514,7 +577,7 @@ def summarize(thoughts: AIBrain) -> AIBrain:
         len(" ".join([pt["content"] for pt in prompt]).split()) / 1500.0
     ) * 2048
     print(f" 🧠 ===OPENAI=== Token Count Estimate: {token_count:.2f} 🧠 ")
-
+    
     # === GET AI RESPONSE ===
     try:
         final_response = get_llm().invoke(prompt)
@@ -553,7 +616,6 @@ def initializeGraph(with_state: bool = True, prompt_chain: list = [], user_id: s
 
     memory = MemorySaver()
     
-    
     if with_state:
         # Initialize assistant prompt
         default_prompt = [
@@ -590,6 +652,7 @@ def initializeGraph(with_state: bool = True, prompt_chain: list = [], user_id: s
     workflow.add_node("summarize", summarize)
     workflow.add_node("enough_info_dec_pt", enough_info_dec_pt)
     workflow.add_node("enough_info_dec_pt_post_extract", enough_info_dec_pt_post_extract)
+
     workflow.add_node("generate_question", generate_question)
     workflow.add_node("knowledge_gathering", knowledge_gathering)
     workflow.add_node("respond_manner", respond_manner)
