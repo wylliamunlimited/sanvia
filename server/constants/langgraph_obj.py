@@ -3,6 +3,8 @@ from typing import TypedDict, List, Dict
 
 class AIBrain(TypedDict):
     thread_id: str ## thread id for the current conversation
+    user_id: str ## user id
+    
     prompt_chain: List[Dict[str, str]] = [{
                 "role": "system",
                 "content": (
@@ -13,9 +15,6 @@ class AIBrain(TypedDict):
                     # "You will not provide any explicit medical advice or diagnosis, but you can talk about the generic knowledge related to the prompt. " ## NEED FURTHER TUNING
                 )
             }] ## list of prompt chain
-    
-    ## Data Extracted
-    data_extraction_completed: bool = False
     
     ## Personal Data
     data: Dict[str, Dict] ## user data

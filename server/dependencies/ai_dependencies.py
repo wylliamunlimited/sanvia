@@ -5,6 +5,7 @@ sys.path.insert(1, "../dependencies")
 sys.path.insert(2, "../constants")
 
 import json
+from fastapi import HTTPException
 from langchain_openai import ChatOpenAI
 from constants.credentials import OPENAI_API_KEY
 from constants.langgraph_obj import AIBrain
@@ -99,7 +100,7 @@ def respond_manner(thoughts: AIBrain) -> AIBrain:
         state of LangGraph Agent
     """
 
-    print(f"🧠 AGENT: DECISION POINT - Responding to polite message 🧠")
+    # print(f"🧠 AGENT: DECISION POINT - Responding to polite message 🧠")
 
     tmp_prompt = thoughts["prompt_chain"] + [
         {
@@ -167,17 +168,17 @@ def enough_info_dec_pt(thoughts: AIBrain) -> AIBrain:
     user_messages = [
         message_obj for message_obj in session_history if message_obj["role"] == "user"
     ]
-    sringified_user_messages = "\n".join(
+    stringified_user_messages = "\n".join(
         [message_obj["content"] for message_obj in user_messages]
     )
-
+    
     reconstructed_prompt = [
         {
             "role": "user",
             "content": (
-                sringified_user_messages
+                stringified_user_messages
                 + "\n"
-                + "Is there enough information to proceed with the next steps? "
+                + "Is there enough information to proceed with a confident conclusion? "
                 "Only answer strictly (without punctuation or space) 'yes' or 'no'. "
             ),
         }
@@ -186,21 +187,75 @@ def enough_info_dec_pt(thoughts: AIBrain) -> AIBrain:
     decision = get_llm().invoke(reconstructed_prompt)
 
     if decision.content == "yes":
-        print("🧠 AGENT: DECISION POINT - Proceeding with the next steps 🧠")
+        # print("🧠 AGENT: DECISION POINT - Proceeding with the next steps 🧠")
         thoughts["proceed"] = True
     elif decision.content == "no":
-        print("🧠 AGENT: DECISION POINT - Not enough information to proceed 🧠")
+        # print("🧠 AGENT: DECISION POINT - Not enough information to proceed 🧠")
+        # print(f"🧠 AGENT:       Evaluated {stringified_user_messages} 🧠")
         thoughts["proceed"] = False
     else:
-        print(
-            "🧠 AGENT: DECISION POINT - Invalid response. Defaulting to not proceed. Value: ",
-            decision.content,
-            " 🧠",
-        )
+        # print(
+        #     "🧠 AGENT: DECISION POINT - Invalid response. Defaulting to not proceed. Value: ",
+        #     decision.content,
+        #     " 🧠",
+        # )
         thoughts["proceed"] = False
 
     return thoughts
 
+def enough_info_dec_pt_post_extract(thoughts: AIBrain) -> AIBrain:
+    """Decision Point for determining if there is enough information (After system information retrieval) to proceed with the next steps.
+
+    Parameters
+    ----------
+    thoughts : AIBrain
+        State of the LangGraph Agent.
+
+    Returns
+    -------
+    AIBrain
+        State of the LangGraph Agent.
+    """
+
+    session_history = thoughts["prompt_chain"]
+    user_messages = [
+        message_obj for message_obj in session_history if message_obj["role"] == "user"
+    ]
+    stringified_user_messages = "\n".join(
+        [message_obj["content"] for message_obj in user_messages]
+    )
+    total_content = ('User portfolio: ' +thoughts["data"]["survey_context"] + '\n' if thoughts["data"]["survey_context"] else "") + ('Documents: ' + thoughts["data"]["doc_context"] + '\n' if thoughts["data"]["doc_context"] else "") + stringified_user_messages
+    
+    reconstructed_prompt = [
+        {
+            "role": "user",
+            "content": (
+                total_content
+                + "\n"
+                + "Is there enough information to proceed with a confident conclusion? "
+                "Only answer strictly (without punctuation or space) 'yes' or 'no'. "
+            ),
+        }
+    ]
+
+    decision = get_llm().invoke(reconstructed_prompt)
+
+    if decision.content == "yes":
+        # print("🧠 AGENT: DECISION POINT - Proceeding with the next steps after Data Extract 🧠")
+        thoughts["proceed"] = True
+    elif decision.content == "no":
+        # print("🧠 AGENT: DECISION POINT - Not enough information to proceed after Data Extract 🧠")
+        # print(f"🧠 AGENT:       Evaluated {total_content} 🧠")
+        thoughts["proceed"] = False
+    else:
+        # print(
+        #     "🧠 AGENT: DECISION POINT - Invalid response. Defaulting to not proceed. Value: ",
+        #     decision.content,
+        #     " 🧠",
+        # )
+        thoughts["proceed"] = False
+
+    return thoughts
 
 def generate_question(thoughts: AIBrain) -> AIBrain:
     """QUESTION GENERATION NODE
@@ -218,15 +273,36 @@ def generate_question(thoughts: AIBrain) -> AIBrain:
     AIBrain
         state of LangGraph Agent
     """
+    
+    prefix_prompt = []
+    if thoughts["data"]["survey_context"]:
+        survey = {
+            "role": "system",
+            "content": thoughts["data"]["survey_context"],
+        }
+        prefix_prompt += [survey]
+        
+    if thoughts["data"]["doc_context"]:
+        doc = {
+            "role": "system",
+            "content": thoughts["data"]["doc_context"],
+        }
+        prefix_prompt += [doc]
 
-    tmp_prompt = thoughts["prompt_chain"] + [
+    tmp_prompt =  prefix_prompt + thoughts["prompt_chain"] + [
         {
             "role": "user",
             "content": (
-                "What other details do you need from me? Give me one question."
+                "Given my health context above, what other details do you need from me? Give me one question."
             ),
         }
     ]
+    
+    print()
+    print(
+        f"- - - - - - - 🧠 [START] AGENT {thoughts['thread_id']}: 'Summarize' Prompt [START] 🧠 - - - - - - -\n{json.dumps(tmp_prompt, indent=4)}\n- - - - - - - 🧠 [END] AGENT {thoughts['thread_id']}: 'Summarize' Prompt [END] 🧠 - - - - - - -"
+    )
+    print()
 
     ai_question = get_llm().invoke(tmp_prompt)
 
@@ -237,6 +313,7 @@ def generate_question(thoughts: AIBrain) -> AIBrain:
             "references": thoughts.get("shortterm_knowledge", []),
         }
     )
+    
 
     return thoughts
 
@@ -263,9 +340,10 @@ def data_extract(thoughts: AIBrain) -> AIBrain:
     """
     # Get user's documents from Firestore
     db = get_firestore_client()
-    user_id = thoughts.get("user_id")
+    user_id = thoughts.get('user_id')
     if not user_id:
-        return thoughts
+        print(f"User ID is not present -> {user_id}")
+        raise 
     
     survey_data = get_profile(user_id=user_id)
 
@@ -286,14 +364,16 @@ def data_extract(thoughts: AIBrain) -> AIBrain:
     )
     
     # Flatten content of queried documents
-    content = ' '.join(relevant_docs["documents"])
+    content = ' '.join([doc[0] for doc in relevant_docs["documents"]])
     if len(content.strip()) > 0:
         thoughts["data"]["doc_context"] = content
         
+    # print(f" ===LANGGRAPH=== Doc Data: {thoughts['data']['doc_context']}")
         
-    print(
-        f"- - - - - - - 🧠 [START] AGENT {thoughts['thread_id']}: context [START] 🧠 - - - - - - -\n{json.dumps(thoughts["data"])}\n- - - - - - - 🧠 [END] AGENT {thoughts['thread_id']}: context [END] 🧠 - - - - - - -"
-    )
+        
+    # print(
+    #     f"- - - - - - - 🧠 [START] AGENT {thoughts['thread_id']}: context [START] 🧠 - - - - - - -\n{json.dumps(thoughts['data'])}\n- - - - - - - 🧠 [END] AGENT {thoughts['thread_id']}: context [END] 🧠 - - - - - - -"
+    # )
 
     return thoughts
 
@@ -379,7 +459,7 @@ def summarize(thoughts: AIBrain) -> AIBrain:
 
     # Add survey context if available
     if survey_context:
-        chunk_context = f"[PATIENT PROFILE]\n{survey_context['content']}\n\n[RELEVANT DOCUMENTS]\n{doc_context}"
+        chunk_context = f"[PATIENT PROFILE]\n{survey_context}\n\n[RELEVANT DOCUMENTS]\n{doc_context}"
 
     ## APPENDING RESEARCH RESULT INTO PROMPT
     if thoughts["knowledge"] == [] and not chunk_context:
@@ -388,14 +468,14 @@ def summarize(thoughts: AIBrain) -> AIBrain:
             {
                 "role": "user",
                 "content": (
-                    "Based on the information I provided, please summarize the key points and provide "
-                    "any relevant insights or recommendations. "
-                    "Please respond in sections: risk level (high, medium, low) with an explanation of what this means in context, suspected condition, next steps, and any disclaimers"
-                    "that you are not an official medical diagnosis."
+                    "**MUST EXPLAIN EVERYTHING IN GENERALIZED PHRASES**, like 'people with [user's health context] are also struggling with [your proposed conclusion]' or similar"
+                    "Respond in sections: an explanation of what this means in context, what user should look out for (symptoms, potential diagnosis, next steps, if any), and side notes (if any)."
                 ),
             }
         ]
     else:
+        if not chunk_context:
+            chunk_context = ""
         # Combine external knowledge with document chunks
         knowledge_context = (
             "\n\n".join(
@@ -426,8 +506,8 @@ def summarize(thoughts: AIBrain) -> AIBrain:
                         else ""
                     )
                     + "Summarize the information and use phrases like 'according to [insert source title]' to indicate the source of the information. "
-                    "Explain everything in generalized phrases, like 'people with [user's health context] are also struggling with [your proposed conclusion]' or similar"
-                    "Respond in sections: an explanation of what this means in context, suspected conditions, next steps, and side notes (if any)."
+                    "**MUST EXPLAIN EVERYTHING IN GENERALIZED PHRASES**, like 'people with [user's health context] are also struggling with [your proposed conclusion]' or similar"
+                    "Respond in sections: an explanation of what this means in context, what user should look out for (symptoms, potential diagnosis, next steps, if any), and side notes (if any)."
                 ),
             }
         ]
@@ -443,7 +523,7 @@ def summarize(thoughts: AIBrain) -> AIBrain:
         len(" ".join([pt["content"] for pt in prompt]).split(" ")) / 1500.0
     ) * 2048
 
-    print(f" 🧠 ===OpenAI=== Token Count Estimate: {token_count} 🧠 ")
+    print(f" 🧠 ===OPENAI=== Token Count Estimate: {token_count} 🧠 ")
 
     ## GET AI RESPONSE
     final_response = get_llm().invoke(prompt)
@@ -451,7 +531,8 @@ def summarize(thoughts: AIBrain) -> AIBrain:
     prompt_chain_ai_obj = {
         "role": "assistant",
         "content": final_response.content,
-        "references": thoughts["shortterm_knowledge"] + relevant_chunks,
+        "references": thoughts["shortterm_knowledge"],
+        "data": thoughts["data"]
     }
 
     ## adding the response to the chain too
@@ -459,46 +540,7 @@ def summarize(thoughts: AIBrain) -> AIBrain:
     return thoughts
 
 
-def determine_document_need(thoughts: AIBrain) -> AIBrain:
-    """DECISION POINT FOR DOCUMENT NEED
-
-    Description
-    -----------
-    This node determines if the current health query needs to access user documents.
-
-    Parameters
-    ----------
-    thoughts : AIBrain
-        state of LangGraph Agent
-
-    Returns
-    -------
-    AIBrain
-        state of LangGraph Agent
-    """
-    session_history = thoughts["prompt_chain"]
-
-    reconstructed_prompt = session_history + [
-        {
-            "role": "user",
-            "content": (
-                "Determine if this health query needs to access the user's medical documents or survey data.\n"
-                "Consider:\n"
-                "1. Is this a general health question that can be answered without personal data?\n"
-                "2. Does this query specifically ask about the user's documents or health history?\n"
-                "3. Would personal health data significantly improve the response?\n"
-                "4. Is this a follow-up question that might need context from previous documents?\n"
-                "Return ONLY 'yes' or 'no'."
-            ),
-        }
-    ]
-
-    decision = get_llm().invoke(reconstructed_prompt)
-    thoughts["needs_documents"] = decision.content.strip().lower() == "yes"
-    return thoughts
-
-
-def initializeGraph(with_state: bool = True, prompt_chain: list = []):
+def initializeGraph(with_state: bool = True, prompt_chain: list = [], user_id: str = ""):
     """Initialize the LangGraph state
 
     Parameters
@@ -530,9 +572,12 @@ def initializeGraph(with_state: bool = True, prompt_chain: list = []):
     # )
 
     memory = MemorySaver()
+    # print(f"Initializing with user {user_id}")
+    
     if with_state:
         state = AIBrain(
             thread_id="",
+            user_id=user_id, ## only needed when with_state is True
             prompt_chain=(
                 [
                     {
@@ -548,11 +593,13 @@ def initializeGraph(with_state: bool = True, prompt_chain: list = []):
                 if prompt_chain == []
                 else prompt_chain
             ),
-            data={},
+            data={
+                "survey_context": "",
+                "doc_context": ""
+                },
             risk_level=0,
             knowledge=[],
             relevance=0,
-            data_extraction_completed=False,
             proceed=False,
             shortterm_knowledge=[],
             category_focus=None,
@@ -562,26 +609,32 @@ def initializeGraph(with_state: bool = True, prompt_chain: list = []):
     workflow = StateGraph(AIBrain)
 
     # workflow.add_node("risk_assessment")
-    # workflow.add_node("data_extract")
-    # workflow.add_node("knowledge_gathering")
     workflow.add_node("determine_relevance", determine_relevance)
     workflow.add_node("refocus_medicine", refocus_medicine)
     workflow.add_node("summarize", summarize)
-    workflow.add_node("enough_info_dec_pt", enough_info_dec_pt)
+    
+    workflow.add_node("enough_info_dec_pt", enough_info_dec_pt) ## simply evaluate if it has enough information
+    workflow.add_node("enough_info_dec_pt_post_extract", enough_info_dec_pt_post_extract) ## evaluate if it has enough information AFTER DATA EXTRACTION
+    
     workflow.add_node("generate_question", generate_question)
     workflow.add_node("knowledge_gathering", knowledge_gathering)
     workflow.add_node("respond_manner", respond_manner)
     workflow.add_node("data_extract", data_extract)
-    workflow.add_node("determine_document_need", determine_document_need)
 
-    def enough_information_conditional(thoughts: AIBrain) -> str:
-        """Decision Point for determining if there is enough information to proceed with the next steps."""
-        if not thoughts["proceed"] and not thoughts["data_extraction_completed"]:
-            return "determine_document_need"
-        elif not thoughts["proceed"]:
-            return "generate_question"
+    def enough_user_provided_info_conditional(thoughts: AIBrain) -> str:
+        """Decision Point for determining if user provided enough information to proceed with the next steps."""
+        if not thoughts["proceed"]:
+            return "data_extract" ## Scrape from what we have
         else:
-            return "knowledge_gathering"
+            return "knowledge_gathering" ## Enrich knowledge
+        
+    def enough_scraped_info_conditional(thoughts: AIBrain) -> str:
+        """Decision Point for determining if scraped information provided enough information to proceed with next steps."""
+        if not thoughts["proceed"]:
+            return "generate_question" ## Nothing we could find, ask question
+        else:
+            return "knowledge_gathering" ## Enrich knowledge
+
 
     def discussion_relevance_conditional(thoughts: AIBrain) -> str:
         """Decision Point for determining if the discussion is relevant to medicine."""
@@ -592,31 +645,29 @@ def initializeGraph(with_state: bool = True, prompt_chain: list = []):
         else:
             return "enough_info_dec_pt"  # Proceed to check for enough information
 
-    def document_need_conditional(thoughts: AIBrain) -> str:
-        """Decision Point for determining if documents are needed."""
-        if thoughts["needs_documents"]:
-            return "data_extract"
-        return "knowledge_gathering"
 
     workflow.add_edge(START, "determine_relevance")
+    
+    
     workflow.add_conditional_edges(
         "enough_info_dec_pt",
-        enough_information_conditional,
-        [
-            "generate_question",
-            "determine_document_need",
-            "knowledge_gathering"
-        ],
-    )
-    workflow.add_conditional_edges(
-        "determine_document_need",
-        document_need_conditional,
+        enough_user_provided_info_conditional,
         [
             "data_extract",
-            "knowledge_gathering",
-        ],
+            "knowledge_gathering"
+        ]
     )
-    workflow.add_edge("data_extract", "knowledge_gathering")
+    
+    workflow.add_conditional_edges(
+        "enough_info_dec_pt_post_extract",
+        enough_scraped_info_conditional,
+        [
+            "generate_question",
+            "knowledge_gathering"
+        ]
+    )
+    
+    workflow.add_edge("data_extract", "enough_info_dec_pt_post_extract")
     workflow.add_edge("knowledge_gathering", "summarize")
     workflow.add_conditional_edges(
         "determine_relevance",

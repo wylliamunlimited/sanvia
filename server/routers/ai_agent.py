@@ -145,12 +145,14 @@ async def ai_response(
                 + datetime.now().strftime("%Y%m%d%H%M%S")
                 + str(random.randint(0, 1000))
             )
-            _graph, _state = initializeGraph()
+            _graph, _state = initializeGraph(user_id=user["uid"])
             _state["thread_id"] = thread_id
             states[user["uid"]] = _state
         else:
-            _graph = initializeGraph(with_state=False)
+            _graph = initializeGraph(with_state=False, user_id=user["uid"])
             _state = states[user["uid"]]
+            
+        _state["user_id"] = user["uid"]
 
         # Append user message to chat history
         _state["prompt_chain"].append({"role": "user", "content": request.prompt})
@@ -282,7 +284,8 @@ async def sanvia_chat(
             raise HTTPException(status_code=404, detail=f"Chat was not found.")
         
         _state = states[user["uid"]]
-        _graph = initializeGraph(with_state=False)
+        _graph = initializeGraph(with_state=False, user_id=user["uid"])
+        _state["user_id"] = user["uid"]
         
         
         # 2) Append User Prompt to global states
@@ -458,8 +461,9 @@ async def getChat(
 
         ## reinitialize session states for LangGraph
         # initialize every completely 
-        _graph, _state = initializeGraph()
+        _graph, _state = initializeGraph(user_id=user["uid"])
         _state["thread_id"] = thread_id
+        _state["user_id"] = user["uid"]
         _state["prompt_chain"] = (
             thread.to_dict()["prompt_chain"]
         )
