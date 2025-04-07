@@ -4,16 +4,9 @@ sys.path.insert(1, "../dependencies")
 sys.path.insert(2, "../constants")
 
 from typing import Dict, List, Optional
-from langchain_core.documents import Document
 from langchain_openai import OpenAIEmbeddings
-from langchain_community.vectorstores import FAISS
 from constants.credentials import OPENAI_API_KEY
 from dependencies.firebase_dependencies import get_firestore_client
-from datetime import datetime
-
-# Initialize embeddings
-embeddings = OpenAIEmbeddings(model="text-embedding-3-small", api_key=OPENAI_API_KEY)
-
 
 def get_survey_context(survey_data: Dict) -> str:
     """Convert survey data into a structured text format for embedding."""
