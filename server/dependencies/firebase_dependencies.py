@@ -27,8 +27,6 @@ def initialize_firebase() -> None:
             print(f"⏳⏳⏳ Initializing Firebase Admin SDK ⏳⏳⏳")
             cred = credentials.Certificate(FIREBASE_ADMIN_API_KEY)
             firebase_admin.initialize_app(cred)
-        else:
-            print("🔥🔥🔥 Firebase Admin SDK already initialized 🔥🔥🔥")
     except Exception as e:
         print(f"❌ Error initializing Firebase: {str(e)}")
         raise
