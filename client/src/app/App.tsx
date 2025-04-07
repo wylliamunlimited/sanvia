@@ -12,12 +12,23 @@ import Login from '../features/auth/components/Login'
 import { FirebaseProvider } from '../context/FirebaseContext';
 import { AuthProvider, useAuth } from '../context/AuthContext';
 import { ProfileProvider } from '../context/ProfileContext';
-import Survey from '../features/onboarding/components/Survey';
+import AnimatedSurvey from '../features/onboarding/components/Survey';
 import ProfilePage from '../features/profile/components/Profile';
 
 function App() {
+  const [activeSection, setActiveSection] = useState('chat')
   const [isSidebarOpen, setSidebarOpen] = useState(true)
   const [isSignUp, setIsSignUp] = useState(false);
+  const [isSurveyCompleted, setIsSurveyCompleted] = useState(false);
+
+  const getActiveComponent = () => {
+    switch (activeSection) {
+      case 'chat': return <Chat />;
+      case 'documents': return <Documents />;
+      case 'history': return <History />;
+      default: return <Chat />;
+    }
+  };
 
   const AppRoutes = () => {
     const { user, loading } = useAuth();
@@ -78,7 +89,7 @@ function App() {
           path="/onboarding"
           element={
             user ? (
-              <Survey
+              <AnimatedSurvey
                 onSurveyComplete={() => {
                   localStorage.setItem('isSurveyCompleted', 'true');
                 }}
