@@ -18,21 +18,26 @@ class Survey:
                  gender: Gender,
                  sex: Sex,
                  height: float, ## in cm
-                 weight: float ## in kg
+                 weight: float, ## in kg
+                 conditions: list = [],
+                 medications: list = [],
                  ):
         self.age = age
         self.gender = gender
         self.sex = sex
         self.height = height
         self.weight = weight
+        self.conditions = conditions
+        self.medications = medications
         self.onboarding = "complete"
     
     @staticmethod
     def from_dict(source):
         try:
-            return Survey(age=int(source['Age']), gender=source['Gender'], sex=source['Sex'], height=float(source['Height']), weight=float(source['Weight']))
+            return Survey(age=int(source['Age']), gender=source['Gender'], sex=source['Sex'], height=float(source['Height']),
+                          weight=float(source['Weight'], conditions=source['Conditions'], medications=source['Medications']),)
         except Exception as e:
-            raise ValueError("Make sure all the fields are entered: age, gender, sex, height, weight")
+            raise ValueError("Make sure all the fields are entered: age, gender, sex, height, weight, conditions, medications.")
     
     def to_dict(self):
         return {
@@ -41,11 +46,14 @@ class Survey:
             "Sex": self.sex,
             "Height": self.height,
             "Weight": self.weight,
+            "Conditions": self.conditions,
+            "Medications": self.medications,
             "onboarding": self.onboarding
         }
     
     def __repr__(self):
-        return f'Survey(age={self.age}, gender={self.gender}, sex={self.sex}, height={self.height}, weight={self.weight}, onboarding={self.onboarding})'
+        return (f'Survey(age={self.age}, gender={self.gender}, sex={self.sex}, height={self.height}, weight={self.weight},' 
+                f'conditions={self.conditions}, medications={self.medications}, onboarding={self.onboarding})')
     
     def contextualize(self):
         f"""Patient Profile:
