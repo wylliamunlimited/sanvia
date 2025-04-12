@@ -96,7 +96,9 @@ const Sidebar: React.FC<SidebarProps> = ({
           weight: data['Weight'],
           gender: data['Gender'],
           sex: data['Sex'],
-          age: data['Age']
+          age: data['Age'],
+          conditions: data['Conditions'],
+          medications: data['Medications']
         });
 
         // Set onboarding status
