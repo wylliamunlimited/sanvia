@@ -1,6 +1,8 @@
 :root {
   --scrollbar-width: 0px; /* Will be set by JS */
 }
+@import url('https://fonts.googleapis.com/css2?family=Unbounded:wght@400&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:ital,wght@0,200..800;1,200..800&display=swap');
 
 .documents-content {
   flex: 1;
@@ -13,6 +15,29 @@
   max-width: 100%;
   box-sizing: border-box;
   padding: 0;
+  background-color: black;
+}
+
+.documents-header {
+  display: flex;
+  padding: 2rem calc(max(1rem, (100% - 768px) / 2));
+}
+
+.documents-header h2 {
+  color: #757575 ;
+  font-family: 'Unbounded', sans-serif;
+  font-weight: 400;
+}
+
+.text-replace{
+  font-family: "Plus Jakarta Sans", sans-serif;
+  color: rgba(255, 255, 255, 0.87);
+  font-size: 14px;
+}
+
+
+.documents-logo {
+  color: #757575 ;
 }
 
 .documents-content.sidebar-open {
@@ -33,6 +58,14 @@
   gap: 1.5rem;
 }
 
+
+.uploade-text {
+  color: white;
+  font-family: "Plus Jakarta Sans", sans-serif;
+  font-weight: 700;
+  font-size: 16px;
+}
+
 .documents-area::-webkit-scrollbar {
   width: 8px;
 }
@@ -47,21 +80,21 @@
 }
 
 .upload-zone {
-  border: 2px dashed #ddd;
+  border: 2px dashed #837e7e;
   border-radius: 12px;
   padding: 2rem;
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 1rem;
+  gap: 1.25rem 1rem;
   color: #666;
   transition: all 0.2s;
-  background-color: white;
+  background-color: #303030;
 }
 
 .upload-zone.dragging {
   border-color: #333;
-  background-color: #f0f0f0;
+  background-color: #a9a9a9;
 }
 
 .upload-zone.uploading {
@@ -73,18 +106,23 @@
   display: none;
 }
 
+.upload-symbol {
+  color: white;
+}
 .upload-button {
   padding: 0.5rem 1rem;
-  background-color: #F9F9F9;
-  border: 1px solid #ddd;
+  background-color: rgba(196, 196, 196, 0.38);
+  border: 1px solid #8e8d8d;
   border-radius: 6px;
-  color: #333;
+  color: #000000;
   cursor: pointer;
   transition: all 0.2s;
+  font-size: 14px;
+  font-weight: 400;
 }
 
 .upload-button:hover {
-  background-color: #f0f0f0;
+  background-color: #b8b7b7;
 }
 
 .documents-list {
