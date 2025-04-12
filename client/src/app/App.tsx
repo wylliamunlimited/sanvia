@@ -48,10 +48,10 @@ function App() {
                   localStorage.setItem('isSignUp', 'true');
                 }}
               />
-            ) 
+            )
           }
         />
-
+  
         {/* Login Route */}
         <Route
           path="/auth/login"
@@ -64,10 +64,10 @@ function App() {
                   localStorage.setItem('isLogged', 'true');
                 }}
               />
-            ) 
+            )
           }
         />
-        
+  
         {/* Survey Route */}
         <Route
           path="/onboarding"
@@ -83,11 +83,11 @@ function App() {
             )
           }
         />
-        
-        {/* Main App Routes */}
+  
+        {/* Main App Layout */}
         <Route
           path="/*"
-          element={user ? (
+          element={
             <div className="app-container">
               {isSidebarOpen && (
                 <Sidebar
@@ -105,7 +105,16 @@ function App() {
                     onClick={() => setSidebarOpen(true)}
                     aria-label="Open sidebar"
                   >
-                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                    <svg
+                      width="24"
+                      height="24"
+                      viewBox="0 0 24 24"
+                      fill="none"
+                      stroke="currentColor"
+                      strokeWidth="2"
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                    >
                       <polyline points="9 18 15 12 9 6" />
                     </svg>
                   </button>
@@ -120,11 +129,12 @@ function App() {
                 </Routes>
               </div>
             </div>
-          ) : <Navigate to="/auth/login" replace />}
+          }
         />
       </Routes>
     );
   };
+
 
   return (
     <FirebaseProvider>
