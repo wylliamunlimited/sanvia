@@ -158,73 +158,77 @@ const Sidebar: React.FC<SidebarProps> = ({
   ]
 
   return (
-    <div className="sidebar">
-      <div className="sidebar-header">
-        <div className="logo-container">
-          <img src="/images/logo.png" alt="Logo" />
-          <span className="logo-text">Sanvia</span>
-        </div>
-        <button 
-          className="collapse-button"
-          onClick={() => document.body.classList.toggle('sidebar-collapsed')}
-          aria-label="Toggle sidebar"
-        >
-          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-            <polyline points="15 18 9 12 15 6" />
-          </svg>
-        </button>
-      </div>
-      <div className="sidebar-content">
-        <nav className="sidebar-nav">
-          <button className="new-chat-button">
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-              <line x1="12" y1="5" x2="12" y2="19"></line>
-              <line x1="5" y1="12" x2="19" y2="12"></line>
-            </svg>
-            <span className="nav-item-text">New Chat</span>
-          </button>
-          {navItems.map((item) => (
-            <button
-              key={item.id}
-              className={`nav-item ${activeSection === item.id ? 'active' : ''}`}
-              onClick={() => onSectionChange(item.id)}
-            >
-              <span className="nav-item-icon">{item.icon}</span>
-              <span className="nav-item-text">{item.label}</span>
-            </button>
-          ))}
-        </nav>
-      </div>
-      
-      <Banner isVisible={!onboardingComplete} />
-      
-      <div className="profile-menu">
-        <button
-          className="profile-section"
-          onClick={() => setMenuOpen(!menuOpen)}
-        >
-          <div className="profile-icon">
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-              <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" />
-              <circle cx="12" cy="7" r="4" />
-            </svg>
+    //outer black
+    <div className="sidebar-back">
+      {/* inner transparent */}
+      <div className = "sidebar">
+        <div className="sidebar-header">
+          <div className="logo-container">
+            <img src="/images/logo.png" alt="Logo" />
+            <span className="logo-text">Sanvia</span>
           </div>
-          {userName && <span className="user-name">{userName}</span>}
-        </button>
-        {menuOpen && (
-          <div className="menu-dropdown">
-            {menuItems.map(item => (
+          <button 
+            className="collapse-button"
+            onClick={() => document.body.classList.toggle('sidebar-collapsed')}
+            aria-label="Toggle sidebar"
+          >
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+              <polyline points="15 18 9 12 15 6" />
+            </svg>
+          </button>
+        </div>
+        <div className="sidebar-content">
+          <nav className="sidebar-nav">
+            <button className="new-chat-button">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <line x1="12" y1="5" x2="12" y2="19"></line>
+                <line x1="5" y1="12" x2="19" y2="12"></line>
+              </svg>
+              <span className="nav-item-text">New Chat</span>
+            </button>
+            {navItems.map((item) => (
               <button
                 key={item.id}
-                className="menu-item"
-                onClick={item.onClick}
+                className={`nav-item ${activeSection === item.id ? 'active' : ''}`}
+                onClick={() => onSectionChange(item.id)}
               >
-                <span className="menu-item-icon">{item.icon}</span>
+                <span className="nav-item-icon">{item.icon}</span>
                 <span className="nav-item-text">{item.label}</span>
               </button>
             ))}
-          </div>
-        )}
+          </nav>
+        </div>
+        
+        <Banner isVisible={!onboardingComplete} />
+        
+        <div className="profile-menu">
+          <button
+            className="profile-section"
+            onClick={() => setMenuOpen(!menuOpen)}
+          >
+            <div className="profile-icon">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" />
+                <circle cx="12" cy="7" r="4" />
+              </svg>
+            </div>
+            {userName && <span className="user-name">{userName}</span>}
+          </button>
+          {menuOpen && (
+            <div className="menu-dropdown">
+              {menuItems.map(item => (
+                <button
+                  key={item.id}
+                  className="menu-item"
+                  onClick={item.onClick}
+                >
+                  <span className="menu-item-icon">{item.icon}</span>
+                  <span className="nav-item-text">{item.label}</span>
+                </button>
+              ))}
+            </div>
+          )}
+        </div>
       </div>
     </div>
   )
