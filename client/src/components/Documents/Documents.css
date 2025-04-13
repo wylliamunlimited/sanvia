@@ -20,7 +20,10 @@
 
 .documents-header {
   display: flex;
+  margin: 0;
+  padding: 0;
   padding: 2rem calc(max(1rem, (100% - 768px) / 2));
+
 }
 
 .documents-header h2 {
