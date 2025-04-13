@@ -13,6 +13,12 @@
   padding-left: 260px;
   transition: padding-left 0.3s ease;
   background-color: black;
+  background-image: 
+    url("/images/sideimg.png");
+  background-position: 
+    -30vw -30vh;
+  background-repeat: no-repeat;
+
 }
 
 body.sidebar-collapsed .app-container {
