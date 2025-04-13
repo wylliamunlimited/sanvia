@@ -8,12 +8,12 @@
   color: #757575;
 }
 
-.chat-header {
+.history-header {
   display: flex;
   padding: 2rem calc(max(1rem, (100% - 768px) / 2));
 }
 
-.chat-header h2 {
+.history-header h2 {
   color: #757575;
   font-family: 'Unbounded', sans-serif;
   font-weight: 400;
@@ -87,6 +87,7 @@
 
 .history-item:hover {
   background-color: rgba(245, 245, 245, 0.5);
+  border-color: rgb(211, 210, 210);
 }
 
 .history-item .history-content {

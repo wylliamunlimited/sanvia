@@ -21,7 +21,21 @@
  .chat-content.sidebar-open {
   padding-right: 399px;
  }
+
+ .chat-header {
+  display: flex;
+  padding: 2rem calc(max(1rem, (100% - 768px) / 2));
+ }
  
+ .chat-header h2 {
+  color: #757575;
+  font-family: 'Unbounded', sans-serif;
+  font-weight: 400;
+}
+
+ .chat-logo {
+  color: #757575;
+ }
  
  .message-area {
   flex: 1;
