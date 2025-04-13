@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
-<manifest xmlns:android="http://schemas.android.com/apk/res/android"
-    package="com.sanvia.healthconnect">
+<manifest xmlns:android="http://schemas.android.com/apk/res/android">
 
     <!-- Health Connect permissions -->
+    <uses-permission android:name="android.permission.READ_PHONE_STATE" />
     <uses-permission android:name="android.permission.health.READ_HEART_RATE" />
     <uses-permission android:name="android.permission.health.READ_SLEEP" />
     <uses-permission android:name="android.permission.health.READ_STEPS" />
@@ -27,11 +27,6 @@
             </intent-filter>
         </activity>
 
-        <!-- Health Connect provider -->
-        <provider
-            android:name="androidx.health.connect.client.impl.HealthConnectClientProvider"
-            android:authorities="${applicationId}.healthconnect"
-            android:exported="true"
-            android:permission="android.permission.health.READ_HEALTH_DATA" />
+
     </application>
 </manifest> 

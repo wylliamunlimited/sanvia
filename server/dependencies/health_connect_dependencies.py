@@ -12,7 +12,9 @@ class HealthConnectDependencies:
         self.health_connect_base_url = "https://healthconnect.googleapis.com/v1"
         self.db = get_firestore_client()
 
-    async def connect_health_connect(self, user_id: str) -> Dict[str, Any]:
+    async def connect_health_connect(
+        self, user_id: str, permissions: List[str] = None
+    ) -> Dict[str, Any]:
         """Connect user's Health Connect account"""
         try:
             # Get user profile from Firestore
@@ -25,7 +27,7 @@ class HealthConnectDependencies:
                 "connected": True,
                 "connected_at": datetime.now().isoformat(),
                 "last_sync": None,
-                "permissions": [],  # Will be updated after OAuth
+                "permissions": permissions or [],  # Will be updated after OAuth
                 "device_id": user_profile.get("device_id", ""),  # Get from user profile
                 "user_id": user_id,
             }

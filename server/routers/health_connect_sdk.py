@@ -37,7 +37,9 @@ async def connect_health_connect(
     request: Request, current_user: User = Depends(get_current_user)
 ) -> Dict[str, Any]:
     """Connect user's Health Connect account"""
-    return await health_connect.connect_health_connect(current_user.id)
+    body = await request.json()
+    permissions = body.get("permissions", [])
+    return await health_connect.connect_health_connect(current_user.id, permissions)
 
 
 @router.get("/oauth/callback")
