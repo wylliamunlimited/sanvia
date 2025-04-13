@@ -1,13 +1,17 @@
 @import url('https://fonts.googleapis.com/css2?family=Unbounded:wght@400&display=swap');
 @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:ital,wght@0,200..800;1,200..800&display=swap');
 
+.sidebar-back {
+  background-color: #333;
+}
 .sidebar {
   /* the side empty area */
   margin: 10px;
   width: 240px;
   min-width: 240px;
   flex-shrink: 0;
-  background-color: hsla(209, 24%, 60%, 0.2);
+  background-color: hsla(210, 100%, 90%, 0.1);
+  box-shadow: 0 4px 16px rgba(0,0,0,0.1);
   display: flex;
   flex-direction: column;
   justify-content: space-between;
@@ -88,15 +92,15 @@ body.sidebar-collapsed .menu-item-icon {
 }
 
 .logo-container img {
-  width: 40px;
-  height: 40px;
+  width: 25px;
+  height: 25px;
 }
 
 .logo-text {
   font-family: 'Unbounded', sans-serif;
   font-size: 20px;
   font-weight: 400;
-  color: #333;
+  color: white;
 }
 
 .sidebar-content {
@@ -118,10 +122,10 @@ body.sidebar-collapsed .menu-item-icon {
 .new-chat-button {
   width: 100%;
   padding: 0.5rem 0.75rem;
-  border: 1px solid #e5e7eb;
+  border: 1px solid rgba(255,255,255, 0.8);
   border-radius: 6px;
-  background: white;
-  color: #333;
+  background: transparent;
+  color: white;
   font-size: 14px;
   text-align: left;
   cursor: pointer;
@@ -132,6 +136,9 @@ body.sidebar-collapsed .menu-item-icon {
   margin-bottom: 0.5rem;
 }
 
+.nav-item-text {
+  color: white;
+}
 .new-chat-button:hover {
   background-color: #f8f9fa;
   border-color: #d1d5db;
@@ -158,19 +165,19 @@ body.sidebar-collapsed .menu-item-icon {
 }
 
 .nav-item.active {
-  background-color: #f2f5fc;
-  color: #333;
+  background-color: rgba(242, 245, 252, 0.5);
+  color: white;
   font-weight: 500;
 }
 
 .nav-item-icon {
   display: flex;
   align-items: center;
-  color: #666;
+  color: white;
 }
 
 .nav-item.active .nav-item-icon {
-  color: #333;
+  color: white;
 }
 
 .profile-menu {
@@ -204,12 +211,12 @@ body.sidebar-collapsed .menu-item-icon {
   justify-content: center;
   background-color: #F2F5FC;
   border-radius: 50%;
-  color: #666;
+  color: rgba(0,0,0, 0.87);
   flex-shrink: 0;
 }
 
 .user-name {
-  color: #333;
+  color: white;
   font-size: 14px;
   font-weight: 500;
 }

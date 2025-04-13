@@ -12,6 +12,7 @@
   background-color: #f9f9f9;
   padding-left: 260px;
   transition: padding-left 0.3s ease;
+  background-color: black;
 }
 
 body.sidebar-collapsed .app-container {
