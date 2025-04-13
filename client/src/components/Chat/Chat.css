@@ -166,7 +166,7 @@
  
  
  .input-container button:hover:not(:disabled) {
-  rgba(116, 107, 179, 0.2);
+  background: rgba(116, 107, 179, 0.2);
  }
  
  
