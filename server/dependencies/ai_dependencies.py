@@ -17,6 +17,10 @@ from dependencies.rag_dependencies import get_docs_from_chroma, query_docs_from_
 from dependencies.firebase_dependencies import get_firestore_client, get_profile
 from dependencies.survey_rag import get_survey_context, get_bmi_context
 
+from routers.whoop_connect import (
+    whoop_access_token
+)
+
 
 def get_llm():
     """Return the LLM."""
@@ -46,8 +50,6 @@ def determine_relevance(thoughts: AIBrain) -> AIBrain:
     AIBrain
         Updated state with `relevance` score and `health_mode` toggle.
     """
-    
-    thoughts["data_extraction_completed"] = False
 
     thoughts["data_extraction_completed"] = False
     session_history = thoughts.get("prompt_chain", [])
@@ -399,7 +401,7 @@ def generate_question(thoughts: AIBrain) -> AIBrain:
 ##                                              is missing then call api to extract them
 ## if foundational data could not be retrieved, the status should also be noted in the data field, indicating
 ##                                              LLM tried to retrieve but failed
-def data_extract(thoughts: AIBrain) -> AIBrain:
+def doc_data_extract(thoughts: AIBrain) -> AIBrain:
     """DATA EXTRACTION NODE
     ------------------------
     Searches internal systems (Firestore, ChromaDB) for the user's health data and stores relevant context in the agent's state.
@@ -426,6 +428,10 @@ def data_extract(thoughts: AIBrain) -> AIBrain:
         thoughts["data"]["doc_context"] = doc_content
 
     return thoughts
+
+def whoop_data_extract(thoughts: AIBrain) -> AIBrain:
+    """WHOOP DATA EXTRACTION NODE"""
+
 
 
 def knowledge_gathering(thoughts: AIBrain) -> AIBrain:
@@ -653,19 +659,27 @@ def initializeGraph(with_state: bool = True, prompt_chain: list = [], user_id: s
     # Setup graph
     workflow = StateGraph(AIBrain)
     workflow.add_node("determine_relevance", determine_relevance)
-    workflow.add_node("refocus_medicine", refocus_medicine)
-    workflow.add_node("summarize", summarize)
     workflow.add_node("enough_info_dec_pt", enough_info_dec_pt)
     workflow.add_node("enough_info_dec_pt_post_extract", enough_info_dec_pt_post_extract)
 
-    workflow.add_node("generate_question", generate_question)
-    workflow.add_node("knowledge_gathering", knowledge_gathering)
+    ## Response Nodes
     workflow.add_node("respond_manner", respond_manner)
-    workflow.add_node("data_extract", data_extract)
+    workflow.add_node("generate_question", generate_question)
+    workflow.add_node("refocus_medicine", refocus_medicine)
+    workflow.add_node("summarize", summarize)
+    
+    ## Knowledge Nodes
+    workflow.add_node("knowledge_gathering", knowledge_gathering)
+    
+    ## Data Gathering Nodes
+    workflow.add_node("doc_data_extract", doc_data_extract)
+    
+    
+    
 
     # Conditional decision functions
     def enough_user_provided_info_conditional(thoughts: AIBrain) -> str:
-        return "data_extract" if not thoughts["proceed"] else "knowledge_gathering"
+        return "doc_data_extract" if not thoughts["proceed"] else "knowledge_gathering"
 
     def enough_scraped_info_conditional(thoughts: AIBrain) -> str:
         return "generate_question" if not thoughts["proceed"] else "knowledge_gathering"
@@ -679,7 +693,7 @@ def initializeGraph(with_state: bool = True, prompt_chain: list = [], user_id: s
 
     # Add workflow edges
     workflow.add_edge(START, "determine_relevance")
-    workflow.add_edge("data_extract", "enough_info_dec_pt_post_extract")
+    workflow.add_edge("doc_data_extract", "enough_info_dec_pt_post_extract")
     workflow.add_edge("knowledge_gathering", "summarize")
 
     workflow.add_conditional_edges(
@@ -690,7 +704,7 @@ def initializeGraph(with_state: bool = True, prompt_chain: list = [], user_id: s
     workflow.add_conditional_edges(
         "enough_info_dec_pt",
         enough_user_provided_info_conditional,
-        ["data_extract", "knowledge_gathering"]
+        ["doc_data_extract", "knowledge_gathering"]
     )
     workflow.add_conditional_edges(
         "enough_info_dec_pt_post_extract",
