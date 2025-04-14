@@ -21,6 +21,7 @@
   top: 0;
   bottom: 0;
   transition: all 0.3s ease;
+  overflow-y: auto;
 }
 
 .menu-item-image {
@@ -235,7 +236,6 @@ body.sidebar-collapsed .menu-item-icon {
   gap: 0.5rem;
   padding: 0.5rem 1rem;
   margin: 0.125rem 0;
-
 }
 
 .menu-item {

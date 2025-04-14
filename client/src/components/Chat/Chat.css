@@ -2,7 +2,6 @@
   --scrollbar-width: 0px; /* Will be set by JS */
  }
  
- 
  .chat-content {
   background-color: #000;
   flex: 1;
@@ -16,7 +15,6 @@
   box-sizing: border-box;
   padding: 0;
  }
- 
  
  .chat-content.sidebar-open {
   padding-right: 399px;
@@ -50,7 +48,6 @@
   width: 100%;
  }
  
- 
  .message.user {
   max-width: 515.2px;
   margin: 1rem;
@@ -64,8 +61,7 @@
   white-space: pre-wrap;
   animation: fadeIn 0.2s ease-in-out;
  }
- 
- 
+
  .message.ai {
   width: auto;
   max-width: 100%;
@@ -78,7 +74,6 @@
   align-self: flex-start;
  }
  
- 
  @keyframes fadeIn {
   from {
     opacity: 0;
@@ -90,13 +85,11 @@
   }
  }
  
- 
  .input-area {
   padding: 0 calc(max(1rem, (100% - 768px) / 2)) 0;
   display: flex;
   justify-content: center;
  }
- 
  
  .input-container {
   width: 100%;
@@ -108,9 +101,8 @@
   color: #585656;
   border-radius: 10px;
   padding: 0.15rem;
-  margin-bottom: 2px;
+  margin-bottom: 7px;
  }
- 
  
  .input-container textarea {
   flex: 1;
@@ -127,7 +119,6 @@
   min-height: 40px;
   color: white;
  }
- 
  
  .input-container button {
   background: rgba(210, 221, 244, 0.57);
@@ -147,11 +138,9 @@
   margin-right: 1rem;
  }
  
- 
  .input-container button:last-child {
   margin-right: 1rem;
  }
- 
  
  .input-container .sources-all-button {
   margin-right: 0.5rem;
@@ -159,16 +148,13 @@
   color: #3b5eda;
  }
  
- 
  .input-container .sources-all-button:hover {
   background: rgba(226, 232, 255, 0.5);
  }
  
- 
  .input-container button:hover:not(:disabled) {
   background: rgba(116, 107, 179, 0.2);
  }
- 
  
  .input-container button:disabled {
   background: #f7f9ff;
@@ -176,12 +162,10 @@
   cursor: not-allowed;
  }
  
- 
  .input-container button svg {
   width: 16px;
   height: 16px;
  }
- 
  
  .thinking-indicator {
   color: #666;
@@ -193,12 +177,10 @@
   max-width: 100%;
  }
  
- 
  @keyframes thinking {
   0%, 100% { opacity: 0.5; }
   50% { opacity: 1; }
  }
- 
  
  .error-message {
   background-color: rgba(255, 0, 0, 0.1);
@@ -209,35 +191,29 @@
   font-size: 0.9rem;
  }
  
- 
  .chat-area {
   flex: 1;
   padding: 2rem calc(max(1rem, (100% - 768px) / 2));
   overflow-y: auto;
  }
  
- 
  .chat-input-container {
   padding: 1rem calc(max(1rem, (100% - 768px) / 2));
   border-top: 1px solid #eee;
  }
  
- 
  .message-area::-webkit-scrollbar {
   width: 8px;
  }
- 
  
  .message-area::-webkit-scrollbar-track {
   background: transparent;
  }
  
- 
  .message-area::-webkit-scrollbar-thumb {
   background-color: rgba(0, 0, 0, 0.1);
   border-radius: 4px;
  }
- 
  
  .disclaimer {
   height: 2rem;
@@ -251,11 +227,9 @@
   margin-bottom: 30px;
  }
  
- 
  .message-sources {
   margin-top: 1.5rem;
  }
- 
  
  .sources-button {
   background-color: #f0f3fd;
@@ -273,23 +247,19 @@
   box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
  }
  
- 
  .sources-button:hover {
   background-color: #e2e8ff;
   border-color: #b8c4e9;
  }
- 
  
  .sources-button:active {
   transform: translateY(1px);
   box-shadow: none;
  }
  
- 
  .sources-button svg {
   flex-shrink: 0;
  }
- 
  
  .sources-sidebar {
   position: fixed;
@@ -306,7 +276,6 @@
   animation: slidein 0.3s ease;
  }
  
- 
  @keyframes slidein {
   from {
     transform: translateX(399px);
@@ -315,7 +284,6 @@
     transform: translateX(0);
   }
  }
- 
  
  .sources-header {
   display: flex;
@@ -327,13 +295,11 @@
   box-sizing: border-box;
  }
  
- 
  .sources-header h3 {
   margin: 0;
   font-size: 1rem;
   font-weight: 500;
  }
- 
  
  .close-sidebar {
   background: none;
@@ -348,11 +314,9 @@
   transition: background-color 0.2s;
  }
  
- 
  .close-sidebar:hover {
   background-color: rgba(0, 0, 0, 0.05);
  }
- 
  
  .sources-content {
   flex: 1;
@@ -360,14 +324,12 @@
   padding: 12px;
  }
  
- 
  .no-sources {
   color: #666;
   font-style: italic;
   text-align: center;
   margin-top: 2rem;
  }
- 
  
  .sources-list {
   list-style: none;
@@ -378,7 +340,6 @@
   align-items: center;
   width: 100%;
  }
- 
  
  .source-item {
   width: 100%;
@@ -400,11 +361,9 @@
   outline: none;
  }
  
- 
  .source-item:last-child {
   margin-bottom: 0;
  }
- 
  
  .source-item:hover {
   background-color: #f5f7fc;
@@ -413,23 +372,19 @@
   border-color: #e2e8ff;
  }
  
- 
  .source-item:active {
   transform: translateY(0);
   box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
  }
  
- 
  .source-item::after {
   display: none;
  }
- 
  
  .source-item:focus {
   background-color: #f5f7fc;
   border-color: #e2e8ff;
  }
- 
  
  .source-item-content {
   height: 100%;
@@ -438,7 +393,6 @@
   flex-direction: column;
   justify-content: space-between;
  }
- 
  
  .source-domain {
   font-size: 0.85rem;
@@ -449,7 +403,6 @@
   align-items: center;
  }
  
- 
  .source-favicon {
   width: 16px;
   height: 16px;
@@ -458,11 +411,9 @@
   object-fit: contain;
  }
  
- 
  .source-domain::before {
   display: none;
  }
- 
  
  .source-link {
   display: block;
@@ -479,7 +430,6 @@
   overflow: hidden;
  }
  
- 
  .source-item:hover .source-link {
   color: #000;
  }
@@ -488,14 +438,12 @@
   color: rgba(41, 36, 88, 1);
  }
  
- 
  .source-categories {
   display: flex;
   flex-wrap: wrap;
   gap: 0.2rem;
   margin-top: 0.3rem;
  }
- 
  
  .source-category {
   color: #777;
@@ -504,7 +452,6 @@
   border-radius: 0;
   background-color: transparent;
  }
- 
  
  .source-meta {
   font-size: 0.8rem;
@@ -519,23 +466,19 @@
   overflow: hidden;
  }
  
- 
  .source-date {
   font-weight: 400;
  }
- 
  
  .source-separator {
   margin: 0 0.5rem;
   font-weight: 300;
  }
  
- 
  .source-preview {
   font-weight: 400;
   color: #666;
  }
- 
  
  @media (min-width: 769px) and (max-width: 1024px) {
   .sources-sidebar {
@@ -554,12 +497,10 @@
   }
  }
  
- 
  @media (max-width: 768px) {
   .chat-content.sidebar-open {
     padding-right: 0;
   }
- 
  
   .sources-sidebar {
     width: 100%;

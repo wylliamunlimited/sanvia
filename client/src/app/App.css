@@ -14,9 +14,11 @@
   transition: padding-left 0.3s ease;
   background-color: black;
   background-image: 
+    url("/images/sideimg.png"),
     url("/images/sideimg.png");
   background-position: 
-    -20vw -25vh;
+    -20vw -25vh,
+    -5vw 85vh;
   background-repeat: no-repeat;
 
 }
