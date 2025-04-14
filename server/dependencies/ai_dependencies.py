@@ -17,6 +17,7 @@ from langgraph.checkpoint.memory import MemorySaver
 from dependencies.rag_dependencies import get_docs_from_chroma, query_docs_from_chroma
 from dependencies.firebase_dependencies import get_firestore_client, get_profile
 from dependencies.survey_rag import get_survey_context, get_bmi_context
+from dependencies.deidentification import deidentify_text
 
 from routers.whoop_connect import (
     check_access_token, refresh_token, get_valid_whoop_token
@@ -427,6 +428,7 @@ def doc_data_extract(thoughts: AIBrain) -> AIBrain:
     
     # Join flattened text chunks into a single context string
     doc_content = " ".join([doc[0] for doc in relevant_docs.get("documents", [])])
+    doc_content = deidentify_text(doc_content)
     if doc_content.strip():
         thoughts["data"]["doc_context"] = doc_content
 
