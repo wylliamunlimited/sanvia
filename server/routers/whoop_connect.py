@@ -56,7 +56,8 @@ def check_access_token(user_id: str) -> dict:
     }
 
 async def get_valid_whoop_token(user_id: str):
-    status = check_access_token(user_id)
+    
+    status = check_access_token(user_id) 
     if status["status"] == "Valid":
         return status["access_token"]
     elif status["status"] == "Expired":
@@ -116,7 +117,6 @@ async def refresh_token(user_id: str):
     
     ## Verify user authentication is successful 
     user_data = await get_whoop_user(access_token=whoop_access_token[user_id]["access_token"])
-    print(json.dumps(user_data, indent=4))
 
     return new_cache_data["access_token"]
 
@@ -160,7 +160,6 @@ async def whoop_callback(request: Request):
             
             ## Verify user authentication is successful 
             user_data = await get_whoop_user(access_token=whoop_access_token[user_id]["access_token"])
-            print(json.dumps(user_data, indent=4))
             
         return RedirectResponse(url=f"{FRONTEND_URL}/profile")
     except Exception as e:
@@ -198,9 +197,3 @@ async def manual_refresh(user: Annotated[dict, Depends(get_firebase_user_from_to
         raise HTTPException(status_code=400, detail=f"Failed to refresh token: {e}")
     
     
-# + ---------------------- +
-# |     Data Operations    |
-# + ---------------------- +
-@router.get("/data/whoop/sleep")
-async def get_whoop_sleep(user: Annotated[dict, Depends(get_firebase_user_from_token)]):
-    ...

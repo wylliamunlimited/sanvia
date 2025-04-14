@@ -149,7 +149,7 @@ async def ai_response(
             _state["thread_id"] = thread_id
             states[user["uid"]] = _state
         else:
-            _graph = initializeGraph(with_state=False, user_id=user["uid"])
+            _graph = await initializeGraph(with_state=False, user_id=user["uid"])
             _state = states[user["uid"]]
             
         _state["user_id"] = user["uid"]
@@ -284,7 +284,7 @@ async def sanvia_chat(
             raise HTTPException(status_code=404, detail=f"Chat was not found.")
         
         _state = states[user["uid"]]
-        _graph = initializeGraph(with_state=False, user_id=user["uid"])
+        _graph = await initializeGraph(with_state=False, user_id=user["uid"])
         _state["user_id"] = user["uid"]
         
         
@@ -367,7 +367,7 @@ async def create_chat_session(
         #       else,
         #           simply create new one
         
-        thread_id, _graph, _state = create_new_thread(user=user)
+        thread_id, _graph, _state = await create_new_thread(user=user)
         
         if user['uid'] not in states:
             states[user["uid"]] = _state
@@ -394,7 +394,7 @@ async def create_chat_session(
         }
         
     except Exception as e:
-        
+        print(f"Error creating chat: {e}")        
         ## Clean up
         if user["uid"] in states:
             states.pop(user["uid"])
@@ -461,7 +461,7 @@ async def getChat(
 
         ## reinitialize session states for LangGraph
         # initialize every completely 
-        _graph, _state = initializeGraph(user_id=user["uid"])
+        _graph, _state = await initializeGraph(user_id=user["uid"])
         _state["thread_id"] = thread_id
         _state["user_id"] = user["uid"]
         _state["prompt_chain"] = (

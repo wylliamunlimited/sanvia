@@ -19,8 +19,8 @@ class AIBrain(TypedDict):
     ## Personal Data
     data: Dict[str, Dict] ## user data
     
-    ## Safety Parameter 
-    risk_level: int ## 1 to 10 risk level 
+    # ## Safety Parameter 
+    # risk_level: int ## 1 to 10 risk level 
     
     ## Proceeding Parameter
     proceed: bool # true: proceed, false: seek for more information

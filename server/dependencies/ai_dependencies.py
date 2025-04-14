@@ -5,6 +5,7 @@ sys.path.insert(1, "../dependencies")
 sys.path.insert(2, "../constants")
 
 import json
+from datetime import datetime, timedelta
 from fastapi import HTTPException
 from langchain_openai import ChatOpenAI
 from constants.credentials import OPENAI_API_KEY
@@ -18,7 +19,10 @@ from dependencies.firebase_dependencies import get_firestore_client, get_profile
 from dependencies.survey_rag import get_survey_context, get_bmi_context
 
 from routers.whoop_connect import (
-    whoop_access_token
+    check_access_token, refresh_token, get_valid_whoop_token
+)
+from dependencies.whoop_dependencies import (
+    get_whoop_sleep, get_whoop_cycle, 
 )
 
 
@@ -34,7 +38,6 @@ def get_llm():
     except Exception as e:
         print(f"❌ Error initializing LLM: {str(e)}")
         raise
-
 
 def determine_relevance(thoughts: AIBrain) -> AIBrain:
     """RELEVANCE DECISION NODE
@@ -429,9 +432,18 @@ def doc_data_extract(thoughts: AIBrain) -> AIBrain:
 
     return thoughts
 
-def whoop_data_extract(thoughts: AIBrain) -> AIBrain:
-    """WHOOP DATA EXTRACTION NODE"""
+# def whoop_data_extract(thoughts: AIBrain) -> AIBrain:
+#     """WHOOP DATA EXTRACTION NODE"""
 
+#     available_data_types = ["sleep", "cycle"]
+     
+#     ## 1. check access token valid or not, Refresh logic automatically implemented
+#     access_token = get_valid_whoop_token(user_id=thoughts["user_id"])
+    
+#     ## 2. check if we need to get data [for practical use, skipped in demo]
+    
+#     ## 2.1 get the data from whoop [call whoo_dependencies function]
+    
 
 
 def knowledge_gathering(thoughts: AIBrain) -> AIBrain:
@@ -608,8 +620,80 @@ def summarize(thoughts: AIBrain) -> AIBrain:
 
     return thoughts
 
+def millis_to_hm(ms: int) -> str:
+    t = timedelta(milliseconds=ms)
+    hours = t.seconds // 3600
+    minutes = (t.seconds % 3600) // 60
+    return f"{hours}h {minutes}m"
 
-def initializeGraph(with_state: bool = True, prompt_chain: list = [], user_id: str = ""):
+def format_whoop_strain_summary(record: dict) -> str:
+    lines = []
+
+    # Time Info
+    start = record.get("start")
+    end = record.get("end")
+    if start and end:
+        lines.append(f"Activity session from {start} to {end} (UTC)")
+
+    score = record.get("score", {})
+
+    if "strain" in score:
+        lines.append(f"• Strain score: {round(score['strain'], 1)}")
+
+    if "kilojoule" in score:
+        kcal = score["kilojoule"] / 4.184  # 1 kcal = 4.184 kJ
+        lines.append(f"• Energy expenditure: {round(kcal)} kcal")
+
+    if "average_heart_rate" in score:
+        lines.append(f"• Avg heart rate: {score['average_heart_rate']} bpm")
+
+    if "max_heart_rate" in score:
+        lines.append(f"• Max heart rate: {score['max_heart_rate']} bpm")
+
+    return "\n".join(lines)
+
+def format_whoop_sleep_summary(record: dict) -> str:
+    lines = []
+
+    # Basic info
+    start_time = record.get("start")
+    end_time = record.get("end")
+    if start_time and end_time:
+        lines.append(f"Sleep session from {start_time} to {end_time} (UTC)")
+
+    score = record.get("score", {})
+    stage = score.get("stage_summary", {})
+    needed = score.get("sleep_needed", {})
+
+    # Sleep stage durations
+    if "total_in_bed_time_milli" in stage:
+        lines.append(f"• Time in bed: {millis_to_hm(stage['total_in_bed_time_milli'])}")
+    if "total_awake_time_milli" in stage:
+        lines.append(f"• Awake time: {millis_to_hm(stage['total_awake_time_milli'])}")
+    if "total_light_sleep_time_milli" in stage:
+        lines.append(f"• Light sleep: {millis_to_hm(stage['total_light_sleep_time_milli'])}")
+    if "total_slow_wave_sleep_time_milli" in stage:
+        lines.append(f"• Deep sleep (SWS): {millis_to_hm(stage['total_slow_wave_sleep_time_milli'])}")
+    if "total_rem_sleep_time_milli" in stage:
+        lines.append(f"• REM sleep: {millis_to_hm(stage['total_rem_sleep_time_milli'])}")
+
+    # Score & metrics
+    if "sleep_performance_percentage" in score:
+        lines.append(f"• Sleep performance: {score['sleep_performance_percentage']}%")
+    if "sleep_consistency_percentage" in score:
+        lines.append(f"• Sleep consistency: {score['sleep_consistency_percentage']}%")
+    if "sleep_efficiency_percentage" in score:
+        lines.append(f"• Sleep efficiency: {round(score['sleep_efficiency_percentage'], 1)}%")
+    if "respiratory_rate" in score:
+        lines.append(f"• Respiratory rate: {round(score['respiratory_rate'], 1)} breaths/min")
+    if "sleep_cycle_count" in stage:
+        lines.append(f"• Sleep cycles: {stage['sleep_cycle_count']}")
+    if "disturbance_count" in stage:
+        lines.append(f"• Disturbances: {stage['disturbance_count']}")
+
+    return "\n".join(lines)
+
+async def initializeGraph(with_state: bool = True, prompt_chain: list = [], user_id: str = ""):
     """Initialize the LangGraph state
 
     Parameters
@@ -628,6 +712,16 @@ def initializeGraph(with_state: bool = True, prompt_chain: list = [], user_id: s
     memory = MemorySaver()
     
     if with_state:
+        
+        
+        ## get token 
+        whoop_token = await get_valid_whoop_token(user_id=user_id)
+        sleep_data = await get_whoop_sleep(access_token=whoop_token)
+        cycle_data = await get_whoop_cycle(access_token=whoop_token)
+        
+        sleep_summary = format_whoop_sleep_summary(record=sleep_data["records"][-1])
+        cycle_summary = format_whoop_strain_summary(record=cycle_data["records"][-1])
+        
         # Initialize assistant prompt
         default_prompt = [
             {
@@ -638,6 +732,9 @@ def initializeGraph(with_state: bool = True, prompt_chain: list = [], user_id: s
                     "You may highlight or bold the phrases (particularly questions or key terminology) for readability. "
                     "If the user’s last message contains a **quick clarification question** (e.g., “Does that mean it’s the milk?”, “Should I be worried about that?”), respond to that in 1–2 brief, clear sentences **first**, then continue asking follow-up questions afterward — all in the same message. "
                     "Do not repeat questions the user has already answered. Your goal is to keep the conversation helpful, informative, and easy to follow."
+                    f"Here is the user's most recent sleep and strain data:\n\n"
+                    f"{sleep_summary}\n\n"
+                    f"{cycle_summary}"
                 ),
             }
         ]
