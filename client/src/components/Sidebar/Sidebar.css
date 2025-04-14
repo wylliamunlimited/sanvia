@@ -141,7 +141,7 @@ body.sidebar-collapsed .menu-item-icon {
   color: white;
 }
 .new-chat-button:hover {
-  background-color: #f8f9fa;
+  background-color: rgba(242, 245, 252, 0.8);
   border-color: #d1d5db;
 }
 
@@ -201,7 +201,7 @@ body.sidebar-collapsed .menu-item-icon {
 }
 
 .profile-section:hover {
-  background-color: #f2f5fc;
+  background-color: rgba(242, 245, 252, 0.8);
 }
 
 .profile-icon {
