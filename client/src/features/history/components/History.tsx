@@ -21,7 +21,7 @@ const History = () => {
         const sessions = await fetchChatThreads()
         setChatSessions(sessions)
       } catch (err) {
-        setError('Failed to load chat history.')
+        setError(err instanceof Error ? err.message : 'Failed to load chat history.')
       } finally {
         setIsLoading(false)
       }
