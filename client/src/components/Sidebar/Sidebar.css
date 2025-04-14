@@ -154,7 +154,7 @@ body.sidebar-collapsed .menu-item-icon {
   border: none;
   border-radius: 6px;
   background: none;
-  color: #666;
+  color: #e7d7d7;
   font-size: 14px;
   text-align: left;
   cursor: pointer;
@@ -165,8 +165,7 @@ body.sidebar-collapsed .menu-item-icon {
 }
 
 .nav-item:hover {
-  background-color: rgba(242, 245, 252, 0.8);
-
+  background-color: rgba(242, 245, 252, 0.1);
 }
 
 .nav-item.active {

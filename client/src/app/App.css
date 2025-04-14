@@ -20,7 +20,7 @@
     -20vw -25vh,
     -5vw 85vh;
   background-repeat: no-repeat;
-
+  overflow: auto;
 }
 
 body.sidebar-collapsed .app-container {
@@ -55,6 +55,9 @@ body.sidebar-collapsed .app-container {
   display: flex;
   align-items: center;
   justify-content: center;
+  overflow-y: auto;
+  overflow-x: auto;
+
 }
 
 .open-sidebar-button:hover {

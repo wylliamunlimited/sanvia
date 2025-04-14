@@ -88,8 +88,8 @@
 }
 
 .history-item:hover {
-  background-color: rgba(245, 245, 245, 0.5);
-  border-color: rgb(211, 210, 210);
+  background-color: rgba(245, 245, 245, 0.35);
+  border-color: rgb(211, 210, 210, 0.4);
 }
 
 .history-item .history-content {
@@ -107,8 +107,8 @@
 }
 
 .history-time {
-  color: #F5F5F5;
-  font-size: 14px;
+  color: #ada4a4;
+  font-size: 13px;
 }
 
 @keyframes fadeIn {
