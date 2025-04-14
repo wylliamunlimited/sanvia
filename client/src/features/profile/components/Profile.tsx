@@ -18,7 +18,9 @@ const Profile = () => {
     height: userData.height,
     weight: userData.weight,
     sex: userData.sex,
-    age: userData.age
+    age: userData.age,
+    conditions: userData.conditions,
+    medications: userData.medications
   })
   const [heightUnit, setHeightUnit] = useState('cm')
   const [weightUnit, setWeightUnit] = useState('kg')
@@ -36,7 +38,9 @@ const Profile = () => {
       height: userData.height,
       weight: userData.weight,
       sex: userData.sex,
-      age: userData.age
+      age: userData.age,
+      conditions: userData.conditions,
+      medications: userData.medications
     })
     setHasChanges(false)
   }, [userData])
@@ -63,7 +67,9 @@ const Profile = () => {
       height: userData.height,
       weight: userData.weight,
       sex: userData.sex,
-      age: userData.age
+      age: userData.age,
+      conditions: userData.conditions,
+      medications: userData.medications
     })
     setHasChanges(false)
   }
