@@ -12,12 +12,6 @@ def firebase_rest(operation: str, api_key: str = FIREBASE_WEB_API_KEY):
 
 FRONTEND_URL = os.getenv("FRONTEND_URL", "http://localhost:5173")
 
-if FRONTEND_URL:
-    print(f"✅ FRONTEND_URL is Detected")
-else:
-    print("❌ FRONTEND_URL is NOT set.")
-    raise ValueError("Frontend URL is missing. Check your .env file.")
-
-
+SANVIA_BACKEND_BASE_URL = os.getenv("SANVIA_BACKEND_BASE_URL", "https://oauth-dev.sanvia.app")
 
 WHOOP_BASE_URL = "https://api.prod.whoop.com/"
