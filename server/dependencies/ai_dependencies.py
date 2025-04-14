@@ -5,6 +5,7 @@ sys.path.insert(1, "../dependencies")
 sys.path.insert(2, "../constants")
 
 import json
+from datetime import datetime, timedelta
 from fastapi import HTTPException
 from langchain_openai import ChatOpenAI
 from constants.credentials import OPENAI_API_KEY
@@ -16,6 +17,13 @@ from langgraph.checkpoint.memory import MemorySaver
 from dependencies.rag_dependencies import get_docs_from_chroma, query_docs_from_chroma
 from dependencies.firebase_dependencies import get_firestore_client, get_profile
 from dependencies.survey_rag import get_survey_context, get_bmi_context
+
+from routers.whoop_connect import (
+    check_access_token, refresh_token, get_valid_whoop_token
+)
+from dependencies.whoop_dependencies import (
+    get_whoop_sleep, get_whoop_cycle, 
+)
 
 
 def get_llm():
@@ -31,7 +39,6 @@ def get_llm():
         print(f"❌ Error initializing LLM: {str(e)}")
         raise
 
-
 def determine_relevance(thoughts: AIBrain) -> AIBrain:
     """RELEVANCE DECISION NODE
     Determines how relevant the user's message is to health-related topics, using a float score.
@@ -46,8 +53,6 @@ def determine_relevance(thoughts: AIBrain) -> AIBrain:
     AIBrain
         Updated state with `relevance` score and `health_mode` toggle.
     """
-    
-    thoughts["data_extraction_completed"] = False
 
     thoughts["data_extraction_completed"] = False
     session_history = thoughts.get("prompt_chain", [])
@@ -399,7 +404,7 @@ def generate_question(thoughts: AIBrain) -> AIBrain:
 ##                                              is missing then call api to extract them
 ## if foundational data could not be retrieved, the status should also be noted in the data field, indicating
 ##                                              LLM tried to retrieve but failed
-def data_extract(thoughts: AIBrain) -> AIBrain:
+def doc_data_extract(thoughts: AIBrain) -> AIBrain:
     """DATA EXTRACTION NODE
     ------------------------
     Searches internal systems (Firestore, ChromaDB) for the user's health data and stores relevant context in the agent's state.
@@ -426,6 +431,19 @@ def data_extract(thoughts: AIBrain) -> AIBrain:
         thoughts["data"]["doc_context"] = doc_content
 
     return thoughts
+
+# def whoop_data_extract(thoughts: AIBrain) -> AIBrain:
+#     """WHOOP DATA EXTRACTION NODE"""
+
+#     available_data_types = ["sleep", "cycle"]
+     
+#     ## 1. check access token valid or not, Refresh logic automatically implemented
+#     access_token = get_valid_whoop_token(user_id=thoughts["user_id"])
+    
+#     ## 2. check if we need to get data [for practical use, skipped in demo]
+    
+#     ## 2.1 get the data from whoop [call whoo_dependencies function]
+    
 
 
 def knowledge_gathering(thoughts: AIBrain) -> AIBrain:
@@ -546,10 +564,11 @@ def summarize(thoughts: AIBrain) -> AIBrain:
         user_instruction = (
             "**MUST EXPLAIN EVERYTHING IN GENERALIZED PHRASES**, like "
             "'people with [user's health context] are also struggling with [your proposed conclusion]' or similar.\n\n"
-            "Respond in sections:\n"
+            "Respond regarding the following area (not required to be exactly the same):\n"
             "1. Explanation of what this means in context\n"
             "2. What user should look out for (symptoms, potential diagnosis, next steps)\n"
             "3. Side notes (if any)"
+            "You can highlight or bold phrases if they are keywords, like medical terminology."
         )
     else:
         user_instruction = (
@@ -559,7 +578,7 @@ def summarize(thoughts: AIBrain) -> AIBrain:
             "Summarize the information and use phrases like 'according to [insert source title]' to indicate the source of the information. "
             "**MUST EXPLAIN EVERYTHING IN GENERALIZED PHRASES SO YOU ARE NOT GIVING SPECIFIC MEDICAL DECISIONS**, like "
             "'people with [user's health context] are also struggling with [your proposed conclusion]' or similar.\n\n"
-            "Respond in sections:\n"
+            "Respond regarding the following area (not required to be exactly the same):\n"
             "1. Explanation of what this means in context\n"
             "2. What user should look out for (symptoms, potential diagnosis, next steps)\n"
             "3. Side notes (if any)"
@@ -602,8 +621,80 @@ def summarize(thoughts: AIBrain) -> AIBrain:
 
     return thoughts
 
+def millis_to_hm(ms: int) -> str:
+    t = timedelta(milliseconds=ms)
+    hours = t.seconds // 3600
+    minutes = (t.seconds % 3600) // 60
+    return f"{hours}h {minutes}m"
 
-def initializeGraph(with_state: bool = True, prompt_chain: list = [], user_id: str = ""):
+def format_whoop_strain_summary(record: dict) -> str:
+    lines = []
+
+    # Time Info
+    start = record.get("start")
+    end = record.get("end")
+    if start and end:
+        lines.append(f"Activity session from {start} to {end} (UTC)")
+
+    score = record.get("score", {})
+
+    if "strain" in score:
+        lines.append(f"• Strain score: {round(score['strain'], 1)}")
+
+    if "kilojoule" in score:
+        kcal = score["kilojoule"] / 4.184  # 1 kcal = 4.184 kJ
+        lines.append(f"• Energy expenditure: {round(kcal)} kcal")
+
+    if "average_heart_rate" in score:
+        lines.append(f"• Avg heart rate: {score['average_heart_rate']} bpm")
+
+    if "max_heart_rate" in score:
+        lines.append(f"• Max heart rate: {score['max_heart_rate']} bpm")
+
+    return "\n".join(lines)
+
+def format_whoop_sleep_summary(record: dict) -> str:
+    lines = []
+
+    # Basic info
+    start_time = record.get("start")
+    end_time = record.get("end")
+    if start_time and end_time:
+        lines.append(f"Sleep session from {start_time} to {end_time} (UTC)")
+
+    score = record.get("score", {})
+    stage = score.get("stage_summary", {})
+    needed = score.get("sleep_needed", {})
+
+    # Sleep stage durations
+    if "total_in_bed_time_milli" in stage:
+        lines.append(f"• Time in bed: {millis_to_hm(stage['total_in_bed_time_milli'])}")
+    if "total_awake_time_milli" in stage:
+        lines.append(f"• Awake time: {millis_to_hm(stage['total_awake_time_milli'])}")
+    if "total_light_sleep_time_milli" in stage:
+        lines.append(f"• Light sleep: {millis_to_hm(stage['total_light_sleep_time_milli'])}")
+    if "total_slow_wave_sleep_time_milli" in stage:
+        lines.append(f"• Deep sleep (SWS): {millis_to_hm(stage['total_slow_wave_sleep_time_milli'])}")
+    if "total_rem_sleep_time_milli" in stage:
+        lines.append(f"• REM sleep: {millis_to_hm(stage['total_rem_sleep_time_milli'])}")
+
+    # Score & metrics
+    if "sleep_performance_percentage" in score:
+        lines.append(f"• Sleep performance: {score['sleep_performance_percentage']}%")
+    if "sleep_consistency_percentage" in score:
+        lines.append(f"• Sleep consistency: {score['sleep_consistency_percentage']}%")
+    if "sleep_efficiency_percentage" in score:
+        lines.append(f"• Sleep efficiency: {round(score['sleep_efficiency_percentage'], 1)}%")
+    if "respiratory_rate" in score:
+        lines.append(f"• Respiratory rate: {round(score['respiratory_rate'], 1)} breaths/min")
+    if "sleep_cycle_count" in stage:
+        lines.append(f"• Sleep cycles: {stage['sleep_cycle_count']}")
+    if "disturbance_count" in stage:
+        lines.append(f"• Disturbances: {stage['disturbance_count']}")
+
+    return "\n".join(lines)
+
+async def initializeGraph(with_state: bool = True, prompt_chain: list = [], user_id: str = ""):
     """Initialize the LangGraph state
 
     Parameters
@@ -622,6 +713,25 @@ def initializeGraph(with_state: bool = True, prompt_chain: list = [], user_id: s
     memory = MemorySaver()
     
     if with_state:
+        
+        
+        ## get token 
+        sleep_summary = ""
+        cycle_summary = ""
+        try:
+            whoop_token = await get_valid_whoop_token(user_id=user_id)
+            
+            if whoop_token:  # ✅ Important check: don't try to fetch if token is None
+                sleep_data = await get_whoop_sleep(access_token=whoop_token)
+                cycle_data = await get_whoop_cycle(access_token=whoop_token)
+
+                sleep_summary = format_whoop_sleep_summary(record=sleep_data["records"][-1])
+                cycle_summary = format_whoop_strain_summary(record=cycle_data["records"][-1])
+            else:
+                print("WHOOP token is missing or invalid. Skipping WHOOP data.")
+        except Exception as e:
+            print(f"⚠️ WHOOP data fetch failed: {e}")
+        
         # Initialize assistant prompt
         default_prompt = [
             {
@@ -632,6 +742,9 @@ def initializeGraph(with_state: bool = True, prompt_chain: list = [], user_id: s
                     "You may highlight or bold the phrases (particularly questions or key terminology) for readability. "
                     "If the user’s last message contains a **quick clarification question** (e.g., “Does that mean it’s the milk?”, “Should I be worried about that?”), respond to that in 1–2 brief, clear sentences **first**, then continue asking follow-up questions afterward — all in the same message. "
                     "Do not repeat questions the user has already answered. Your goal is to keep the conversation helpful, informative, and easy to follow."
+                    f"Here is the user's most recent sleep and strain data:\n\n"
+                    f"{sleep_summary}\n\n"
+                    f"{cycle_summary}"
                 ),
             }
         ]
@@ -653,19 +766,27 @@ def initializeGraph(with_state: bool = True, prompt_chain: list = [], user_id: s
     # Setup graph
     workflow = StateGraph(AIBrain)
     workflow.add_node("determine_relevance", determine_relevance)
-    workflow.add_node("refocus_medicine", refocus_medicine)
-    workflow.add_node("summarize", summarize)
     workflow.add_node("enough_info_dec_pt", enough_info_dec_pt)
     workflow.add_node("enough_info_dec_pt_post_extract", enough_info_dec_pt_post_extract)
 
-    workflow.add_node("generate_question", generate_question)
-    workflow.add_node("knowledge_gathering", knowledge_gathering)
+    ## Response Nodes
     workflow.add_node("respond_manner", respond_manner)
-    workflow.add_node("data_extract", data_extract)
+    workflow.add_node("generate_question", generate_question)
+    workflow.add_node("refocus_medicine", refocus_medicine)
+    workflow.add_node("summarize", summarize)
+    
+    ## Knowledge Nodes
+    workflow.add_node("knowledge_gathering", knowledge_gathering)
+    
+    ## Data Gathering Nodes
+    workflow.add_node("doc_data_extract", doc_data_extract)
+    
+    
+    
 
     # Conditional decision functions
     def enough_user_provided_info_conditional(thoughts: AIBrain) -> str:
-        return "data_extract" if not thoughts["proceed"] else "knowledge_gathering"
+        return "doc_data_extract" if not thoughts["proceed"] else "knowledge_gathering"
 
     def enough_scraped_info_conditional(thoughts: AIBrain) -> str:
         return "generate_question" if not thoughts["proceed"] else "knowledge_gathering"
@@ -679,7 +800,7 @@ def initializeGraph(with_state: bool = True, prompt_chain: list = [], user_id: s
 
     # Add workflow edges
     workflow.add_edge(START, "determine_relevance")
-    workflow.add_edge("data_extract", "enough_info_dec_pt_post_extract")
+    workflow.add_edge("doc_data_extract", "enough_info_dec_pt_post_extract")
     workflow.add_edge("knowledge_gathering", "summarize")
 
     workflow.add_conditional_edges(
@@ -690,7 +811,7 @@ def initializeGraph(with_state: bool = True, prompt_chain: list = [], user_id: s
     workflow.add_conditional_edges(
         "enough_info_dec_pt",
         enough_user_provided_info_conditional,
-        ["data_extract", "knowledge_gathering"]
+        ["doc_data_extract", "knowledge_gathering"]
     )
     workflow.add_conditional_edges(
         "enough_info_dec_pt_post_extract",

@@ -14,10 +14,13 @@ from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
 import firebase_admin
 from firebase_admin.auth import verify_id_token
 from firebase_admin import credentials, firestore
-from datetime import datetime
+from datetime import datetime, timedelta
 from constants.credentials import FIREBASE_ADMIN_API_KEY
 from constants.firestore_obj import Survey
 from constants.langgraph_obj import AIBrain
+from constants.firestore_obj import (
+    WhoopTokenData
+)
 
 
 def initialize_firebase() -> None:
@@ -138,41 +141,111 @@ def get_settings() -> Settings:
     return Settings()
 
 
+
 def get_firebase_user_from_token(
     token: Annotated[HTTPAuthorizationCredentials | None, Depends(bearer_scheme)],
 ) -> Dict[str, Any]:
-    """Uses a bearer token to identify Firebase user.
+    """Verifies Firebase bearer token and returns user info.
 
     Raises:
-        HTTPException 401 if user does not exist or token is invalid.
+        HTTPException: 401 if token is missing, invalid, or expired.
     """
+    if token is None:
+        raise _unauthorized_exception("Token required.")
+
+    initialize_firebase()
+
     try:
-        if not token:
-            raise HTTPException(
-                status_code=status.HTTP_401_UNAUTHORIZED,
-                detail="Token Required.",
-                headers={"WWW-Authenticate": "Bearer realm='Authentication Required'"},
-            )
+        return verify_id_token(token.credentials, check_revoked=True)
+    except Exception as e:
+        print(f"❌ Firebase token verification failed: {e}")
+        raise _unauthorized_exception("Invalid or expired token.")
 
-        # Initialize Firebase if not already initialized
-        initialize_firebase()
 
-        # Verify the token
-        try:
-            user = verify_id_token(token.credentials, check_revoked=True)
-            return user
-        except Exception as token_error:
-            print(f"❌ Token verification error: {str(token_error)}")
-            raise HTTPException(
-                status_code=status.HTTP_401_UNAUTHORIZED,
-                detail="Invalid or expired token.",
-                headers={"WWW-Authenticate": "Bearer realm='Authentication Required'"},
-            )
+def _unauthorized_exception(detail: str) -> HTTPException:
+    """Returns a standardized 401 HTTPException."""
+    return HTTPException(
+        status_code=status.HTTP_401_UNAUTHORIZED,
+        detail=detail,
+        headers={"WWW-Authenticate": "Bearer realm='Authentication Required'"},
+    )
+
+
+
+def update_whoop_tokens(user_id: str, token_data: dict):
+    
+    """Store WHOOP Authentication Token Pair & Metadata
+    
+    Format:
+        access_token: str
+        refresh_token: str
+        expires_in: int
+        scope: str
+        token_type: str
+    """
+    
+    try:
+        ## TODO: encrypt refresh token
+        whoop_token_data = WhoopTokenData(
+            access_token=token_data["access_token"],
+            refresh_token=token_data["refresh_token"],
+            scope=token_data["scope"],
+            token_type=token_data["token_type"],
+            expires_in=token_data["expires_in"],
+            expiration_date=datetime.utcnow() + timedelta(seconds=token_data["expires_in"]),
+            last_updated=datetime.utcnow(),
+        )
+        
+        ## get list of token 
+        token_history = get_whoop_tokens(user_id=user_id)
+        
+        token_history.append(whoop_token_data.to_dict())
+        
+        doc_ref = get_firestore_client().collection("whoop-tokens").document(user_id)
+        doc_ref.set({"tokens": token_history}, merge=True)
+        
+        return {
+            "access_token": whoop_token_data.access_token,
+            "expiration_date": whoop_token_data.expiration_date,
+        }
+    except KeyError as ke:
+        print(f"Key Error - Whoop Token Data missing value: {ke}")
+        raise HTTPException(status_code=400, detail=f"Whoop authorization data corrupted.")
+    except Exception as e:
+        print(f"❌ Whoop authorization error: {str(e)}")
+
+
+
+def get_whoop_tokens(user_id: str):
+    """Retrieve WHOOP Authorization Token data from Firestore
+    
+    Format:
+        access_token: str
+        refresh_token: str
+        expires_in: int
+        scope: str
+        token_type: str
+        last_updated: datetime
+        expiration_date: datetime
+    """
+    
+    try:
+        doc_ref = get_firestore_client().collection("whoop-tokens").document(user_id)
+        doc = doc_ref.get() ## returning {"tokens": [...]}
+        
+        if not doc.exists:
+            return []
+        
+        token_history = doc.to_dict().get("tokens", [])
+
+        # Return the list of token
+        return token_history
 
     except Exception as e:
-        print(f"❌ Error in Firebase auth: {str(e)}")
-        raise HTTPException(
-            status_code=status.HTTP_401_UNAUTHORIZED,
-            detail="Authentication failed.",
-            headers={"WWW-Authenticate": "Bearer realm='Authentication Required'"},
-        )
+        print(f"Error retrieving WHOOP token information: {e}")
+        raise HTTPException(status_code=500, detail="Database: WHOOP Token Retrieval Failed.")
+    
+    
+def get_recent_whoop_token(user_id: str):
+    token_history = get_whoop_tokens(user_id=user_id)
+    return token_history[-1]

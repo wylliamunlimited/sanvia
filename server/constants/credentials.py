@@ -77,3 +77,21 @@ if JWT_HASH_KEY:
 else:
     print("❌ JWT_HASH_KEY is NOT set.")
     raise ValueError("JWT hash key is missing. Check your .env file.")
+
+
+WHOOP_CLIENT_ID = os.getenv("WHOOP_CLIENT_ID")
+
+if WHOOP_CLIENT_ID:
+    print(f"✅ WHOOP_CLIENT_ID is Detected")
+else:
+    print("❌ WHOOP_CLIENT_ID is NOT set.")
+    raise ValueError("WHOOP Client ID is missing. Check your .env file.")
+
+
+WHOOP_CLIENT_SECRET = os.getenv("WHOOP_CLIENT_SECRET")
+
+if WHOOP_CLIENT_SECRET:
+    print(f"✅ WHOOP_CLIENT_SECRET is Detected")
+else:
+    print("❌ WHOOP_CLIENT_SECRET is NOT set.")
+    raise ValueError("WHOOP Client Secret is missing. Check your .env file.")

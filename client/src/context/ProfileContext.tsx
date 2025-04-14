@@ -9,6 +9,8 @@ interface ProfileData {
   gender: string;
   sex: string;
   age: string;
+  conditions: string[];
+  medications: string[];
 }
 
 interface ProfileContextType {
@@ -26,7 +28,9 @@ const ProfileContext = createContext<ProfileContextType>({
     weight: '',
     gender: '',
     sex: '',
-    age: ''
+    age: '',
+    conditions: [],
+    medications: []
   },
   setUserData: () => {},
   updateUserData: () => {}
@@ -44,7 +48,9 @@ export const ProfileProvider: React.FC<{ children: ReactNode }> = ({ children })
     weight: '',
     gender: '',
     sex: '',
-    age: ''
+    age: '',
+    conditions: [],
+    medications: []
   });
 
   const updateUserData = async (updatedData: ProfileData) => {
@@ -52,7 +58,7 @@ export const ProfileProvider: React.FC<{ children: ReactNode }> = ({ children })
       // Update user data in Firestore
       await firestoreApi.uploadProfile(
         updatedData.age, updatedData.gender, updatedData.sex,
-        updatedData.height, updatedData.weight
+        updatedData.height, updatedData.weight, updatedData.conditions, updatedData.medications
       );
       await firestoreApi.uploadNames(
         updatedData.firstName, updatedData.lastName
