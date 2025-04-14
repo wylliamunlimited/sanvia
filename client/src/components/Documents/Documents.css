@@ -139,14 +139,15 @@
   align-items: center;
   gap: 1rem;
   padding: 1rem;
-  background-color: white;
+  background-color: rgba(62, 62, 62, 0.41);
   border-radius: 8px;
-  border: 1px solid #ddd;
+  border: 1px solid rgba(117, 117, 117, 0.31);
   cursor: pointer;
 }
 
 .document-item:hover {
-  background-color: #f8f9fa;
+  background-color: rgba(245, 245, 245, 0.5);
+  border-color: rgb(211, 210, 210);
 }
 
 .document-icon {
@@ -158,13 +159,13 @@
 }
 
 .document-name {
-  color: #333;
+  color: white;
   font-weight: 500;
   margin-bottom: 0.25rem;
 }
 
 .document-meta {
-  color: #666;
+  color: #C6C6C8;
   font-size: 0.875rem;
 }
 
