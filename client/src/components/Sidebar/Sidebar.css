@@ -3,6 +3,8 @@
 
 .sidebar-back {
   background-color: #333;
+  overflow: visible;
+  position: relative;
 }
 .sidebar {
   /* the side empty area */
@@ -22,6 +24,7 @@
   bottom: 0;
   transition: all 0.3s ease;
   overflow-y: auto;
+  overflow: visible;
 }
 
 .menu-item-image {
@@ -271,6 +274,8 @@ body.sidebar-collapsed .menu-item-icon {
 
 .collapse-button {
   position: absolute;
+  overflow: visible;
+
   right: -12.5px;
   top: 50vh;
   transform: translateY(-50%);
