@@ -23,7 +23,8 @@
   margin: 0;
   padding: 0;
   padding: 2rem calc(max(1rem, (100% - 768px) / 2));
-
+  padding-top: 0;
+  margin-top: 20px;
 }
 
 .documents-header h2 {

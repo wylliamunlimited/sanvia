@@ -23,6 +23,8 @@
  .chat-header {
   display: flex;
   padding: 2rem calc(max(1rem, (100% - 768px) / 2));
+  padding-top: 0;
+  margin-top: 20px;
  }
  
  .chat-header h2 {
@@ -31,7 +33,7 @@
   font-weight: 400;
 }
 
- .chat-logo {
+.chat-logo {
   color: #757575;
  }
  
