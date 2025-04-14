@@ -19,8 +19,6 @@ const SourcesSidebar: React.FC<SourcesSidebarProps> = ({
   onClose,
   showAllSources = false
 }) => {
-  if (!isOpen) return null;
-
   const [sourcesWithMeta, setSourcesWithMeta] = useState<SourceWithMeta[]>([]);
 
   // Extract domain from URL
@@ -56,6 +54,9 @@ const SourcesSidebar: React.FC<SourcesSidebarProps> = ({
   const handleSourceClick = (url: string) => {
     window.open(url, '_blank', 'noopener,noreferrer');
   };
+
+
+  if (!isOpen) return null;
 
   return (
     <div className="sources-sidebar">

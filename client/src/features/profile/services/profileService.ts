@@ -8,6 +8,8 @@ export interface ProfileUpdate {
   gender: string
   sex: string
   age: string
+  conditions: string[]
+  medications: string[]
 }
 
 export const updateProfile = async (profile: ProfileUpdate): Promise<void> => {
@@ -18,7 +20,9 @@ export const updateProfile = async (profile: ProfileUpdate): Promise<void> => {
       profile.gender,
       profile.sex,
       profile.height,
-      profile.weight
+      profile.weight,
+      profile.conditions,
+      profile.medications
     )
     console.log(`Uploading user profile (without names), result: ${profile_response}`)
 

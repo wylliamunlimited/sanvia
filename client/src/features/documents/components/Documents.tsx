@@ -23,7 +23,7 @@ const Documents = () => {
         const docs = await fetchDocuments()
         setDocuments(docs)
       } catch (err) {
-        setError('Failed to load documents. Please refresh the page.')
+        setError(err instanceof Error ? err.message : 'Failed to load documents. Please refresh the page.')
       }
     }
 
