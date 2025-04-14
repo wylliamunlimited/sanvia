@@ -10,7 +10,7 @@ from constants.credentials import (
     WHOOP_CLIENT_ID, WHOOP_CLIENT_SECRET
 )
 from constants.url import (
-    WHOOP_BASE_URL, FRONTEND_URL
+    WHOOP_BASE_URL, FRONTEND_URL, SANVIA_BACKEND_BASE_URL
 )
 from dependencies.firebase_dependencies import (
     get_firebase_user_from_token,
@@ -34,9 +34,6 @@ SCOPES = "offline read:recovery read:cycles read:sleep read:workout read:profile
 
 
 router = APIRouter()
-
-base_url = f"https://oauth-dev.sanvia.app"
-
 whoop_access_token = dict()
 
 def check_access_token(user_id: str) -> dict:
@@ -137,7 +134,7 @@ async def whoop_callback(request: Request):
         if not auth_code:
             raise HTTPException(status_code=400, detail=f"Missing authorization code from WHOOP.")
         
-        redirectURI = f"{base_url}/auth/whoop/callback"
+        redirectURI = f"{SANVIA_BACKEND_BASE_URL}/auth/whoop/callback"
         
         params = {
             "grant_type": "authorization_code",
@@ -177,7 +174,7 @@ async def whoop_callback(request: Request):
 async def whoop_redirect(request: Request, user: Annotated[dict, Depends(get_firebase_user_from_token)]):
     """[WHOOP] This endpoint redirects user to WHOOP sign in page."""
     try:
-        redirectURI = f"{base_url}/auth/whoop/callback"
+        redirectURI = f"{SANVIA_BACKEND_BASE_URL}/auth/whoop/callback"
         
         params = {
             "client_id": WHOOP_CLIENT_ID,
