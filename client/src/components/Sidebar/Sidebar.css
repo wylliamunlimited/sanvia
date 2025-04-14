@@ -275,12 +275,11 @@ body.sidebar-collapsed .menu-item-icon {
 .collapse-button {
   position: absolute;
   overflow: visible;
-
+  background-color: hsla(210, 15%, 76%, 0.4);
   right: -12.5px;
   top: 50vh;
   transform: translateY(-50%);
-  background: white;
-  border: 1px solid #e5e7eb;
+  border: 1px solid #bcbec1;
   border-radius: 4px;
   padding: 0;
   width: 25px;
