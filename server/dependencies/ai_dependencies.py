@@ -564,10 +564,11 @@ def summarize(thoughts: AIBrain) -> AIBrain:
         user_instruction = (
             "**MUST EXPLAIN EVERYTHING IN GENERALIZED PHRASES**, like "
             "'people with [user's health context] are also struggling with [your proposed conclusion]' or similar.\n\n"
-            "Respond in sections:\n"
+            "Respond regarding the following area (not required to be exactly the same):\n"
             "1. Explanation of what this means in context\n"
             "2. What user should look out for (symptoms, potential diagnosis, next steps)\n"
             "3. Side notes (if any)"
+            "You can highlight or bold phrases if they are keywords, like medical terminology."
         )
     else:
         user_instruction = (
@@ -577,7 +578,7 @@ def summarize(thoughts: AIBrain) -> AIBrain:
             "Summarize the information and use phrases like 'according to [insert source title]' to indicate the source of the information. "
             "**MUST EXPLAIN EVERYTHING IN GENERALIZED PHRASES SO YOU ARE NOT GIVING SPECIFIC MEDICAL DECISIONS**, like "
             "'people with [user's health context] are also struggling with [your proposed conclusion]' or similar.\n\n"
-            "Respond in sections:\n"
+            "Respond regarding the following area (not required to be exactly the same):\n"
             "1. Explanation of what this means in context\n"
             "2. What user should look out for (symptoms, potential diagnosis, next steps)\n"
             "3. Side notes (if any)"
@@ -715,12 +716,21 @@ async def initializeGraph(with_state: bool = True, prompt_chain: list = [], user
         
         
         ## get token 
-        whoop_token = await get_valid_whoop_token(user_id=user_id)
-        sleep_data = await get_whoop_sleep(access_token=whoop_token)
-        cycle_data = await get_whoop_cycle(access_token=whoop_token)
-        
-        sleep_summary = format_whoop_sleep_summary(record=sleep_data["records"][-1])
-        cycle_summary = format_whoop_strain_summary(record=cycle_data["records"][-1])
+        sleep_summary = ""
+        cycle_summary = ""
+        try:
+            whoop_token = await get_valid_whoop_token(user_id=user_id)
+            
+            if whoop_token:  # ✅ Important check: don't try to fetch if token is None
+                sleep_data = await get_whoop_sleep(access_token=whoop_token)
+                cycle_data = await get_whoop_cycle(access_token=whoop_token)
+
+                sleep_summary = format_whoop_sleep_summary(record=sleep_data["records"][-1])
+                cycle_summary = format_whoop_strain_summary(record=cycle_data["records"][-1])
+            else:
+                print("WHOOP token is missing or invalid. Skipping WHOOP data.")
+        except Exception as e:
+            print(f"⚠️ WHOOP data fetch failed: {e}")
         
         # Initialize assistant prompt
         default_prompt = [
