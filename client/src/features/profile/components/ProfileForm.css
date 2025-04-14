@@ -31,7 +31,7 @@
 
 .field-label {
   font-size: 14px;
-  color: #666;
+  color: #C6C6C8;
   margin-bottom: 6px;
   font-weight: 500;
   display: flex;
@@ -42,14 +42,14 @@
 .unit-select {
   margin-left: 6px;
   font-size: 14px;
-  color: #666;
-  border: 1px solid #ddd;
+  color: white;
   border-radius: 4px;
   padding: 2px 4px;
-  background-color: #f9f9f9;
+  border-color: rgba(220, 220, 220, 0.41);
+  background-color: rgba(220, 220, 220, 0.41);
   cursor: pointer;
   appearance: none;
-  background-image: url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23666' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3e%3cpolyline points='6 9 12 15 18 9'%3e%3c/polyline%3e%3c/svg%3e");
+  background-image: url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='white' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3e%3cpolyline points='6 9 12 15 18 9'%3e%3c/polyline%3e%3c/svg%3e");
   background-repeat: no-repeat;
   background-position: right 4px center;
   background-size: 12px;
@@ -64,11 +64,13 @@
 .editable-input {
   width: 100%;
   padding: 10px;
-  font-size: 16px;
-  border: 1px solid #ddd;
+  font-size: 14px;
+  border: 1.5px solid rgba(117, 117, 117, 0.31);
   border-radius: 6px;
-  background-color: white;
+  background-color: rgba(62, 62, 62, 0.31);
   transition: all 0.2s ease;
+  color: white;
+  font-weight: 600;
 }
 
 .editable-select {
@@ -92,6 +94,8 @@
   align-items: center;
   gap: 12px;
   margin-top: 26px;
+  margin-bottom: 26px;
+
 }
 
 .cancel-link {

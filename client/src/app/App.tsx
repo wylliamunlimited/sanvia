@@ -101,7 +101,7 @@ function App() {
         />
         
         {/* Main App Routes */}
-        <Route
+        {/* <Route
           path="/*"
           element={user ? (
             <div className="app-container">
@@ -138,7 +138,47 @@ function App() {
               </div>
             </div>
           ) : <Navigate to="/auth/login" replace />}
+        /> */}
+
+<Route
+          path="/*"
+          element={
+            <div className="app-container">
+              {isSidebarOpen && (
+                <Sidebar
+                  activeSection={getActiveSection()}
+                  onSectionChange={(section) => {
+                    navigate(`/${section}`);
+                  }}
+                  onCollapse={() => setSidebarOpen(false)}
+                />
+              )}
+              <div className="main-section">
+                {!isSidebarOpen && (
+                  <button
+                    className="open-sidebar-button"
+                    onClick={() => setSidebarOpen(true)}
+                    aria-label="Open sidebar"
+                  >
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                      <polyline points="9 18 15 12 9 6" />
+                    </svg>
+                  </button>
+                )}
+                <Routes>
+                  <Route path="/" element={<Navigate to="/chat" replace />} />
+                  <Route path="/chat" element={<NewChat />} />
+                  <Route path="/chat/:threadId" element={<Chat />} />
+                  <Route path="/documents" element={<Documents />} />
+                  <Route path="/history" element={<History />} />
+                  <Route path="/profile" element={<ProfilePage />} />
+                  <Route path="*" element={<Navigate to="/chat" replace />} />
+                </Routes>
+              </div>
+            </div>
+          }
         />
+
       </Routes>
     );
   };

@@ -148,6 +148,7 @@ const ProfileForm: React.FC<ProfileFormProps> = ({
             <div className="field-label">First name</div>
             <input
               type="text"
+              placeholder='First Name'
               value={editedData.firstName}
               onChange={(e) => handleInputChange('firstName', e.target.value)}
               className="editable-input"
@@ -158,6 +159,7 @@ const ProfileForm: React.FC<ProfileFormProps> = ({
             <div className="field-label">Last name</div>
             <input
               type="text"
+              placeholder='Last Name'
               value={editedData.lastName}
               onChange={(e) => handleInputChange('lastName', e.target.value)}
               className="editable-input"
@@ -170,6 +172,7 @@ const ProfileForm: React.FC<ProfileFormProps> = ({
             <div className="field-label">Age</div>
             <input
               type="number"
+              placeholder='Age:'
               value={editedData.age}
               onChange={(e) => handleInputChange('age', e.target.value)}
               className="editable-input"
@@ -183,7 +186,7 @@ const ProfileForm: React.FC<ProfileFormProps> = ({
               onChange={(e) => handleInputChange('sex', e.target.value)}
               className="editable-input editable-select"
             >
-              {!editedData.sex && <option value="">Select</option>}
+              {!editedData.sex && <option className="select-button" value="">Select</option>}
               <option value="Male">Male</option>
               <option value="Female">Female</option>
               <option value="Intersex">Intersex</option>

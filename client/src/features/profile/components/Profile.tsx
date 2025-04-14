@@ -90,8 +90,18 @@ const Profile = () => {
         title=""
       />
 
-      <h2 className="profile-subheader">Your profile</h2>
-
+    <div className="profile-header">
+        <Header 
+          icon={
+            <svg className="profile-logo" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+              <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" />
+              <circle cx="12" cy="7" r="4" />
+            </svg>
+            }
+          title="Profile"
+        />
+      </div>
+      <p className="profile-tag">Personal information</p>
       <div className="profile-area scrollable-area">
         <ProfileForm 
           editedData={editedData}
@@ -104,8 +114,9 @@ const Profile = () => {
           handleSave={handleSave}
           handleCancel={handleCancel}
         />
+      <p className="section-tag">Medication</p>
+      <p className="section-tag">Diagnosis</p>
         
-        <div className="section-divider"></div>
         
         <ConnectedAccounts />
       </div>

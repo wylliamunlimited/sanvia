@@ -1,12 +1,12 @@
 .connected-accounts-header {
-  font-size: 1.25rem;
+  font-size: 16px;
   font-weight: 600;
-  color: #333;
+  color: white;
   margin: 0 0 8px;
 }
 
 .connected-accounts-description {
-  color: #666;
+  color: #C6C6C8;
   font-size: 14px;
   margin: 0 0 24px;
   line-height: 1.5;
@@ -23,9 +23,10 @@
   justify-content: space-between;
   align-items: center;
   padding: 16px;
-  background-color: white;
+  border: 1.5px solid rgba(117, 117, 117, 0.31);
+  border-radius: 6px;
+  background-color: rgba(62, 62, 62, 0.31);
   border-radius: 8px;
-  border: 1px solid #E4E9F2;
 }
 
 .service-info {
@@ -53,7 +54,7 @@
 .service-name {
   font-size: 16px;
   font-weight: 500;
-  color: #333;
+  color: white;
 }
 
 .connect-button {
