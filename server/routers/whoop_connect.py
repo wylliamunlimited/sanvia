@@ -56,14 +56,19 @@ def check_access_token(user_id: str) -> dict:
     }
 
 async def get_valid_whoop_token(user_id: str):
+    status = check_access_token(user_id)
     
-    status = check_access_token(user_id) 
     if status["status"] == "Valid":
         return status["access_token"]
     elif status["status"] == "Expired":
-        return await refresh_token(user_id)
+        try:
+            return await refresh_token(user_id)
+        except Exception as e:
+            print(f"⚠️ WHOOP token refresh failed: {e}")
+            return None
     else:
-        raise HTTPException(status_code=401, detail="WHOOP token not found.")
+        print("⚠️ WHOOP token not found for user.")
+        return None
 
 ## Implement Token Refreshing 
 ##      All refreshes have to be done before the token expires
