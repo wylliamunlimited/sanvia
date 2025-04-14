@@ -27,7 +27,7 @@ from dependencies.ai_dependencies import (
     trigger_response,
 )
 
-def create_new_thread(
+async def create_new_thread(
         user,
         message_thread : list = []
     ):
@@ -60,9 +60,9 @@ def create_new_thread(
     
     ## UNFINISHED
     if len(message_thread) > 0:
-        _graph, _state = initializeGraph()
+        _graph, _state = await initializeGraph(user_id=user["uid"])
     else:
-        _graph, _state = initializeGraph(prompt_chain=message_thread)
+        _graph, _state = await initializeGraph(prompt_chain=message_thread, user_id=user["uid"])
     
     _state["thread_id"] = thread_id
     return thread_id, _graph, _state ## returning metadata for newly created thread
