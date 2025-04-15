@@ -17,20 +17,6 @@ const ConnectedAccounts: React.FC = () => {
           </div>
           <button className="connect-button" onClick={whoopapi.connectWhoop}>Connect</button>
         </div>
-        <div className="account-connection-item">
-          <div className="service-info">
-            <div className="service-logo samsung-health-logo"></div>
-            <span className="service-name">Samsung Health</span>
-          </div>
-          <button className="connect-button">Connect</button>
-        </div>
-        <div className="account-connection-item">
-          <div className="service-info">
-            <div className="service-logo apple-health-logo"></div>
-            <span className="service-name">Apple Health</span>
-          </div>
-          <button className="connect-button">Connect</button>
-        </div>
       </div>
     </>
   );
