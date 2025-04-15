@@ -4,7 +4,6 @@ import { useNavigate } from 'react-router-dom'
 import { firestoreApi } from '../../../api/firestoreApi'
 import { useAuth } from '../../../context/AuthContext'
 import { useProfile } from '../../../context/ProfileContext'
-import Banner from './Banner'
 
 type NavItem = {
   id: string
@@ -231,8 +230,6 @@ const Sidebar: React.FC<SidebarProps> = ({
           ))}
         </nav>
       </div>
-      
-      <Banner isVisible={!onboardingComplete} />
       
       <div className="profile-menu">
         <button
