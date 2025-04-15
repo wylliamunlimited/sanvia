@@ -6,6 +6,7 @@ import chatApi, { SourceItem } from '../../../api/chatApi'
 import Header from '../../../shared/components/Header'
 import SourcesSidebar from '../components/SourcesSidebar'
 import Message from '../components/Message'
+import { useAutoScroll } from '../hooks/useAutoScroll'
 
 type Message = {
   id: number
@@ -29,8 +30,11 @@ const Chat = () => {
   const [showAllSources, setShowAllSources] = useState(false)
   
   const textareaRef = useRef<HTMLTextAreaElement>(null)
-  const messageAreaRef = useRef<HTMLDivElement>(null)
-  const prevMessageCountRef = useRef(0)
+  const { messageAreaRef, handleScroll } = useAutoScroll({
+    messages,
+    shouldAutoScroll,
+    setShouldAutoScroll
+  })
 
   // Store threadId in localStorage whenever it changes
   useEffect(() => {
@@ -81,32 +85,6 @@ const Chat = () => {
       textareaRef.current.style.height = `${textareaRef.current.scrollHeight}px`
     }
   }, [inputText])
-
-  // Auto-scroll when new messages are added
-  useEffect(() => {
-    const hasNewMessage = messages.length > prevMessageCountRef.current;
-    prevMessageCountRef.current = messages.length;
-    
-    // Only scroll when new message and auto-scroll enabled
-    if (hasNewMessage && shouldAutoScroll && messageAreaRef.current) {
-      setTimeout(() => {
-        // Find last user message
-        const userMessages = messages.filter(msg => msg.isUser);
-        const lastUserMessage = userMessages[userMessages.length - 1];
-        
-        // Scroll to user message
-        if (lastUserMessage) {
-          const userElement = document.querySelector(`.message.user[data-message-id="${lastUserMessage.id}"]`);
-          if (userElement) {
-            userElement.scrollIntoView({ 
-              behavior: 'smooth', 
-              block: 'start' 
-            });
-          }
-        }
-      }, 150);
-    }
-  }, [messages.length, shouldAutoScroll]);
 
   // Set scrollbar width for consistent scrollbar width
   useEffect(() => {
@@ -184,18 +162,6 @@ const Chat = () => {
       }])
     } finally {
       setIsThinking(false)
-    }
-  }
-
-  const handleScroll = () => {
-    if (messageAreaRef.current) {
-      const { scrollTop, scrollHeight, clientHeight } = messageAreaRef.current;
-      const isAtBottom = Math.abs(scrollHeight - scrollTop - clientHeight) < 10;
-      
-      // Only update if value actually changed
-      if (shouldAutoScroll !== isAtBottom) {
-        setShouldAutoScroll(isAtBottom);
-      }
     }
   }
 
