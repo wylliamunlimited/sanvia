@@ -59,7 +59,6 @@ const Sidebar: React.FC<SidebarProps> = ({
   const { user, loading, logout } = useAuth();
   const { setUserData } = useProfile();
   const navigate = useNavigate();
-  const [onboardingComplete, setOnboardingComplete] = useState<boolean>(true);
 
   const handleChatNavigation = () => {
     // Check if chat ID in localStorage
@@ -99,13 +98,6 @@ const Sidebar: React.FC<SidebarProps> = ({
           conditions: data['Conditions'],
           medications: data['Medications']
         });
-
-        // Set onboarding status
-        if (data['onboarding'] === "complete") {
-          setOnboardingComplete(true);
-        } else {
-          setOnboardingComplete(false);
-        }
 
         console.log("Profile data fetched:", data);
       } catch (error) {
