@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import "./Login.css"; // Import the CSS file
+import "./auth.css";
 import { useFirebase } from "../../../context/FirebaseContext";
 import { signInWithEmailAndPassword } from "firebase/auth";
 

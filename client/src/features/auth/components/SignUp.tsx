@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import "./SignUp.css"; // Import shared styles
+import "./auth.css";
 // import { useAuth } from "../../provider/AuthContext";
 import { auth } from "../../../api/firebase";
 import { createUserWithEmailAndPassword } from "firebase/auth";
@@ -19,6 +19,7 @@ const SignUp: React.FC<SignUpProps> = ({ onSignUpSuccess }) => {
   const [error, setError] = useState<string>("");
   const [showPassword, setShowPassword] = useState<boolean>(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState<boolean>(false);
+  const [agreeToTerms, setAgreeToTerms] = useState<boolean>(false);
   const navigate = useNavigate();
 
   // const { user, loading, logout } = useAuth();
@@ -32,6 +33,11 @@ const SignUp: React.FC<SignUpProps> = ({ onSignUpSuccess }) => {
 
       if (password !== confirmPassword) {
         setError("Passwords do not match.");
+        return;
+      }
+
+      if (!agreeToTerms) {
+        setError("Please agree to the Privacy Policy.");
         return;
       }
 
@@ -127,7 +133,25 @@ const SignUp: React.FC<SignUpProps> = ({ onSignUpSuccess }) => {
             )}
           </div>
         )}
-
+        <div className="terms-container">
+          <input
+            type="checkbox"
+            id="terms"
+            checked={agreeToTerms}
+            onChange={(e) => setAgreeToTerms(e.target.checked)}
+            className="terms-checkbox"
+          />
+          <label htmlFor="terms" className="terms-label">
+            I agree to Sanvia's{" "}
+            <a 
+              href="https://sanvia.app/privacy-policy" 
+              target="_blank" 
+              className="link"
+            >
+              Privacy Policy
+            </a>.
+          </label>
+        </div>
         <button className="button" onClick={handleSignUp}>
           Sign Up
         </button>
