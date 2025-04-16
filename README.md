@@ -1,14 +1,16 @@
 # Sanvia
 
 <div style="text-align: center;">
-  <img src="docs/assets/sanvia-banner.png" style="max-width: 100%; height: auto;"><br><br>
+  <img src="docs/assets/sanvia-banner.png" style="display: block; margin: auto; max-width: 100%; height: auto;">
 
-  <img src="https://img.shields.io/badge/FastAPI-009688?style=for-the-badge&logo=fastapi&logoColor=white" style="height: 20px; margin: 2px;">
-  <img src="https://img.shields.io/badge/React-61DAFB?style=for-the-badge&logo=react&logoColor=white" style="height: 20px; margin: 2px;">
-  <img src="https://img.shields.io/badge/OpenAI_API-412991?style=for-the-badge&logo=openai&logoColor=white" style="height: 20px; margin: 2px;">
-  <!-- <img src="https://img.shields.io/badge/FHIR_API-FF4081?style=for-the-badge&logo=fhir&logoColor=white" style="height: 20px; margin: 2px;"> -->
-  <img src="https://img.shields.io/badge/WHOOP_API-00BFFF?style=for-the-badge&logo=whoop&logoColor=white" style="height: 20px; margin: 2px;">
-  <img src="https://img.shields.io/badge/Firebase-FFCA28?style=for-the-badge&logo=firebase&logoColor=white" style="height: 20px; margin: 2px;">
+  <br>
+
+  <img src="https://img.shields.io/badge/FastAPI-009688?style=for-the-badge&logo=fastapi&logoColor=white" style="display: inline-block; height: 20px; margin: 2px;">
+  <img src="https://img.shields.io/badge/React-61DAFB?style=for-the-badge&logo=react&logoColor=white" style="display: inline-block; height: 20px; margin: 2px;">
+  <img src="https://img.shields.io/badge/OpenAI_API-412991?style=for-the-badge&logo=openai&logoColor=white" style="display: inline-block; height: 20px; margin: 2px;">
+  <!-- <img src="https://img.shields.io/badge/FHIR_API-FF4081?style=for-the-badge&logo=fhir&logoColor=white" style="display: inline-block; height: 20px; margin: 2px;"> -->
+  <img src="https://img.shields.io/badge/WHOOP_API-00BFFF?style=for-the-badge&logo=whoop&logoColor=white" style="display: inline-block; height: 20px; margin: 2px;">
+  <img src="https://img.shields.io/badge/Firebase-FFCA28?style=for-the-badge&logo=firebase&logoColor=white" style="display: inline-block; height: 20px; margin: 2px;">
 </div>
 
 Sanvia is a privacy-first, health app that provides personalized insights by analyzing your medical documents and health data — securely and on your terms.
