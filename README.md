@@ -7,6 +7,10 @@ Sanvia is a privacy-first, health app that provides personalized insights by ana
 ---
 
 ## Key Features
+- **Conversational Chat** - Multi-turn chat interface for asking health-related questions and receiving personalized answers.
+- **Document Upload** – Upload lab results and medical reports to get personalized, context-aware responses using RAG.
+- **Health Tracking Integration** – Sync with platforms like WHOOP to incorporate real-time health metrics into responses.
+- **Privacy-First Architecture** – End-to-end encryption (*upcoming*), de-identification, and full user control over personal health data.
 
 ---
 
@@ -39,16 +43,17 @@ Sanvia uses ChromaDB as a vector database for semantic search and retrieval. For
 ## Getting Started
 
 ### Prerequisites
+Before you begin, ensure you have the following prerequisites installed:
 - Node.js 18+ and npm
 - Python 3.11+
-- Firebase account (Admin SDK Key and Web API Key)
-- OpenAI API key
-- Tavily API key
-- Whoop API credentials
-- ChromaDB credentials and URL
 - Poppler (system dependency for PDF processing)
   - macOS: `brew install poppler`
   - Windows: Download from [poppler releases](https://github.com/oschwartz10612/poppler-windows/releases/)
+- Firebase account (Admin SDK Key and Web API Key)
+- ChromaDB credentials and URL
+- OpenAI API key
+- Tavily API key
+- Whoop API credentials
 
 ### Installation
 
@@ -134,8 +139,10 @@ ___
 
 ## Team
 
-- Wylliam Cheng
-- Oghenerukevwe Omusi
-- Yasemin Nurluoglu
-- Justin Wang
-- Yewon Park
+| Name | Role | Contact |
+|------|------|---------|
+| Wylliam Cheng | Product Owner, Software Engineer | |
+| Oghenerukevwe Omusi | Software Engineer | |
+| Yasemin Nurluoglu | Software Engineer | |
+| Justin Wang | Software Engineer | justin1@bu.edu |
+| Yewon Park | UI/UX Designer | |
