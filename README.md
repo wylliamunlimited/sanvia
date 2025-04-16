@@ -51,6 +51,9 @@ Sanvia is a privacy-first, health app that provides personalized insights by ana
 
 Sanvia uses ChromaDB as a vector database for semantic search and retrieval. For setup and deployment details, see [Vector Database Setup](docs/vector-db/README.md).
 
+## LangGraph Architecture
+<img src="docs/assets/langgraph-architecture.png" width="600">
+
 ---
 
 ## Getting Started
@@ -128,6 +131,7 @@ CHROMA_DB_ACCESS_SECRET=
 WHOOP_CLIENT_ID=
 WHOOP_CLIENT_SECRET=
 ```
+
 
 ### Running the App
 
