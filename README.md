@@ -21,6 +21,10 @@ Sanvia is a privacy-first, health app that provides personalized insights by ana
 
 ## Technical Architecture
 
+![Technical Architecture](docs/assets/architecture.png)
+
+![RAG Architecture](docs/assets/rag-architecture.png)
+
 ---
 
 ## Getting Started
