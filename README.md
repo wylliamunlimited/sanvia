@@ -141,8 +141,8 @@ ___
 
 | Name | Role | Contact |
 |------|------|---------|
-| Wylliam Cheng | Product Owner, Software Engineer | |
-| Oghenerukevwe Omusi | Software Engineer | |
-| Yasemin Nurluoglu | Software Engineer | |
+| Wylliam Cheng | Product Owner, Software Engineer | wycheng@bu.edu |
+| Oghenerukevwe Omusi | Software Engineer | ojomusi@bu.edu |
+| Yasemin Nurluoglu | Software Engineer | yaseminn@bu.edu |
 | Justin Wang | Software Engineer | justin1@bu.edu |
-| Yewon Park | UI/UX Designer | |
+| Yewon Park | UI/UX Designer | yewones@bu.edu |
