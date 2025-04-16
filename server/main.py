@@ -21,6 +21,7 @@ from routers import (
     ai_agent,
     document_processing,
     health_connect_sdk,
+    health_data,
 )
 from dependencies.firebase_dependencies import (
     get_settings,
@@ -48,6 +49,7 @@ app.include_router(search.router)
 app.include_router(ai_agent.router)
 app.include_router(document_processing.router)
 app.include_router(health_connect_sdk.router)
+app.include_router(health_data.router)
 # = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = =
 
 

@@ -23,6 +23,7 @@ from dependencies.health_connect_dependencies import HealthConnectDependencies
 from dependencies.firebase_dependencies import get_firebase_user_from_token
 from dependencies.auth_dependencies import get_current_user
 from models.user import User
+from models.health_data import HealthData
 
 router = APIRouter(
     prefix="/health-connect",
@@ -40,6 +41,22 @@ async def connect_health_connect(
     body = await request.json()
     permissions = body.get("permissions", [])
     return await health_connect.connect_health_connect(current_user.id, permissions)
+
+
+@router.post("/data")
+async def receive_health_data(
+    health_data: HealthData, current_user: User = Depends(get_current_user)
+) -> Dict[str, Any]:
+    """Receive health data from the Android app"""
+    try:
+        # Verify the user ID matches the current user
+        if health_data.user_id != current_user.id:
+            raise HTTPException(status_code=403, detail="User ID mismatch")
+
+        # Store the health data
+        return await health_connect.store_health_data(health_data)
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
 
 
 @router.get("/oauth/callback")

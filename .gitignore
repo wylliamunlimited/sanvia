@@ -1,4 +1,5 @@
 android-health-connect/android-health-connect-app/app/google-services.json
+android-health-connect - Copy
 
 .env
 .env.local
@@ -81,3 +82,6 @@ Thumbs.db
 crashlytics.properties
 crashlytics-build.properties
 fabric.properties
+
+# Health Connect
+health-android-sources

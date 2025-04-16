@@ -2,16 +2,17 @@ plugins {
     id 'com.android.application'
     id 'org.jetbrains.kotlin.android'
     id 'com.google.gms.google-services'
+    id 'org.jetbrains.kotlin.plugin.compose'
 }
 
 android {
     namespace 'com.sanvia.healthconnect'
-    compileSdk 34
+    compileSdk 35
 
     defaultConfig {
         applicationId "com.sanvia.healthconnect"
         minSdk 30
-        targetSdk 34
+        targetSdk 35
         versionCode 1
         versionName "1.0"
 
@@ -31,7 +32,7 @@ android {
     }
 
     composeOptions {
-        kotlinCompilerExtensionVersion "1.5.3"
+        kotlinCompilerExtensionVersion "1.4.1"
     }
 
     compileOptions {
@@ -73,13 +74,21 @@ dependencies {
     implementation 'org.jetbrains.kotlinx:kotlinx-coroutines-play-services:1.7.3'
     
     // Health Connect SDK
-    implementation 'androidx.health.connect:connect-client:1.1.0-alpha02'
+    implementation 'androidx.health.connect:connect-client:1.1.0-alpha11'
+    //implementation 'androidx.health:health-connect-client:1.0.0-alpha11'
     
     // Firebase
-    implementation platform('com.google.firebase:firebase-bom:32.7.1')
+    implementation platform('com.google.firebase:firebase-bom:33.12.0')
     implementation 'com.google.firebase:firebase-analytics-ktx'
     implementation 'com.google.firebase:firebase-auth-ktx'
     implementation 'com.google.firebase:firebase-firestore-ktx'
+
+    // Retrofit & Network
+    implementation 'com.squareup.retrofit2:retrofit:2.9.0'
+    implementation 'com.squareup.retrofit2:converter-gson:2.9.0'
+    implementation 'com.squareup.okhttp3:okhttp:4.12.0'
+    implementation 'com.squareup.okhttp3:logging-interceptor:4.12.0'
+    implementation 'com.google.code.gson:gson:2.10.1'
 
     // Testing
     testImplementation 'junit:junit:4.13.2'
