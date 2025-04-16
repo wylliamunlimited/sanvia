@@ -52,8 +52,9 @@ Sanvia is a privacy-first, health app that provides personalized insights by ana
 Sanvia uses ChromaDB as a vector database for semantic search and retrieval. For setup and deployment details, see [Vector Database Setup](docs/vector-db/README.md).
 
 ## LangGraph Architecture
-<img src="docs/assets/langgraph-architecture.png" width="600">
-
+<p align="center">
+  <img src="docs/assets/langgraph-architecture.png" width="300">
+</p>
 ---
 
 ## Getting Started
