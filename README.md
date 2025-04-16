@@ -1,7 +1,7 @@
 # Sanvia
 
 <p align="center">
-  <img src="docs/assets/sanvia-banner.png" width="600">
+  <img src="docs/assets/sanvia-banner.svg" width="600">
 </p>
 
 <p align="center">
