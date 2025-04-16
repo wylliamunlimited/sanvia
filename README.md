@@ -32,6 +32,8 @@ Sanvia is a privacy-first, health app that provides personalized insights by ana
   </tr>
 </table>
 
+Sanvia uses ChromaDB as a vector database for semantic search and retrieval. For setup and deployment details, see [Vector Database Setup](docs/vector-db/README.md).
+
 ---
 
 ## Getting Started
