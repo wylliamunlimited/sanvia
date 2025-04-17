@@ -53,8 +53,10 @@ Sanvia uses ChromaDB as a vector database for semantic search and retrieval. For
 
 ## LangGraph Architecture
 <p align="center">
-  <img src="docs/assets/langgraph-architecture.png" width="300">
+  <img src="docs/assets/langgraph-architecture.png" width="450">
 </p>
+
+
 ---
 
 ## Getting Started
