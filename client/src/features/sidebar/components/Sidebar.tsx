@@ -4,7 +4,6 @@ import { useNavigate } from 'react-router-dom'
 import { firestoreApi } from '../../../api/firestoreApi'
 import { useAuth } from '../../../context/AuthContext'
 import { useProfile } from '../../../context/ProfileContext'
-import Banner from './Banner'
 
 type NavItem = {
   id: string
@@ -60,7 +59,6 @@ const Sidebar: React.FC<SidebarProps> = ({
   const { user, loading, logout } = useAuth();
   const { setUserData } = useProfile();
   const navigate = useNavigate();
-  const [onboardingComplete, setOnboardingComplete] = useState<boolean>(true);
 
   const handleChatNavigation = () => {
     // Check if chat ID in localStorage
@@ -101,13 +99,6 @@ const Sidebar: React.FC<SidebarProps> = ({
           medications: data['Medications']
         });
 
-        // Set onboarding status
-        if (data['onboarding'] === "complete") {
-          setOnboardingComplete(true);
-        } else {
-          setOnboardingComplete(false);
-        }
-
         console.log("Profile data fetched:", data);
       } catch (error) {
         console.error("Error fetching profile:", error);
@@ -136,33 +127,6 @@ const Sidebar: React.FC<SidebarProps> = ({
       onClick: () => {
         console.log('Profile button clicked');
         navigate('/profile');
-        setMenuOpen(true);
-      }
-    },
-    {
-      id: 'settings',
-      label: 'Settings',
-      icon: (
-        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-          <path d="M12.22 2h-.44a2 2 0 0 0-2 2v.18a2 2 0 0 1-1 1.73l-.43.25a2 2 0 0 1-2 0l-.15-.08a2 2 0 0 0-2.73.73l-.22.38a2 2 0 0 0 .73 2.73l.15.1a2 2 0 0 1 1 1.72v.51a2 2 0 0 1-1 1.74l-.15.09a2 2 0 0 0-.73 2.73l.22.38a2 2 0 0 0 2.73.73l.15-.08a2 2 0 0 1 2 0l.43.25a2 2 0 0 1 1 1.73V20a2 2 0 0 0 2 2h.44a2 2 0 0 0 2-2v-.18a2 2 0 0 1 1-1.73l.43-.25a2 2 0 0 1 2 0l.15.08a2 2 0 0 0 2.73-.73l.22-.39a2 2 0 0 0-.73-2.73l-.15-.08a2 2 0 0 1-1-1.74v-.5a2 2 0 0 1 1-1.74l.15-.09a2 2 0 0 0 .73-2.73l-.22-.38a2 2 0 0 0-2.73-.73l-.15.08a2 2 0 0 1-2 0l-.43-.25a2 2 0 0 1-1-1.73V4a2 2 0 0 0-2-2z" />
-          <circle cx="12" cy="12" r="3" />
-        </svg>
-      ),
-      onClick: () => {
-        console.log('Settings clicked');
-        setMenuOpen(true);
-      }
-    },
-    {
-      id: 'feedback',
-      label: 'Feedback',
-      icon: (
-        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-          <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z" />
-        </svg>
-      ),
-      onClick: () => {
-        console.log('Feedback clicked');
         setMenuOpen(true);
       }
     },
@@ -231,8 +195,6 @@ const Sidebar: React.FC<SidebarProps> = ({
           ))}
         </nav>
       </div>
-      
-      <Banner isVisible={!onboardingComplete} />
       
       <div className="profile-menu">
         <button
