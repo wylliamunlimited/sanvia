@@ -32,8 +32,8 @@
 }
 
 body.sidebar-collapsed .sidebar {
-  width: 80px;
-  min-width: 80px;
+  width: 62px;
+  min-width: 62px;
 }
 
 body.sidebar-collapsed .logo-text,
@@ -289,7 +289,7 @@ body.sidebar-collapsed .menu-item-icon {
   display: flex;
   align-items: center;
   justify-content: center;
-  z-index: 10;
+  z-index: 9999;
   opacity: 0;
 }
 
@@ -299,5 +299,5 @@ body.sidebar-collapsed .menu-item-icon {
 
 .collapse-button:hover {
   color: #B3B3B3;
-  background-color: #f8f9fa;
+  background-color: rgba(248, 249, 250, 0.6);
 }

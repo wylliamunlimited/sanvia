@@ -2,6 +2,7 @@
   box-sizing: border-box;
   margin: 0;
   padding: 0;
+
 }
 
 .app-container {
@@ -20,7 +21,7 @@
     -20vw -25vh,
     -5vw 85vh;
   background-repeat: no-repeat;
-  overflow: auto;
+  overflow: visible;
 }
 
 body.sidebar-collapsed .app-container {
@@ -29,8 +30,8 @@ body.sidebar-collapsed .app-container {
 
 .main-section {
   flex: 1;
-  overflow: hidden;
   position: relative;
+  z-index: 1;
 }
 
 .main-section > * {
@@ -57,9 +58,4 @@ body.sidebar-collapsed .app-container {
   justify-content: center;
   overflow-y: auto;
   overflow-x: auto;
-
 }
-
-.open-sidebar-button:hover {
-  color: #333;
-} 

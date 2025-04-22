@@ -13,6 +13,7 @@ import { AuthProvider, useAuth } from '../provider/AuthContext';
 import { ProfileProvider } from '../provider/ProfileContext';
 import Survey from '../components/Survey/Survey';
 
+
 function App() {
   const [isSidebarOpen, setSidebarOpen] = useState(true)
   const [isSignUp, setIsSignUp] = useState(false);
@@ -31,6 +32,10 @@ function App() {
       if (path === '/history') return 'history';
       if (path === '/settings') return 'settings';
       return 'chat';
+    };
+    const handleSidebarToggle = () => {
+      setSidebarOpen(prev => !prev);
+      document.body.classList.toggle('sidebar-collapsed');
     };
 
     return (
