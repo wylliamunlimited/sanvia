@@ -144,6 +144,8 @@
   border-radius: 8px;
   border: 1px solid rgba(117, 117, 117, 0.31);
   cursor: pointer;
+  transition: all 0.2s;
+
 }
 
 .document-item:hover {
