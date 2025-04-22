@@ -277,40 +277,6 @@ const AnimatedSurvey: React.FC<SurveyProps> = ({ onSurveyComplete }) => {
   
   const navigate = useNavigate();
 
-  // Function to calculate the slide position based on direction and indices
-  const getSlidePosition = (index: number) => {
-    if (index === currentQuestionIndex) return 0;
-    
-    if (transitionDirection === 'next') {
-      return index < currentQuestionIndex ? -100 : 100;
-    } else {
-      return index > currentQuestionIndex ? 100 : -100;
-    }
-  };
-
-  // Fetch profile data on mount
-  useEffect(() => {
-    const fetchProfile = async () => {
-      try {
-        const data = await firestoreApi.get_user_profile();
-        setUserData({
-          firstName: data['first-name'],
-          lastName: data['last-name'],
-          height: data['Height'],
-          weight: data['Weight'],
-          gender: data['Gender'],
-          sex: data['Sex'],
-          age: data['Age'],
-          conditions: data['Conditions'],
-          medications: data['Medications']
-        });
-      } catch (error) {
-        console.error('Error fetching profile:', error);
-      }
-    };
-    fetchProfile();
-  }, [setUserData]);
-
   return (
     <div className="survey-container">
       {/* Background slides */}
@@ -551,6 +517,9 @@ const AnimatedSurvey: React.FC<SurveyProps> = ({ onSurveyComplete }) => {
                   </div>
                 </div>
               )}
+        
+
+              {/* Question 7: Medical conditions */}
         
 
               {/* Navigation buttons */}
