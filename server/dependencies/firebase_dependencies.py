@@ -22,6 +22,10 @@ from constants.firestore_obj import (
     WhoopTokenData
 )
 
+def get_survey_context(survey_data: Dict) -> str:
+    """Convert survey data into a structured text format for embedding."""
+    return f"""Patient Profile: Age: {survey_data['Age']} Gender: {survey_data['Gender']} Sex: {survey_data['Sex']} Height: {survey_data['Height']}cm Weight: {survey_data['Weight']}kg"""
+
 
 def initialize_firebase() -> None:
     """Initialize Firebase Admin SDK if not already initialized."""

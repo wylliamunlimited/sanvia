@@ -19,7 +19,6 @@ WHOOP_USER_URL = WHOOP_BASE_URL + "developer/v1/user/profile/basic"
 WHOOP_BODY_MEASUREMENT_URL = WHOOP_BASE_URL + "developer/v1/user/measurement/body"
 WHOOP_CYCLE_URL = WHOOP_BASE_URL + "developer/v1/cycle"
 
-
 async def get_whoop_sleep(access_token: str, start_days_ago: int = 7):
     
     """Get WHOOP Sleep data for user
