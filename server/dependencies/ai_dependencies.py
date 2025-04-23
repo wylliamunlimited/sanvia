@@ -429,6 +429,9 @@ def doc_data_extract(thoughts: AIBrain) -> AIBrain:
     # Join flattened text chunks into a single context string
     doc_content = " ".join([doc[0] for doc in relevant_docs.get("documents", []) if len(doc) != 0])
     doc_content = deidentify_text(doc_content)
+    
+    print(f"[DOC EXTRACT] De-identified Text: {doc_content}")
+    
     if doc_content.strip():
         thoughts["data"]["doc_context"] = doc_content
 
@@ -517,11 +520,11 @@ def knowledge_gathering(thoughts: AIBrain) -> AIBrain:
     thoughts["knowledge"] += results
     thoughts["shortterm_knowledge"] = results
 
-    print(
-        f"\n- - - - - - - 🧠 [START] AGENT {thread_id}: knowledge - {search_category} 🧠 - - - - - - -\n"
-        f"{json.dumps(results, indent=4)}\n"
-        f"- - - - - - - 🧠 [END] AGENT {thread_id}: knowledge - {search_category} 🧠 - - - - - - -\n"
-    )
+    # print(
+    #     f"\n- - - - - - - 🧠 [START] AGENT {thread_id}: knowledge - {search_category} 🧠 - - - - - - -\n"
+    #     f"{json.dumps(results, indent=4)}\n"
+    #     f"- - - - - - - 🧠 [END] AGENT {thread_id}: knowledge - {search_category} 🧠 - - - - - - -\n"
+    # )
 
     return thoughts
 
