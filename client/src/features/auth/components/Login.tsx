@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import "./auth.css";
+import "./Auth.css";
 import { useFirebase } from "../../../context/FirebaseContext";
 import { signInWithEmailAndPassword } from "firebase/auth";
 import { handleFormNavigation } from "../../../shared/utils/formNavigation";
