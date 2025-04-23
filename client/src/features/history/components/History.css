@@ -15,8 +15,8 @@
 
 .history-subheader {
   font-size: 1.5rem;
-  font-weight: 600;
-  margin: 3rem 0 0.5rem;
+  font-weight: 400;
+  font-family: 'Unbounded', sans-serif;  margin: 3rem 0 0.5rem;
   padding: 0 calc(max(1rem, (100% - 768px) / 2));
   color: var(--text-primary);
 }
