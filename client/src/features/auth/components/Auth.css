@@ -49,6 +49,13 @@
     font-size: 14px;
     background: var(--background-hover);
     color: var(--text-primary);
+    transition: all 0.2s ease;
+  }
+
+  .input:focus {
+    border-color: var(--primary);
+    outline: none;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.2);
   }
 
   .input::placeholder {
@@ -70,6 +77,13 @@
     font-size: 14px;
     background: var(--background-hover);
     color: var(--text-primary);
+    transition: all 0.2s ease;
+  }
+
+  .password-input:focus {
+    border-color: var(--primary);
+    outline: none;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.2);
   }
 
   .password-input::placeholder {

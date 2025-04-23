@@ -3,6 +3,7 @@ import { useNavigate } from "react-router-dom";
 import "./auth.css";
 import { useFirebase } from "../../../context/FirebaseContext";
 import { signInWithEmailAndPassword } from "firebase/auth";
+import { handleFormNavigation } from "../../../shared/utils/formNavigation";
 
 interface LoginProps {
   onLoginSuccess: () => void;
@@ -57,6 +58,7 @@ const Login: React.FC<LoginProps> = ({ onLoginSuccess }) => {
           className="input"
           value={email}
           onChange={(e) => setEmail(e.target.value)}
+          onKeyDown={(e) => handleFormNavigation(e, 'password')}
         />
         <div className="password-container">
           <input
@@ -65,6 +67,7 @@ const Login: React.FC<LoginProps> = ({ onLoginSuccess }) => {
             className="password-input"
             value={password}
             onChange={(e) => setPassword(e.target.value)}
+            onKeyDown={(e) => handleFormNavigation(e, undefined, handleLogin)}
           />
           {password && (
             <button

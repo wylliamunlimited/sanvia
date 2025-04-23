@@ -106,7 +106,7 @@ const NewChat = () => {
       </div>
       
       <div className="disclaimer">
-        For informational purposes only. Not a substitute for professional medical advice.
+        Sanvia is not a substitute for professional medical advice.
       </div>
     </div>
   )

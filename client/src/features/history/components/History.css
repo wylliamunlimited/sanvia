@@ -117,7 +117,7 @@
 
 .search-input {
   flex: 1;
-  border: none;
+  border: none !important;
   outline: none;
   font-size: 0.9rem;
   background: transparent;

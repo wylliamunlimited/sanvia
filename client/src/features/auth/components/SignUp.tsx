@@ -6,6 +6,7 @@ import { auth } from "../../../api/firebase";
 import { createUserWithEmailAndPassword } from "firebase/auth";
 import { firestoreApi } from "../../../api/firestoreApi";
 import { capitalizeFirstLetter } from "../../../shared/utils/capitalize";
+import { handleFormNavigation } from "../../../shared/utils/formNavigation";
 
 interface SignUpProps {
   onSignUpSuccess: () => void;
@@ -81,6 +82,7 @@ const SignUp: React.FC<SignUpProps> = ({ onSignUpSuccess }) => {
           className="input"
           value={name}
           onChange={(e) => setName(capitalizeFirstLetter(e.target.value))}
+          onKeyDown={(e) => handleFormNavigation(e, 'lastName')}
         />
         <input
           type="lastName"
@@ -88,6 +90,7 @@ const SignUp: React.FC<SignUpProps> = ({ onSignUpSuccess }) => {
           className="input"
           value={lastName}
           onChange={(e) => setLastName(capitalizeFirstLetter(e.target.value))}
+          onKeyDown={(e) => handleFormNavigation(e, 'text')}
         />
         <input
           type="text"
@@ -95,6 +98,7 @@ const SignUp: React.FC<SignUpProps> = ({ onSignUpSuccess }) => {
           className="input"
           value={email}
           onChange={(e) => setEmail(e.target.value)}
+          onKeyDown={(e) => handleFormNavigation(e, 'password')}
         />
         <div className="password-container">
           <input
@@ -103,6 +107,7 @@ const SignUp: React.FC<SignUpProps> = ({ onSignUpSuccess }) => {
             className="password-input"
             value={password}
             onChange={(e) => setPassword(e.target.value)}
+            onKeyDown={(e) => handleFormNavigation(e, 'password')}
           />
           {password && (
             <button
@@ -122,6 +127,7 @@ const SignUp: React.FC<SignUpProps> = ({ onSignUpSuccess }) => {
               className="password-input"
               value={confirmPassword}
               onChange={(e) => setConfirmPassword(e.target.value)}
+              onKeyDown={(e) => handleFormNavigation(e, undefined, handleSignUp)}
             />
             {confirmPassword && (
               <button
