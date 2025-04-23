@@ -93,7 +93,7 @@ const Documents = () => {
   return (
     <div className="documents-content">
 
-      <h2 className="documents-subheader">Your documents</h2>
+      <h2 className="documents-subheader">Documents</h2>
 
       <div 
         className={`upload-zone ${isDragging ? 'dragging' : ''} ${isUploading ? 'uploading' : ''}`}

@@ -43,7 +43,7 @@ const History = () => {
   return (
     <div className="history-content">
 
-      <h2 className="history-subheader">Your chat history</h2>
+      <h2 className="history-subheader">History</h2>
 
       <div className="search-section">
         <div className="search-row">
