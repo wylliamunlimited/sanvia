@@ -10,54 +10,67 @@ from typing import Annotated
 import requests
 from dependencies.firebase_dependencies import (
     get_firebase_user_from_token,
-    update_survey_entry,
     get_firestore_client,
-    update_name_entry,
     get_profile,
+    initialize_profile,
+    update_profile,
 )
 from constants.firestore_obj import Survey
 
 router = APIRouter()
 
 
-@router.post("/survey")
-async def submit_survey(
-    user: Annotated[dict, Depends(get_firebase_user_from_token)], survey_data: dict
+@router.post("/initialize-profile")
+async def initialize_user_profile(
+    user: Annotated[dict, Depends(get_firebase_user_from_token)],
+    profile_data: dict
 ):
-    """Submits or updates a user's survey entry in Firestore."""
-    try: 
-        update_survey_entry(user["uid"], Survey(
-            age=survey_data['age'], gender=survey_data['gender'], sex=survey_data['sex'], height=survey_data['height'], 
-            weight=survey_data['weight'], conditions=survey_data['conditions'], medications=survey_data['medications'],
-        ))
-        return {"msg": "Survey updated successfully"}
+    """Initialize user's profile in Firestore."""
+    try:
+        initialize_profile(
+            user_id=user['uid'],
+            first_name=profile_data['first_name'],
+            last_name=profile_data['last_name']
+        )
+        return {"msg": "Profile initialized successfully"}
     except KeyError as ke:
         raise HTTPException(
-            status_code=400, detail=("Invalid survey data format. Required Fields: age, "
-                                     "gender, sex, height, weight, conditions, medications."
-                                     "Please pass them in using JSON.")
+            status_code=400, detail="Invalid profile data format. Required fields: first_name, last_name."
         )
     except Exception as e:
-        print(f"❌ Error submitting survey: {str(e)}")
+        print(f"❌ Error initializing profile: {str(e)}")
         raise HTTPException(
-            status_code=400, detail=f"Survey data upload failed: {str(e)}"
+            status_code=400, detail=f"Profile initialization failed."
         )
 
-
-@router.post("/store-names")
-async def upload_names(
-    user: Annotated[dict, Depends(get_firebase_user_from_token)],
-    first_name: str,
-    last_name: str,
+@router.post("/update-profile")
+async def update_user_profile(
+    user: Annotated[dict, Depends(get_firebase_user_from_token)], survey_data: dict
 ):
-    """Upload user's first & last name in Firestore."""
-    try:
-        update_name_entry(user_id=user['uid'], first_name=first_name, last_name=last_name)
-        return {"msg": "Names updated successfully"}
-    except Exception as e:
-        print(f"❌ Error uploading names: {str(e)}")
+    """Updates a user's profile in Firestore."""
+    try: 
+        update_profile(user["uid"], Survey(
+            age=survey_data['age'], 
+            gender=survey_data['gender'], 
+            sex=survey_data['sex'], 
+            height=survey_data['height'], 
+            weight=survey_data['weight'], 
+            conditions=survey_data['conditions'], 
+            medications=survey_data['medications'],
+            first_name=survey_data['first_name'],
+            last_name=survey_data['last_name']
+        ))
+        return {"msg": "Profile updated successfully"}
+    except KeyError as ke:
         raise HTTPException(
-            status_code=400, detail=f"name data upload failed."
+            status_code=400, detail=("Invalid profile data format. Required Fields: age, "
+                                     "gender, sex, height, weight, conditions, medications, "
+                                     "first_name, last_name. Please pass them in using JSON.")
+        )
+    except Exception as e:
+        print(f"❌ Error updating profile: {str(e)}")
+        raise HTTPException(
+            status_code=400, detail=f"Profile update failed: {str(e)}"
         )
 
 @router.get("/get-profile")
