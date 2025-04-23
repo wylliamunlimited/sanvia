@@ -17,7 +17,7 @@ from dependencies.firebase_dependencies import (
     get_all_chat_threads,
 )
 from constants.request_obj import (
-    PromptRequest,
+    EncryptedPromptRequest,
 )
 from constants.langgraph_obj import (
     AIBrain,
@@ -29,6 +29,12 @@ from dependencies.ai_dependencies import (
     get_llm,
     initializeGraph,
     trigger_response,
+)
+from dependencies.encryption_dependencies import (
+    encrypt_aes_gcm, decrypt_aes_gcm
+)
+from constants.credentials import (
+    AES_ENCRYPTION_KEY
 )
 from langchain_core.messages import HumanMessage  # ✅ Correct Import
 import random  ## TO BE REMOVED
@@ -91,105 +97,105 @@ async def health_check():
 #     }
 # ]
 # ]
-@router.post("/ai-response")
-async def ai_response(
-    request: PromptRequest,
-    user: Annotated[dict, Depends(get_firebase_user_from_token)],
-):
-    """[LEGACY] Obtain for AI Response
+# @router.post("/ai-response")
+# async def ai_response(
+#     request: EncryptedPromptRequest,
+#     user: Annotated[dict, Depends(get_firebase_user_from_token)],
+# ):
+#     """[LEGACY] Obtain for AI Response
 
-    Descriptions
-    ------------
-    - User authentication is required, token must be embedded in request header
-    - Take in user prompt, and run LangGraph based on it
-    - Update the LangGraph global states
-    - If no prior chat for this user, it would create one for user
+#     Descriptions
+#     ------------
+#     - User authentication is required, token must be embedded in request header
+#     - Take in user prompt, and run LangGraph based on it
+#     - Update the LangGraph global states
+#     - If no prior chat for this user, it would create one for user
 
-    Parameters
-    ----------
-    request : PromptRequest
-        consist of a prompt
+#     Parameters
+#     ----------
+#     request : EncryptedPromptRequest
+#         consist of a prompt
 
-    Returns
-    -------
-    dict
-        chat: str
-            messages
-        full_response: str
-            ai response
-        simple_response: str
-            abstract ai response 
-        total_sources: list[dict]
-            all the references 
-        sources: list[dict]
-            references for ai response
-        thread_id: str
-            chat thread id
+#     Returns
+#     -------
+#     dict
+#         chat: str
+#             messages
+#         full_response: str
+#             ai response
+#         simple_response: str
+#             abstract ai response 
+#         total_sources: list[dict]
+#             all the references 
+#         sources: list[dict]
+#             references for ai response
+#         thread_id: str
+#             chat thread id
 
-    Raises
-    ------
-    HTTPException 422
-        indicate there is no prompt, parameter value is invalid
-    HTTPException 
-        general endpoint errors
-    """
+#     Raises
+#     ------
+#     HTTPException 422
+#         indicate there is no prompt, parameter value is invalid
+#     HTTPException 
+#         general endpoint errors
+#     """
 
-    if request is None or request.prompt is None:
-        raise HTTPException(status_code=422, detail=f"Request does not contain prompt for AI to work with.")
+#     if request is None or request.encrypted_prompt is None:
+#         raise HTTPException(status_code=422, detail=f"Request does not contain prompt for AI to work with.")
 
-    try:
-        # Initialize user session if not active
-        if user["uid"] not in states:
-            thread_id = (
-                user["uid"]
-                + datetime.now().strftime("%Y%m%d%H%M%S")
-                + str(random.randint(0, 1000))
-            )
-            _graph, _state = initializeGraph(user_id=user["uid"])
-            _state["thread_id"] = thread_id
-            states[user["uid"]] = _state
-        else:
-            _graph = await initializeGraph(with_state=False, user_id=user["uid"])
-            _state = states[user["uid"]]
+#     try:
+#         # Initialize user session if not active
+#         if user["uid"] not in states:
+#             thread_id = (
+#                 user["uid"]
+#                 + datetime.now().strftime("%Y%m%d%H%M%S")
+#                 + str(random.randint(0, 1000))
+#             )
+#             _graph, _state = initializeGraph(user_id=user["uid"])
+#             _state["thread_id"] = thread_id
+#             states[user["uid"]] = _state
+#         else:
+#             _graph = await initializeGraph(with_state=False, user_id=user["uid"])
+#             _state = states[user["uid"]]
             
-        _state["user_id"] = user["uid"]
+#         _state["user_id"] = user["uid"]
 
-        # Append user message to chat history
-        _state["prompt_chain"].append({"role": "user", "content": request.prompt})
-        states[user["uid"]] = _state
+#         # Append user message to chat history
+#         _state["prompt_chain"].append({"role": "user", "content": request.encrypted_prompt})
+#         states[user["uid"]] = _state
 
-        # Call AI response
-        response = trigger_response(_graph, _state)
-        full_response = response["prompt_chain"][-1]["content"]  # Last AI response
+#         # Call AI response
+#         response = trigger_response(_graph, _state)
+#         full_response = response["prompt_chain"][-1]["content"]  # Last AI response
 
-        # Modify response based on complexity choice
-        simple_response = (
-            " ".join(full_response.split()[:30]) + "..."
-        )  # Shortened summary
+#         # Modify response based on complexity choice
+#         simple_response = (
+#             " ".join(full_response.split()[:30]) + "..."
+#         )  # Shortened summary
 
-        # Save chat to Firestore
-        update_chat_entry(
-            user_id=user["uid"],
-            thread_id=_state["thread_id"],
-            chat_data={
-                "prompt_chain": _state["prompt_chain"],
-                "sources": _state["knowledge"],
-                "last_updated_at": datetime.now().strftime("%m/%d/%y %H:%M:%S"),
-            },
-        )
+#         # Save chat to Firestore
+#         update_chat_entry(
+#             user_id=user["uid"],
+#             thread_id=_state["thread_id"],
+#             chat_data={
+#                 "prompt_chain": _state["prompt_chain"],
+#                 "sources": _state["knowledge"],
+#                 "last_updated_at": datetime.now().strftime("%m/%d/%y %H:%M:%S"),
+#             },
+#         )
 
-        return {
-            "chat": _state["prompt_chain"],
-            "full_response": full_response,  # Full text for "See More"
-            "simple_response": simple_response,  # Now correctly accessible
-            "total_sources": _state.get("knowledge", []),  # All sources used in the chat
-            "sources": _state.get("shortterm_knowledge", []),  # Tavily search results
-            "thread_id": _state["thread_id"],
-        }
+#         return {
+#             "chat": _state["prompt_chain"],
+#             "full_response": full_response,  # Full text for "See More"
+#             "simple_response": simple_response,  # Now correctly accessible
+#             "total_sources": _state.get("knowledge", []),  # All sources used in the chat
+#             "sources": _state.get("shortterm_knowledge", []),  # Tavily search results
+#             "thread_id": _state["thread_id"],
+#         }
 
-    except Exception as e:
-        print(f"AI Response Trigger Error: {e}")
-        raise HTTPException(status_code=400, detail=f"Error: {e}")
+#     except Exception as e:
+#         print(f"AI Response Trigger Error: {e}")
+#         raise HTTPException(status_code=400, detail=f"Error: {e}")
 
 
 @router.post("/destroy-chat-session")
@@ -228,7 +234,7 @@ async def destroy_chat_session(
 @router.post("/sanvia-chat/{thread_id}")
 async def sanvia_chat(
     thread_id: str,
-    request: PromptRequest,
+    request: EncryptedPromptRequest,
     user: Annotated[dict, Depends(get_firebase_user_from_token)],
 ):
     
@@ -269,9 +275,19 @@ async def sanvia_chat(
         general codebase error
     """
     
-    if request is None or request.prompt is None:
+    if request is None or request.encrypted_prompt is None:
         raise HTTPException(status_code=422, detail=f"Request does not contain prompt for AI to work with.")
-
+    
+    ## NOTE: DECRYPTION
+    try:
+        print(f"\t\t[DECRYPT] EncryptedPrompt: {request.encrypted_prompt}")
+        print(f"\t\t[DECRYPT] IV: {request.iv}")
+        prompt_json = decrypt_aes_gcm(request.encrypted_prompt, request.iv, AES_ENCRYPTION_KEY)
+        print(f"\t\t[DECRYPT] Decrypted JSON: {prompt_json}")
+        prompt = json.loads(prompt_json)["prompt"]
+        
+    except Exception as e:
+        raise HTTPException(status_code=500, detail="Decryption failed.")
     
     try:
         # 1) Check if the chat [thread_id] is currently active in global state
@@ -289,20 +305,18 @@ async def sanvia_chat(
         
         
         # 2) Append User Prompt to global states
-        
-        _state["prompt_chain"].append({"role": "user", "content": request.prompt})
+        _state["prompt_chain"].append({"role": "user", "content": prompt})
         states[user["uid"]] = _state
         
         
         # 3) Generate AI response & Cleaning
-        
         response = trigger_response(_graph, _state)
         full_response = response["prompt_chain"][-1]["content"]  # Last AI response
 
-        # Modify response based on complexity choice
-        simple_response = (
-            " ".join(full_response.split()[:30]) + "..."
-        )  # Shortened summary
+        # # Modify response based on complexity choice
+        # simple_response = (
+        #     " ".join(full_response.split()[:30]) + "..."
+        # )  # Shortened summary
         
         
         # 4) Update the Firestore entry of the chat [thread_id]
@@ -316,12 +330,19 @@ async def sanvia_chat(
             },
         )
         
+        ## NOTE: ENCRYPTION
+        try:
+            print("[ENCRYPT] Raw Response: ", full_response)
+            encrypted_response = encrypt_aes_gcm(plaintext=full_response, key_b64=AES_ENCRYPTION_KEY)
+            print("[ENCRYPT] Encrypted Response: ", json.dumps(encrypted_response))
+        except Exception as e:
+            raise HTTPException(status_code=500, detail="Response encryption failed.")
         
         # 5) HTTP Response
         return {
             "chat": _state["prompt_chain"],
             "full_response": full_response,  # Full text for "See More"
-            "simple_response": simple_response,  # Now correctly accessible
+            # "simple_response": simple_response,  # Now correctly accessible
             "total_sources": _state.get("knowledge", []),  # All sources used in the chat
             "sources": _state.get("shortterm_knowledge", []),  # Tavily search results
             "thread_id": _state["thread_id"],

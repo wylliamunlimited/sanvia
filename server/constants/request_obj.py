@@ -1,8 +1,9 @@
 from pydantic import BaseModel
 
 
-class PromptRequest(BaseModel):
-    prompt: str
+class EncryptedPromptRequest(BaseModel):
+    encrypted_prompt: str
+    iv: str
     # thread_id: str = None ## Temporary
     
     
