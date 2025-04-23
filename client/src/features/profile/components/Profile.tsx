@@ -6,6 +6,7 @@ import { getScrollbarWidth } from '../../../shared/utils/scrollbar'
 import { updateProfile } from '../services/profileService'
 import ProfileForm from './ProfileForm'
 import ConnectedAccounts from './ConnectedAccounts'
+import DangerZone from './DangerZone'
 
 const Profile = () => {
   const { userData, updateUserData } = useProfile()
@@ -94,9 +95,8 @@ const Profile = () => {
         title=""
       />
 
-      <h2 className="profile-subheader">Your profile</h2>
-
       <div className="profile-area scrollable-area">
+        <h2 className="profile-subheader">Your profile</h2>
         <ProfileForm 
           editedData={editedData}
           handleInputChange={handleInputChange}
@@ -112,6 +112,10 @@ const Profile = () => {
         <div className="section-divider"></div>
         
         <ConnectedAccounts />
+
+        <div className="section-divider"></div>
+        
+        <DangerZone />
       </div>
     </div>
   )
