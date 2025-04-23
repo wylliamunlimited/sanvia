@@ -377,14 +377,14 @@ def generate_question(thoughts: AIBrain) -> AIBrain:
         }
     ]
     
-    # Debug logging
-    print()
-    print(
-        f"- - - - - - - 🧠 [START] AGENT {thoughts['thread_id']}: 'Generate Question' Prompt [START] 🧠 - - - - - - -\n"
-        f"{json.dumps(tmp_prompt, indent=4)}\n"
-        f"- - - - - - - 🧠 [END] AGENT {thoughts['thread_id']}: 'Generate Question' Prompt [END] 🧠 - - - - - - -"
-    )
-    print()
+    # # Debug logging
+    # print()
+    # print(
+    #     f"- - - - - - - 🧠 [START] AGENT {thoughts['thread_id']}: 'Generate Question' Prompt [START] 🧠 - - - - - - -\n"
+    #     f"{json.dumps(tmp_prompt, indent=4)}\n"
+    #     f"- - - - - - - 🧠 [END] AGENT {thoughts['thread_id']}: 'Generate Question' Prompt [END] 🧠 - - - - - - -"
+    # )
+    # print()
 
     # LLM call
     ai_question = get_llm().invoke(tmp_prompt)
@@ -493,8 +493,8 @@ def knowledge_gathering(thoughts: AIBrain) -> AIBrain:
         print(f"❌ [thread {thread_id}] Invalid search category: {search_category}")
         return thoughts
 
-    print(f"🌐 [thread {thread_id}] Query: {search_query}")
-    print(f"📂 [thread {thread_id}] Category: {search_category}")
+    # print(f"🌐 [thread {thread_id}] Query: {search_query}")
+    # print(f"📂 [thread {thread_id}] Category: {search_category}")
 
 
     # print(f"AGENT: search metadata => {search_prompt.content}, {search_category.content}")
@@ -588,13 +588,14 @@ def summarize(thoughts: AIBrain) -> AIBrain:
     # Append the new user instruction
     prompt = processed_prompt_chain + [{"role": "user", "content": user_instruction}]
 
-    print()
-    print(
-        f"- - - - - - - 🧠 [START] AGENT {thoughts['thread_id']}: 'Summarize' Prompt [START] 🧠 - - - - - - -\n"
-        f"{json.dumps(prompt, indent=4)}\n"
-        f"- - - - - - - 🧠 [END] AGENT {thoughts['thread_id']}: 'Summarize' Prompt [END] 🧠 - - - - - - -"
-    )
-    print()
+    ## debug
+    # print()
+    # print(
+    #     f"- - - - - - - 🧠 [START] AGENT {thoughts['thread_id']}: 'Summarize' Prompt [START] 🧠 - - - - - - -\n"
+    #     f"{json.dumps(prompt, indent=4)}\n"
+    #     f"- - - - - - - 🧠 [END] AGENT {thoughts['thread_id']}: 'Summarize' Prompt [END] 🧠 - - - - - - -"
+    # )
+    # print()
 
     # === TOKEN COUNT ESTIMATION ===
     token_count = (
@@ -830,7 +831,7 @@ def trigger_response(graph, user_state: AIBrain) -> AIBrain:
         print(f"[GRAPH] Invoking with thread_id={user_state['thread_id']}")
         response = graph.invoke(user_state, config)
         print("[GRAPH] Invocation complete")
-        print(f"[GRAPH] Final prompt_chain:\n{json.dumps(response.get('prompt_chain', []), indent=2)}")
+        # print(f"[GRAPH] Final prompt_chain:\n{json.dumps(response.get('prompt_chain', []), indent=2)}")
         return response
     except Exception as e:
         print(f"❌ [GRAPH] Error during graph execution: {e}")
