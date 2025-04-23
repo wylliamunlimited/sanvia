@@ -5,6 +5,7 @@ import "./auth.css";
 import { auth } from "../../../api/firebase";
 import { createUserWithEmailAndPassword } from "firebase/auth";
 import { firestoreApi } from "../../../api/firestoreApi";
+import { capitalizeFirstLetter } from "../../../shared/utils/capitalize";
 
 interface SignUpProps {
   onSignUpSuccess: () => void;
@@ -79,14 +80,14 @@ const SignUp: React.FC<SignUpProps> = ({ onSignUpSuccess }) => {
           placeholder="First Name"
           className="input"
           value={name}
-          onChange={(e) => setName(e.target.value)}
+          onChange={(e) => setName(capitalizeFirstLetter(e.target.value))}
         />
         <input
           type="lastName"
           placeholder="Last Name"
           className="input"
           value={lastName}
-          onChange={(e) => setLastName(e.target.value)}
+          onChange={(e) => setLastName(capitalizeFirstLetter(e.target.value))}
         />
         <input
           type="text"
