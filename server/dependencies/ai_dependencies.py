@@ -426,7 +426,7 @@ def doc_data_extract(thoughts: AIBrain) -> AIBrain:
     relevant_docs = query_docs_from_chroma(prompt=last_message, premise={"user_id": user_id})
     
     # Join flattened text chunks into a single context string
-    doc_content = " ".join([doc[0] for doc in relevant_docs.get("documents", [])])
+    doc_content = " ".join([doc[0] for doc in relevant_docs.get("documents", []) if len(doc) != 0])
     if doc_content.strip():
         thoughts["data"]["doc_context"] = doc_content
 
@@ -824,9 +824,16 @@ async def initializeGraph(with_state: bool = True, prompt_chain: list = [], user
 
 
 def trigger_response(graph, user_state: AIBrain) -> AIBrain:
-
     config = {"configurable": {"thread_id": user_state["thread_id"]}}
-    state = graph.get_state(config)
-    # print(f"Current state: {state}")
-    response = graph.invoke(user_state, config)
-    return response
+
+    try:
+        print(f"[GRAPH] Invoking with thread_id={user_state['thread_id']}")
+        response = graph.invoke(user_state, config)
+        print("[GRAPH] Invocation complete")
+        print(f"[GRAPH] Final prompt_chain:\n{json.dumps(response.get('prompt_chain', []), indent=2)}")
+        return response
+    except Exception as e:
+        print(f"❌ [GRAPH] Error during graph execution: {e}")
+        import traceback
+        traceback.print_exc()
+        raise e

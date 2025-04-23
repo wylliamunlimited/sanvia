@@ -15,7 +15,7 @@ from dependencies.firebase_dependencies import (
     get_chat,
 )
 from constants.request_obj import (
-    PromptRequest,
+    EncryptedPromptRequest,
 )
 from constants.langgraph_obj import (
     AIBrain,
