@@ -158,7 +158,7 @@ const Sidebar: React.FC<SidebarProps> = ({
       <div className="sidebar-header">
         <div className="logo-container">
           <div className="logo-wrapper">
-            <img src="/images/logo.png" alt="Logo" />
+            <img src="/images/logo.svg" alt="Logo" />
             <span className="logo-text">Sanvia</span>
           </div>
           <button 

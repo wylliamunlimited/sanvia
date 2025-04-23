@@ -4,6 +4,10 @@
   padding: 0;
 }
 
+html, body {
+  background-color: var(--background-secondary);
+}
+
 :root {
   --background: #181818;
   --background-hover: #2d2d2d;

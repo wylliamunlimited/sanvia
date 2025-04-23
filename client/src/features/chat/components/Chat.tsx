@@ -268,7 +268,7 @@ const Chat = () => {
       </form>
       
       <div className="disclaimer">
-        For informational purposes only. Not a substitute for professional medical advice.
+        Sanvia is not a substitute for professional medical advice.
       </div>
 
       <SourcesSidebar 
