@@ -2,7 +2,6 @@ import { useState, useRef, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
 import './NewChat.css'
 import chatApi from '../../../api/chatApi'
-import Header from '../../../shared/components/Header'
 import { useProfile } from '../../../context/ProfileContext'
 
 const NewChat = () => {
@@ -58,10 +57,6 @@ const NewChat = () => {
 
   return (
     <div className="new-chat-content">
-      <Header
-        icon={<></>}
-        title=""
-      />
 
       <div className="new-chat-container">
         <div className="new-chat-message">

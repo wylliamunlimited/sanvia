@@ -1,7 +1,6 @@
 import { useState, useEffect } from 'react'
 import './Profile.css'
 import { useProfile } from '../../../context/ProfileContext'
-import Header from '../../../shared/components/Header'
 import { getScrollbarWidth } from '../../../shared/utils/scrollbar'
 import { updateProfile } from '../services/profileService'
 import ProfileForm from './ProfileForm'
@@ -90,10 +89,6 @@ const Profile = () => {
 
   return (
     <div className="profile-content">
-      <Header 
-        icon={<></>}
-        title=""
-      />
 
       <div className="profile-area scrollable-area">
         <h2 className="profile-subheader">Your profile</h2>
