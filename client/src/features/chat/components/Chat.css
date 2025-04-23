@@ -80,7 +80,7 @@
   max-width: 90rem;
   display: flex;
   align-items: flex-end;
-  background-color: #1E1E1E;
+  background-color: var(--background-dark);
   border: 1px solid var(--border-color);
   border-radius: 10px;
   padding: 0.3rem;
@@ -184,7 +184,7 @@
 
 .chat-input-container {
   padding: 1rem calc(max(1rem, (100% - 768px) / 2));
-  border-top: 1px solid #eee;
+  border-top: 1px solid var(--border-light);
 }
 
 .message-area::-webkit-scrollbar {

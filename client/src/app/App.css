@@ -14,6 +14,8 @@
   --primary: #3b5eda;
   --primary-hover: #4d6ee8;
   --error: #ff6b6b;
+  --background-dark: #1E1E1E;
+  --border-light: #eee;
 }
 
 .app-container {
