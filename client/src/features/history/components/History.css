@@ -160,7 +160,7 @@
 .error-message {
   text-align: center;
   padding: 2rem 0;
-  color: #ff6b6b;
+  color: var(--error);
 }
 
 .history-group {

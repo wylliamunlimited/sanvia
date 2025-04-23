@@ -13,6 +13,7 @@
   --border-color: #333333;
   --primary: #3b5eda;
   --primary-hover: #4d6ee8;
+  --error: #ff6b6b;
 }
 
 .app-container {
