@@ -46,23 +46,33 @@ def get_firestore_client() -> firestore.Client:
 
 
 ## this function should be under utils for sign up or database operation script [will come back and check]
-def update_survey_entry(user_id: str, survey_data: Survey) -> None:
-    """Updates a user's survey entry in Firestore."""
+def update_profile(user_id: str, survey_data: Survey) -> None:
+    """Updates a user's profile in Firestore."""
     try:
         doc_ref = get_firestore_client().collection("profiles").document(user_id)
         doc_ref.set(survey_data.to_dict(), merge=True)
     except Exception as e:
-        print(f"❌ Error updating survey entry: {str(e)}")
+        print(f"❌ Error updating profile: {str(e)}")
         raise
 
 
-def update_name_entry(user_id: str, first_name: str, last_name: str) -> None:
-    """Updates a user's first & last names in Firestore."""
+def initialize_profile(user_id: str, first_name: str, last_name: str) -> None:
+    """Initializes a user's profile in Firestore with empty values."""
     try:
         doc_ref = get_firestore_client().collection("profiles").document(user_id)
-        doc_ref.set({"first-name": first_name, "last-name": last_name}, merge=True)
+        doc_ref.set({
+            "first-name": first_name,
+            "last-name": last_name,
+            "Age": "",
+            "Gender": "",
+            "Sex": "",
+            "Height": "",
+            "Weight": "",
+            "Conditions": [],
+            "Medications": []
+        })
     except Exception as e:
-        print(f"❌ Error updating name entry: {str(e)}")
+        print(f"❌ Error initializing profile: {str(e)}")
         raise
 
 

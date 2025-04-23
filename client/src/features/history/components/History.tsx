@@ -1,7 +1,6 @@
 import { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
 import './History.css'
-import Header from '../../../shared/components/Header'
 import { formatHistoryTime, groupSessionsByDate } from '../utils/dateUtils'
 import { ChatSession, fetchChatThreads } from '../services/historyService'
 
@@ -43,10 +42,6 @@ const History = () => {
 
   return (
     <div className="history-content">
-      <Header
-        icon={<></>}
-        title=""
-      />
 
       <h2 className="history-subheader">Your chat history</h2>
 

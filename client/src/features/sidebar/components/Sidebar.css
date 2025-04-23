@@ -4,7 +4,7 @@
   width: 260px;
   min-width: 260px;
   flex-shrink: 0;
-  background-color: white;
+  background-color: var(--background-secondary);
   display: flex;
   flex-direction: column;
   justify-content: space-between;
@@ -73,21 +73,28 @@ body.sidebar-collapsed .menu-item-icon {
   display: flex;
   flex-direction: row;
   align-items: center;
+  justify-content: space-between;
   width: 100%;
   padding: 1.25rem 1.25rem 0 1.25rem;
-  color: #333;
+  color: var(--text-primary);
+}
+
+.logo-wrapper {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
 }
 
 .logo-container img {
-  width: 40px;
-  height: 40px;
+  width: 1.5rem;
+  height: 1.5rem;
 }
 
 .logo-text {
   font-family: 'Unbounded', sans-serif;
   font-size: 20px;
   font-weight: 400;
-  color: #333;
+  color: var(--text-primary);
 }
 
 .sidebar-content {
@@ -109,10 +116,10 @@ body.sidebar-collapsed .menu-item-icon {
 .new-chat-button {
   width: 100%;
   padding: 0.5rem 0.75rem;
-  border: 1px solid #e5e7eb;
+  border: 1px solid var(--border-color);
   border-radius: 6px;
-  background: white;
-  color: #333;
+  background: #1E1E1E;
+  color: var(--text-primary);
   font-size: 14px;
   text-align: left;
   cursor: pointer;
@@ -124,8 +131,8 @@ body.sidebar-collapsed .menu-item-icon {
 }
 
 .new-chat-button:hover {
-  background-color: #f8f9fa;
-  border-color: #d1d5db;
+  background-color: var(--background-hover);
+  border-color: var(--border-color);
 }
 
 .nav-item {
@@ -134,7 +141,7 @@ body.sidebar-collapsed .menu-item-icon {
   border: none;
   border-radius: 6px;
   background: none;
-  color: #666;
+  color: var(--text-secondary);
   font-size: 14px;
   text-align: left;
   cursor: pointer;
@@ -145,23 +152,23 @@ body.sidebar-collapsed .menu-item-icon {
 }
 
 .nav-item:hover {
-  background-color: #f2f5fc;
+  background-color: var(--background-hover);
 }
 
 .nav-item.active {
-  background-color: #f2f5fc;
-  color: #333;
+  background-color: var(--background-hover);
+  color: var(--text-primary);
   font-weight: 500;
 }
 
 .nav-item-icon {
   display: flex;
   align-items: center;
-  color: #666;
+  color: var(--text-secondary);
 }
 
 .nav-item.active .nav-item-icon {
-  color: #333;
+  color: var(--text-primary);
 }
 
 .profile-menu {
@@ -183,7 +190,7 @@ body.sidebar-collapsed .menu-item-icon {
 }
 
 .profile-section:hover {
-  background-color: #f2f5fc;
+  background-color: var(--background-hover);
 }
 
 .profile-icon {
@@ -193,14 +200,14 @@ body.sidebar-collapsed .menu-item-icon {
   display: flex;
   align-items: center;
   justify-content: center;
-  background-color: #F2F5FC;
+  background-color: var(--background-hover);
   border-radius: 50%;
-  color: #666;
+  color: var(--text-secondary);
   flex-shrink: 0;
 }
 
 .user-name {
-  color: #333;
+  color: var(--text-primary);
   font-size: 14px;
   font-weight: 500;
 }
@@ -210,7 +217,7 @@ body.sidebar-collapsed .menu-item-icon {
   bottom: 100%;
   left: 0;
   right: 0;
-  background-color: white;
+  background-color: var(--background-secondary);
   border-radius: 8px;
   overflow: hidden;
   display: flex;
@@ -229,7 +236,7 @@ body.sidebar-collapsed .menu-item-icon {
   border: none;
   border-radius: 6px;
   background: none;
-  color: #666;
+  color: var(--text-secondary);
   font-size: 14px;
   text-align: left;
   cursor: pointer;
@@ -237,16 +244,16 @@ body.sidebar-collapsed .menu-item-icon {
 }
 
 .menu-item:hover, .menu-item.active {
-  background-color: #f2f5fc;
+  background-color: var(--background-hover);
 }
 
 .menu-item.active {
-  color: #333;
+  color: var(--text-primary);
   font-weight: 500;
 }
 
 .menu-item.active .menu-item-icon {
-  color: #333;
+  color: var(--text-primary);
 }
 
 .menu-item:not(:last-child) {
@@ -256,35 +263,35 @@ body.sidebar-collapsed .menu-item-icon {
 .menu-item-icon {
   display: flex;
   align-items: center;
-  color: #666;
+  color: var(--text-secondary);
 }
 
 .collapse-button {
-  position: absolute;
-  right: -12.5px;
-  top: 50vh;
-  transform: translateY(-50%);
-  background: white;
-  border: 1px solid #e5e7eb;
-  border-radius: 4px;
-  padding: 0;
-  width: 25px;
-  height: 33px;
+  background: none;
+  border: none;
+  padding: 0.5rem;
+  color: var(--text-secondary);
   cursor: pointer;
-  color: #B3B3B3;
-  transition: all 0.2s;
   display: flex;
   align-items: center;
   justify-content: center;
-  z-index: 10;
-  opacity: 0;
-}
-
-.sidebar:hover .collapse-button {
-  opacity: 1;
+  border-radius: 6px;
+  transition: all 0.2s;
 }
 
 .collapse-button:hover {
-  color: #B3B3B3;
-  background-color: #f8f9fa;
+  color: var(--text-primary);
+  background-color: var(--background-hover);
+}
+
+body.sidebar-collapsed .collapse-button {
+  display: none;
+}
+
+body.sidebar-collapsed .collapse-nav-item {
+  display: flex;
+}
+
+.collapse-nav-item {
+  display: none;
 }

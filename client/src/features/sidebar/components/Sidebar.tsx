@@ -4,7 +4,6 @@ import { useNavigate } from 'react-router-dom'
 import { firestoreApi } from '../../../api/firestoreApi'
 import { useAuth } from '../../../context/AuthContext'
 import { useProfile } from '../../../context/ProfileContext'
-import Banner from './Banner'
 
 type NavItem = {
   id: string
@@ -53,14 +52,16 @@ const navItems: NavItem[] = [
 const Sidebar: React.FC<SidebarProps> = ({
   activeSection,
   onSectionChange,
-  // onCollapse,
 }) => {
   const [menuOpen, setMenuOpen] = useState(false)
+  const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(() => {
+    const savedState = localStorage.getItem('sidebarCollapsed');
+    return savedState ? JSON.parse(savedState) : false;
+  });
   const [userName, setUserName] = useState("");
   const { user, loading, logout } = useAuth();
   const { setUserData } = useProfile();
   const navigate = useNavigate();
-  const [onboardingComplete, setOnboardingComplete] = useState<boolean>(true);
 
   const handleChatNavigation = () => {
     // Check if chat ID in localStorage
@@ -101,13 +102,6 @@ const Sidebar: React.FC<SidebarProps> = ({
           medications: data['Medications']
         });
 
-        // Set onboarding status
-        if (data['onboarding'] === "complete") {
-          setOnboardingComplete(true);
-        } else {
-          setOnboardingComplete(false);
-        }
-
         console.log("Profile data fetched:", data);
       } catch (error) {
         console.error("Error fetching profile:", error);
@@ -119,9 +113,23 @@ const Sidebar: React.FC<SidebarProps> = ({
 
   const handleLogout = () => {
     setMenuOpen(false);
+    localStorage.removeItem('lastChatId');
     logout();
     navigate('/auth/login');
   };
+
+  const toggleSidebar = () => {
+    const newState = !isSidebarCollapsed;
+    document.body.classList.toggle('sidebar-collapsed')
+    setIsSidebarCollapsed(newState)
+    localStorage.setItem('sidebarCollapsed', JSON.stringify(newState));
+  }
+
+  useEffect(() => {
+    if (isSidebarCollapsed) {
+      document.body.classList.add('sidebar-collapsed');
+    }
+  }, []);
 
   const menuItems = [
     {
@@ -136,33 +144,6 @@ const Sidebar: React.FC<SidebarProps> = ({
       onClick: () => {
         console.log('Profile button clicked');
         navigate('/profile');
-        setMenuOpen(true);
-      }
-    },
-    {
-      id: 'settings',
-      label: 'Settings',
-      icon: (
-        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-          <path d="M12.22 2h-.44a2 2 0 0 0-2 2v.18a2 2 0 0 1-1 1.73l-.43.25a2 2 0 0 1-2 0l-.15-.08a2 2 0 0 0-2.73.73l-.22.38a2 2 0 0 0 .73 2.73l.15.1a2 2 0 0 1 1 1.72v.51a2 2 0 0 1-1 1.74l-.15.09a2 2 0 0 0-.73 2.73l.22.38a2 2 0 0 0 2.73.73l.15-.08a2 2 0 0 1 2 0l.43.25a2 2 0 0 1 1 1.73V20a2 2 0 0 0 2 2h.44a2 2 0 0 0 2-2v-.18a2 2 0 0 1 1-1.73l.43-.25a2 2 0 0 1 2 0l.15.08a2 2 0 0 0 2.73-.73l.22-.39a2 2 0 0 0-.73-2.73l-.15-.08a2 2 0 0 1-1-1.74v-.5a2 2 0 0 1 1-1.74l.15-.09a2 2 0 0 0 .73-2.73l-.22-.38a2 2 0 0 0-2.73-.73l-.15.08a2 2 0 0 1-2 0l-.43-.25a2 2 0 0 1-1-1.73V4a2 2 0 0 0-2-2z" />
-          <circle cx="12" cy="12" r="3" />
-        </svg>
-      ),
-      onClick: () => {
-        console.log('Settings clicked');
-        setMenuOpen(true);
-      }
-    },
-    {
-      id: 'feedback',
-      label: 'Feedback',
-      icon: (
-        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-          <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z" />
-        </svg>
-      ),
-      onClick: () => {
-        console.log('Feedback clicked');
         setMenuOpen(true);
       }
     },
@@ -188,21 +169,34 @@ const Sidebar: React.FC<SidebarProps> = ({
     <div className="sidebar">
       <div className="sidebar-header">
         <div className="logo-container">
-          <img src="/images/logo.png" alt="Logo" />
-          <span className="logo-text">Sanvia</span>
+          <div className="logo-wrapper">
+            <img src="/images/logo.svg" alt="Logo" />
+            <span className="logo-text">Sanvia</span>
+          </div>
+          <button 
+            className="collapse-button"
+            onClick={toggleSidebar}
+            aria-label="Toggle sidebar"
+          >
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+              <polyline points="15 18 9 12 15 6" />
+            </svg>
+          </button>
         </div>
-        <button 
-          className="collapse-button"
-          onClick={() => document.body.classList.toggle('sidebar-collapsed')}
-          aria-label="Toggle sidebar"
-        >
-          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-            <polyline points="15 18 9 12 15 6" />
-          </svg>
-        </button>
       </div>
       <div className="sidebar-content">
         <nav className="sidebar-nav">
+          <button
+            className="nav-item collapse-nav-item"
+            onClick={toggleSidebar}
+          >
+            <span className="nav-item-icon">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <polyline points="9 18 15 12 9 6" />
+              </svg>
+            </span>
+            <span className="nav-item-text">Expand sidebar</span>
+          </button>
           <button 
             className="new-chat-button"
             onClick={() => navigate('/chat')}
@@ -231,8 +225,6 @@ const Sidebar: React.FC<SidebarProps> = ({
           ))}
         </nav>
       </div>
-      
-      <Banner isVisible={!onboardingComplete} />
       
       <div className="profile-menu">
         <button

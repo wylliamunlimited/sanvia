@@ -1,6 +1,5 @@
 import { useState, useEffect } from 'react'
 import './Documents.css'
-import Header from '../../../shared/components/Header'
 import { getScrollbarWidth } from '../../../shared/utils/scrollbar'
 import { Document, fetchDocuments, uploadDocuments, getPreviewUrl } from '../services/documentService'
 
@@ -93,10 +92,6 @@ const Documents = () => {
 
   return (
     <div className="documents-content">
-      <Header 
-        icon={<></>}
-        title=""
-      />
 
       <h2 className="documents-subheader">Your documents</h2>
 

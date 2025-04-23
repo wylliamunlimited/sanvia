@@ -95,3 +95,12 @@ if WHOOP_CLIENT_SECRET:
 else:
     print("❌ WHOOP_CLIENT_SECRET is NOT set.")
     raise ValueError("WHOOP Client Secret is missing. Check your .env file.")
+
+
+AES_ENCRYPTION_KEY = os.getenv("AES_ENCRYPTION_KEY")
+
+if AES_ENCRYPTION_KEY:
+    print(f"✅ AES_ENCRYPTION_KEY is Detected")
+else:
+    print("❌ AES_ENCRYPTION_KEY is NOT set.")
+    raise ValueError("AES Encryption key is missing. Check your .env file.")

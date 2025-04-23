@@ -2,7 +2,6 @@ import { useState, useRef, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
 import './NewChat.css'
 import chatApi from '../../../api/chatApi'
-import Header from '../../../shared/components/Header'
 import { useProfile } from '../../../context/ProfileContext'
 
 const NewChat = () => {
@@ -13,6 +12,13 @@ const NewChat = () => {
   const [error, setError] = useState<string | null>(null)
   
   const textareaRef = useRef<HTMLTextAreaElement>(null)
+
+  // Focus textarea on mount
+  useEffect(() => {
+    if (textareaRef.current) {
+      textareaRef.current.focus()
+    }
+  }, [])
 
   const getTimeOfDay = (): string => {
     const hour = new Date().getHours()
@@ -58,10 +64,6 @@ const NewChat = () => {
 
   return (
     <div className="new-chat-content">
-      <Header
-        icon={<></>}
-        title=""
-      />
 
       <div className="new-chat-container">
         <div className="new-chat-message">
@@ -106,7 +108,7 @@ const NewChat = () => {
       </div>
       
       <div className="disclaimer">
-        For informational purposes only. Not a substitute for professional medical advice.
+        Sanvia is not a substitute for professional medical advice.
       </div>
     </div>
   )

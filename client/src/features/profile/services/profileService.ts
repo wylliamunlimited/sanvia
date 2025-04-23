@@ -14,8 +14,10 @@ export interface ProfileUpdate {
 
 export const updateProfile = async (profile: ProfileUpdate): Promise<void> => {
   try {
-    // Update profile metrics
-    const profile_response = await firestoreApi.uploadProfile(
+    // Update profile data
+    const response = await firestoreApi.updateProfile(
+      profile.firstName,
+      profile.lastName,
       profile.age,
       profile.gender,
       profile.sex,
@@ -24,16 +26,7 @@ export const updateProfile = async (profile: ProfileUpdate): Promise<void> => {
       profile.conditions,
       profile.medications
     )
-    console.log(`Uploading user profile (without names), result: ${profile_response}`)
-
-    // Update user names
-    const name_response = await firestoreApi.uploadNames(
-      profile.firstName,
-      profile.lastName
-    )
-    console.log(`Uploading user names, result: ${name_response}`)
-
-    console.log('Update user information successful.')
+    console.log('Update user information successful:', response)
   } catch (error) {
     console.error('Error updating profile:', error)
     throw error
