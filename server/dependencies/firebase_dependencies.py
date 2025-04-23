@@ -264,8 +264,8 @@ def update_epic_tokens(user_id: str, token_data: Dict):
     
     try:
         epic_token_data = EPICTokenData(
+            patient=token_data["patient"],
             access_token=token_data["access_token"],
-            refresh_token=token_data["refresh_token"],
             scope=token_data["scope"],
             token_type=token_data["token_type"],
             expires_in=token_data["expires_in"],
@@ -283,6 +283,7 @@ def update_epic_tokens(user_id: str, token_data: Dict):
         
         return {
             "access_token": epic_token_data.access_token,
+            "patient": epic_token_data.patient,
             "expiration_date": epic_token_data.expiration_date,
         }
     except KeyError as ke:

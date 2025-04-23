@@ -130,6 +130,7 @@ class WhoopTokenData:
                 
 class EPICTokenData:
     def __init__(self, 
+                 patient: str,
                  access_token: str,
                  refresh_token: str,
                  scope: str,
@@ -137,8 +138,8 @@ class EPICTokenData:
                  expires_in: int,
                  expiration_date: datetime,
                  last_updated: datetime):
+        self.patient = patient
         self.access_token = access_token
-        self.refresh_token = refresh_token
         self.scope = scope
         self.token_type = token_type
         self.expires_in = expires_in
@@ -149,8 +150,8 @@ class EPICTokenData:
     def from_dict(source: dict):
         try:
             return WhoopTokenData(
+                patient=source["patient"],
                 access_token=source['access_token'],
-                refresh_token=source['refresh_token'],
                 scope=source['scope'],
                 token_type=source['token_type'],
                 expires_in=int(source['expires_in']),
@@ -164,8 +165,8 @@ class EPICTokenData:
 
     def to_dict(self):
         return {
+            "patient": self.patient,
             "access_token": self.access_token,
-            "refresh_token": self.refresh_token,
             "scope": self.scope,
             "token_type": self.token_type,
             "expires_in": self.expires_in,
@@ -174,6 +175,6 @@ class EPICTokenData:
         }
 
     def __repr__(self):
-        return (f"EPICTokenData(access_token='{self.access_token[:10]}...', refresh_token='{self.refresh_token[:10]}...', "
+        return (f"EPICTokenData(patient='{self.patient[:10]}...', access_token='{self.access_token[:10]}...', "
                 f"scope='{self.scope}', token_type='{self.token_type}', expires_in={self.expires_in}, "
                 f"expiration_date='{self.expiration_date}', last_updated='{self.last_updated}')")

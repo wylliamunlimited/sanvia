@@ -4,6 +4,8 @@ from fastapi import APIRouter, Depends, HTTPException, Request
 from fastapi.responses import RedirectResponse
 import urllib.parse
 import httpx
+import json
+import base64
 from datetime import datetime
 
 from constants.url import (
@@ -14,6 +16,9 @@ from constants.credentials import (
 )
 from dependencies.firebase_dependencies import (
     get_firebase_user_from_token, update_epic_tokens, get_epic_tokens, get_recent_epic_token
+)
+from dependencies.epic_dependencies import (
+    get_epic_patient_data
 )
 
 router = APIRouter()
@@ -33,6 +38,13 @@ async def fhir_epic_callback(
     try:
         auth_code = request.query_params.get("code")
         user_id = request.query_params.get("state")
+        
+        print("Retrieved")
+        
+        state_raw = request.query_params.get("state")
+        state_decoded = json.loads(base64.urlsafe_b64decode(state_raw.encode()).decode())
+        user_id = state_decoded["uid"]
+        provider_url = state_decoded["aud"]
         
         if not auth_code:
             raise HTTPException(status_code=400, detail=f"Missing authorization code from EPIC.")
@@ -59,6 +71,11 @@ async def fhir_epic_callback(
             
             ## Verify user authentication is successful, by calling an example API call
             ## TODO
+            user_data = get_epic_patient_data(access_token=access_token_cache["access_token"], patient_id=access_token_cache["patient"],
+                                              provider_url=provider_url)
+            
+            print(f"User Data: {user_data}")
+            
             
         return RedirectResponse(url=f"{FRONTEND_URL}/profile?provider=whoop&connect-status=success")
         
@@ -81,11 +98,16 @@ async def fhir_epic_redirect(
 
         redirect_uri = f"{SANVIA_BACKEND_BASE_URL}/auth/epic/callback"
 
+        state_data = {
+            "uid": user["uid"],
+            "aud": provider_url
+        }
+
         params = {
             "response_type": "code",
             "client_id": EPIC_CLIENT_ID,
             "redirect_uri": redirect_uri,
-            "state": user['uid'],
+            "state": state_data,
             "scope": "offline_access",
             "aud": provider_url
         }
