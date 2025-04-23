@@ -1,6 +1,6 @@
 import React from 'react';
 import './ConnectedAccounts.css';
-import whoopapi from '../../../api/external_auth';
+import { whoopapi, epicapi } from '../../../api/external_auth';
 
 const ConnectedAccounts: React.FC = () => {
   return (
@@ -16,6 +16,16 @@ const ConnectedAccounts: React.FC = () => {
             <span className="service-name">WHOOP</span>
           </div>
           <button className="connect-button" onClick={whoopapi.connectWhoop}>Connect</button>
+        </div>
+        <div className="account-connection-item">
+          <div className="service-info">
+            <div className="service-logo epic-logo"></div>
+            <span className="service-name">EPIC</span>
+          </div>
+          <button className="connect-button" onClick={() => {
+            const providerUrl = "https://fhir.epic.com/interconnect-fhir-oauth/";
+            epicapi.connectEpic(providerUrl) // default: test server
+          }}>Connect</button>
         </div>
       </div>
     </>

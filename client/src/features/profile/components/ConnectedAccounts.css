@@ -50,6 +50,11 @@
   background-image: url("https://play-lh.googleusercontent.com/RpXxly7Gn0C_MjCHbynE9QxhMgC2D3PI4CAC7E2ujha2GRqepYWgH9IletL1x5facA");
 }
 
+.epic-logo {
+  background-color: #fff;
+  background-image: url("https://seeklogo.com/images/E/epic-systems-corporation-logo-B7F3606BB5-seeklogo.com.png");
+}
+
 .service-name {
   font-size: 16px;
   font-weight: 500;
