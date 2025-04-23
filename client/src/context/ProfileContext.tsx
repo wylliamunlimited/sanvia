@@ -56,12 +56,10 @@ export const ProfileProvider: React.FC<{ children: ReactNode }> = ({ children })
   const updateUserData = async (updatedData: ProfileData) => {
     try {
       // Update user data in Firestore
-      await firestoreApi.uploadProfile(
+      await firestoreApi.updateProfile(
+        updatedData.firstName, updatedData.lastName,
         updatedData.age, updatedData.gender, updatedData.sex,
-        updatedData.height, updatedData.weight, updatedData.conditions, updatedData.medications
-      );
-      await firestoreApi.uploadNames(
-        updatedData.firstName, updatedData.lastName
+        updatedData.height, updatedData.weight, updatedData.conditions, updatedData.medications,
       );
       
       // Update local state

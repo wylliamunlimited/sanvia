@@ -17,6 +17,7 @@ const Profile = () => {
     lastName: userData.lastName,
     height: userData.height,
     weight: userData.weight,
+    gender: userData.gender,
     sex: userData.sex,
     age: userData.age,
     conditions: userData.conditions,
@@ -37,6 +38,7 @@ const Profile = () => {
       lastName: userData.lastName,
       height: userData.height,
       weight: userData.weight,
+      gender: userData.gender,
       sex: userData.sex,
       age: userData.age,
       conditions: userData.conditions,
@@ -66,6 +68,7 @@ const Profile = () => {
       lastName: userData.lastName,
       height: userData.height,
       weight: userData.weight,
+      gender: userData.gender,
       sex: userData.sex,
       age: userData.age,
       conditions: userData.conditions,
@@ -75,14 +78,9 @@ const Profile = () => {
   }
 
   const handleSave = async () => {
-    const updatedProfile = {
-      ...editedData,
-      gender: userData.gender // Removing
-    }
-
     try {
-      await updateProfile(updatedProfile)
-      updateUserData(updatedProfile)
+      await updateProfile(editedData)
+      updateUserData(editedData)
       setHasChanges(false)
     } catch (e) {
       console.error('Failed to update profile:', e)

@@ -22,6 +22,8 @@ class Survey:
                  weight: float, ## in kg
                  conditions: list = [],
                  medications: list = [],
+                 first_name: str = "",
+                 last_name: str = "",
                  ):
         self.age = age
         self.gender = gender
@@ -30,13 +32,23 @@ class Survey:
         self.weight = weight
         self.conditions = conditions
         self.medications = medications
-        self.onboarding = "complete"
+        self.first_name = first_name
+        self.last_name = last_name
     
     @staticmethod
     def from_dict(source):
         try:
-            return Survey(age=int(source['Age']), gender=source['Gender'], sex=source['Sex'], height=float(source['Height']),
-                          weight=float(source['Weight'], conditions=source['Conditions'], medications=source['Medications']),)
+            return Survey(
+                age=int(source['Age']), 
+                gender=source['Gender'], 
+                sex=source['Sex'], 
+                height=float(source['Height']),
+                weight=float(source['Weight']), 
+                conditions=source['Conditions'], 
+                medications=source['Medications'],
+                first_name=source.get('first-name', ''),
+                last_name=source.get('last-name', '')
+            )
         except Exception as e:
             raise ValueError("Make sure all the fields are entered: age, gender, sex, height, weight, conditions, medications.")
     
@@ -49,12 +61,13 @@ class Survey:
             "Weight": self.weight,
             "Conditions": self.conditions,
             "Medications": self.medications,
-            "onboarding": self.onboarding
+            "first-name": self.first_name,
+            "last-name": self.last_name
         }
     
     def __repr__(self):
         return (f'Survey(age={self.age}, gender={self.gender}, sex={self.sex}, height={self.height}, weight={self.weight},' 
-                f'conditions={self.conditions}, medications={self.medications}, onboarding={self.onboarding})')
+                f'conditions={self.conditions}, medications={self.medications})')
     
     def contextualize(self):
         f"""Patient Profile:

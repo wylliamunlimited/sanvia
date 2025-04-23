@@ -39,9 +39,34 @@ api.interceptors.request.use((config) => {
 });
 
 export const firestoreApi = {
-    uploadProfile: async (age: string, gender: string, sex: string, height: string, weight: string, conditions: string[], medications: string[]): Promise<any> => {
+    initializeProfile: async (first_name: string, last_name: string): Promise<any> => {
         try {
-            const response = await api.post<any>('/survey', { 
+            const response = await api.post<any>('/initialize-profile', {
+                first_name: first_name,
+                last_name: last_name
+            });
+            return response.data;
+        } catch (error) {
+            console.error('Error initializing profile:', error);
+            throw error;
+        }
+    },
+    
+    get_user_profile: async (): Promise<any> => {
+        try {
+            const response = await api.get<any>(`/get-profile`);
+            console.log(response.data);
+            return response.data;
+        } catch (error) {
+            console.error('Error retrieving profile data:', error);
+        }
+    },
+
+    updateProfile: async (firstName: string, lastName: string, age: string, gender: string, sex: string, height: string, weight: string, conditions: string[], medications: string[]): Promise<any> => {
+        try {
+            const response = await api.post<any>('/update-profile', { 
+                "first_name": firstName,
+                "last_name": lastName,
                 "age": age,
                 "gender": gender,
                 "sex": sex,
@@ -52,30 +77,8 @@ export const firestoreApi = {
             });
             return response.data;
         } catch (error) {
-            console.error('Error uploading survey data:', error);
+            console.error('Error updating profile data:', error);
             throw error;
-        }
-    },
-    uploadNames: async (first_name: string, last_name: string): Promise<any> => {
-        try {
-            const response = await api.post<any>(`/store-names?first_name=${first_name}&last_name=${last_name}`, {});
-            return response.data;
-        } catch (error) {
-            console.error('Error uploading names:', error);
-            throw error;
-        }
-    },
-
-
-
-
-    get_user_profile: async (): Promise<any> => {
-        try {
-            const response = await api.get<any>(`/get-profile`);
-            console.log(response.data);
-            return response.data;
-        } catch (error) {
-            console.error('Error retrieving profile data:', error);
         }
     }
 };
