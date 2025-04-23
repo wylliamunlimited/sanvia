@@ -19,7 +19,7 @@
 .profile-subheader {
   font-size: 1.5rem;
   font-weight: 600;
-  margin: 0 0 1rem;
+  margin: 1rem 0;
   padding: 0;
   color: var(--text-primary);
 }
@@ -40,7 +40,7 @@
 }
 
 .section-divider {
-  height: 1px;
+  min-height: 1px;
   background-color: var(--border-color);
   margin: 32px 0 24px;
   width: 100%;

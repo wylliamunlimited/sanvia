@@ -3,7 +3,6 @@ import { useParams, useNavigate } from 'react-router-dom'
 import './Chat.css'
 import { getScrollbarWidth } from '../../../shared/utils/scrollbar'
 import chatApi, { SourceItem } from '../../../api/chatApi'
-import Header from '../../../shared/components/Header'
 import SourcesSidebar from '../components/SourcesSidebar'
 import Message from '../components/Message'
 import { useAutoScroll } from '../hooks/useAutoScroll'
@@ -200,10 +199,6 @@ const Chat = () => {
 
   return (
     <div className={`chat-content ${isSourcesSidebarOpen ? 'sidebar-open' : ''}`}>
-      <Header 
-        icon={<></>}
-        title=""
-      />
 
       <div 
         ref={messageAreaRef}
