@@ -6,8 +6,8 @@ import Sidebar from '../components/Sidebar/Sidebar'
 import Chat from '../components/Chat/Chat'
 import Documents from '../components/Documents/Documents'
 import History from '../components/History/History'
-import SignUp from '../components/SignUp/SignUp'
-import Login from '../components/Login/Login'
+import SignUp from '../features/auth/components/SignUp'
+import Login from '../features/auth/components/Login'
 import { FirebaseProvider } from '../provider/FirebaseContext';
 import { AuthProvider, useAuth } from '../provider/AuthContext';
 import { ProfileProvider } from '../provider/ProfileContext';

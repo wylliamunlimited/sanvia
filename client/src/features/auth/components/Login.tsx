@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import "./Login.css"; // Import the CSS file
-import { useFirebase } from "../../provider/FirebaseContext";
+import { useFirebase } from "../../../provider/FirebaseContext";
 import { signInWithEmailAndPassword } from "firebase/auth";
 
 interface LoginProps {
