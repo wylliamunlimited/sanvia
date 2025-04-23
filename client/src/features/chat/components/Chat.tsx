@@ -6,6 +6,7 @@ import chatApi, { SourceItem } from '../../../api/chatApi'
 import SourcesSidebar from '../components/SourcesSidebar'
 import Message from '../components/Message'
 import { useAutoScroll } from '../hooks/useAutoScroll'
+import Header from "../../../shared/components/Header";
 
 type Message = {
   id: number
