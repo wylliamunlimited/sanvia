@@ -31,7 +31,7 @@
 
 .field-label {
   font-size: 14px;
-  color: #666;
+  color: var(--text-secondary);
   margin-bottom: 6px;
   font-weight: 500;
   display: flex;
@@ -42,11 +42,11 @@
 .unit-select {
   margin-left: 6px;
   font-size: 14px;
-  color: #666;
-  border: 1px solid #ddd;
+  color: var(--text-secondary);
+  border: 1px solid var(--border-color);
   border-radius: 4px;
   padding: 2px 4px;
-  background-color: #f9f9f9;
+  background-color: var(--background);
   cursor: pointer;
   appearance: none;
   background-image: url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23666' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3e%3cpolyline points='6 9 12 15 18 9'%3e%3c/polyline%3e%3c/svg%3e");
@@ -65,10 +65,11 @@
   width: 100%;
   padding: 10px;
   font-size: 16px;
-  border: 1px solid #ddd;
+  border: 1px solid var(--border-color);
   border-radius: 6px;
-  background-color: white;
+  background-color: var(--background);
   transition: all 0.2s ease;
+  color: var(--text-primary);
 }
 
 .editable-select {
@@ -83,7 +84,7 @@
 .editable-input:focus {
   border-color: var(--primary);
   outline: none;
-  box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+  box-shadow: 0 2px 4px rgba(0,0,0,0.2);
 }
 
 .profile-action-buttons {
@@ -95,7 +96,7 @@
 }
 
 .cancel-link {
-  color: #666;
+  color: var(--text-secondary);
   font-weight: 500;
   cursor: pointer;
   margin-right: 8px;
@@ -104,12 +105,13 @@
 
 .cancel-link:hover {
   text-decoration: underline;
+  color: var(--text-primary);
 }
 
 .save-button {
-  background-color: #F2F5FC;
-  color: var(--primary);
-  border: 1px solid #E4E9F2;
+  background-color: var(--background-hover);
+  color: var(--text-primary);
+  border: 1px solid var(--border-color);
   padding: 8px 16px;
   border-radius: 6px;
   font-size: 14px;
@@ -119,7 +121,8 @@
 }
 
 .save-button:hover {
-  background-color: #E4E9F2;
+  background-color: var(--primary);
+  border-color: var(--primary);
 }
 
 .feet-inches-inputs {
@@ -137,5 +140,5 @@
 .unit-label {
   margin-left: 8px;
   font-size: 14px;
-  color: #666;
+  color: var(--text-secondary);
 } 

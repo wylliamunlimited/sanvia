@@ -76,20 +76,18 @@
 .nav-button.login {
     background: none;
     border: none;
-    color: #fff;
+    color: var(--text-primary);
 }
 
 .nav-button.signup {
-    background: rgba(255, 255, 255, 0.1);
-    backdrop-filter: blur(10px);
-    -webkit-backdrop-filter: blur(10px);
-    border: 1px solid rgba(255, 255, 255, 0.2);
-    color: #fff;
-    box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37);
+    background: var(--background-hover);
+    border: 1px solid var(--border-color);
+    color: var(--text-primary);
 }
 
 .nav-button:hover {
-    background: rgba(255, 255, 255, 0.2);
+    background: var(--primary);
+    border-color: var(--primary);
 }
 
 .hero-section {
@@ -131,20 +129,20 @@
 }
 
 .cta-button {
-    background: rgba(0, 0, 0, 0.9);
-    backdrop-filter: blur(10px);
-    -webkit-backdrop-filter: blur(10px);
-    border: 1px solid rgba(255, 255, 255, 0.2);
-    color: #fff;
+    background: var(--background-hover);
+    border: 1px solid var(--border-color);
+    color: var(--text-primary);
     padding: 0.75rem 1.5rem;
     border-radius: 8px;
     font-size: 1.125rem;
     font-weight: 500;
     cursor: pointer;
+    transition: all 0.2s ease;
 }
 
 .cta-button:hover {
-    background: rgba(0, 0, 0, 1);
+    background: var(--primary);
+    border-color: var(--primary);
 }
 
 @media (max-width: 768px) {
