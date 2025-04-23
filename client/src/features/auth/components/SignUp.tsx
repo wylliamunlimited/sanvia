@@ -48,9 +48,9 @@ const SignUp: React.FC<SignUpProps> = ({ onSignUpSuccess }) => {
             localStorage.setItem("sanvia-refreshToken", token);
             console.log("Token is stored properly.");
           }).then(() => {
-            firestoreApi.uploadNames(name, lastName)
+            firestoreApi.initializeProfile(name, lastName)
             .then((data) => {
-              console.log(`Upload names onto Firestore, ${data}`);
+              console.log(`Initialized profile with names, ${data}`);
               setError("");
               onSignUpSuccess();
               navigate("/onboarding");
