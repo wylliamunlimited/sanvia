@@ -72,7 +72,7 @@ function App() {
               <Navigate to="/chat" replace />
             ) : (
               <Login
-                onLoginSuccess={() => {
+                onLoginSuccess={async () => {
                   localStorage.setItem('isLogged', 'true');
                 }}
               />
