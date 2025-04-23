@@ -4,6 +4,7 @@ import "./auth.css";
 import { useFirebase } from "../../../context/FirebaseContext";
 import { signInWithEmailAndPassword } from "firebase/auth";
 import { handleFormNavigation } from "../../../shared/utils/formNavigation";
+import securityApi from "../../../api/encryption/security";
 
 interface LoginProps {
   onLoginSuccess: () => void;
@@ -32,6 +33,11 @@ const Login: React.FC<LoginProps> = ({ onLoginSuccess }) => {
           user.getIdToken(true).then((token) => {
             localStorage.setItem("sanvia-refreshToken", token);
             console.log("Token is stored properly.");
+          });
+
+          securityApi.getEncryptionKey().then((key) => {
+            sessionStorage.setItem("AES_KEY", key);
+            console.log("AES Encryption Key stored properly.");
           });
           
           onLoginSuccess();
