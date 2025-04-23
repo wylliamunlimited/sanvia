@@ -9,6 +9,7 @@ import Documents from '../features/documents/components/Documents'
 import History from '../features/history/components/History'
 import SignUp from '../features/auth/components/SignUp'
 import Login from '../features/auth/components/Login'
+import Landing from '../features/landing/components/Landing'
 import { FirebaseProvider } from '../context/FirebaseContext';
 import { AuthProvider, useAuth } from '../context/AuthContext';
 import { ProfileProvider } from '../context/ProfileContext';
@@ -51,6 +52,12 @@ function App() {
 
     return (
       <Routes>
+        {/* Landing Page Route */}
+        <Route
+          path="/"
+          element={user ? <Navigate to="/chat" replace /> : <Landing />}
+        />
+
         {/* Sign-Up Route */}
         <Route
           path="/auth/signup"
@@ -127,7 +134,6 @@ function App() {
                   </button>
                 )}
                 <Routes>
-                  <Route path="/" element={<Navigate to="/chat" replace />} />
                   <Route path="/chat" element={<NewChat />} />
                   <Route path="/chat/:threadId" element={<Chat />} />
                   <Route path="/documents" element={<Documents />} />
@@ -137,7 +143,7 @@ function App() {
                 </Routes>
               </div>
             </div>
-          ) : <Navigate to="/auth/login" replace />}
+          ) : <Navigate to="/" replace />}
         />
       </Routes>
     );

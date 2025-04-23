@@ -160,7 +160,7 @@ const SignUp: React.FC<SignUpProps> = ({ onSignUpSuccess }) => {
       {error && <p className="error">{error}</p>}
       <p className="toggleText">
         Already have an account?{" "}
-        <span className="link" onClick={() => navigate("/onboarding")}>
+        <span className="link" onClick={() => navigate("/auth/login")}>
           Login
         </span>
       </p>

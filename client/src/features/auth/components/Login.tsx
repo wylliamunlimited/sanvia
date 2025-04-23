@@ -34,7 +34,7 @@ const Login: React.FC<LoginProps> = ({ onLoginSuccess }) => {
           });
           
           onLoginSuccess();
-          navigate("/");
+          navigate("/chat");
         })
         .catch((error) => {
           console.log(`Sign In Failed. ${error}`);
