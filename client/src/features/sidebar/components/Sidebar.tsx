@@ -113,6 +113,7 @@ const Sidebar: React.FC<SidebarProps> = ({
 
   const handleLogout = () => {
     setMenuOpen(false);
+    localStorage.removeItem('lastChatId');
     logout();
     navigate('/auth/login');
   };
