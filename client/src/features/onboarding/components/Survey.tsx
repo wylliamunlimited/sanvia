@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { useNavigate } from "react-router-dom";
 import "./Survey.css";
 import { firestoreApi } from '../../../api/firestoreApi';
@@ -7,8 +7,9 @@ import { useProfile } from '../../../context/ProfileContext';
 interface SurveyQuestion {
   id: string;
   text: string;
-  backgroundColor: string;
 }
+
+
 
 interface SurveyProps {
   onSurveyComplete: () => void;
@@ -32,6 +33,15 @@ const AnimatedSurvey: React.FC<SurveyProps> = ({ onSurveyComplete }) => {
   const [searchTerm, setSearchTerm] = useState('');
   const [filteredConditions, setFilteredConditions] = useState<string[]>([]);
   const [medicalConditions, setMedicalConditions] = useState<string[]>([]);
+  const [medication, setMedication] = useState<string[]>([]);
+  const [prescribedMeds, setPrescribedMeds] = useState<string[]>([]);
+  const rxInputRef = useRef<HTMLInputElement | null>(null);
+  const [selectedMedication, setSelectedMedication] = useState<string>('');
+
+  const handleMedicationSelect = (medication: string) => {
+    setSelectedMedication(medication);
+  };
+
 
   //medical info
   useEffect(() => {
@@ -68,37 +78,32 @@ const AnimatedSurvey: React.FC<SurveyProps> = ({ onSurveyComplete }) => {
   const [heightUnit, setHeightUnit] = useState('cm');
   const [weightUnit, setWeightUnit] = useState('kg');
 
+
   // Define questions
   const questions: SurveyQuestion[] = [
     {
       id: 'age',
-      text: "How old are you?",
-      backgroundColor: "#E6F2FF" // Very light blue
+      text: "1. How old are you?",
     },
     {
       id: 'gender',
-      text: "Select your gender?",
-      backgroundColor: "#B3D9FF" // Light blue
+      text: "2. Select your gender:",
     },
     {
       id: 'sex',
-      text: "Select your sex?",
-      backgroundColor: "#80C1FF" // Medium blue
+      text: "3. Select your sex:",
     },
     {
       id: 'height',
-      text: "What is your height?",
-      backgroundColor: "#4DA6FF" // Bright blue
+      text: "4. What is your height?",
     },
     {
       id: 'weight',
-      text: "What is your weight?",
-      backgroundColor: "#1A75FF" // Deep blue
+      text: "5. What is your weight?",
     },
     {
       id: 'medicalConditions',
-      text: "Select any medical conditions you have:",
-      backgroundColor: "#0052cc" // Darker blue
+      text: "6. Select any medical conditions you have:",
     }
   ];
 
@@ -124,14 +129,8 @@ const AnimatedSurvey: React.FC<SurveyProps> = ({ onSurveyComplete }) => {
       setTransitionDirection('next');
       setPreviousQuestionIndex(currentQuestionIndex);
       setIsAnimating(true);
-      
-      // Delay changing the current question to allow animation to start
-      setTimeout(() => {
-        setCurrentQuestionIndex(prevIndex => prevIndex + 1);
-        setTimeout(() => {
-          setIsAnimating(false);
-        }, 50); // Small delay to ensure state is updated
-      }, 50);
+      setCurrentQuestionIndex(prevIndex => prevIndex + 1);
+
     } else {
       handleSubmit();
     }
@@ -143,14 +142,20 @@ const AnimatedSurvey: React.FC<SurveyProps> = ({ onSurveyComplete }) => {
       setTransitionDirection('prev');
       setPreviousQuestionIndex(currentQuestionIndex);
       setIsAnimating(true);
-      
-      // Delay changing the current question to allow animation to start
-      setTimeout(() => {
-        setCurrentQuestionIndex(prevIndex => prevIndex - 1);
-        setTimeout(() => {
-          setIsAnimating(false);
-        }, 50); // Small delay to ensure state is updated
-      }, 50);
+      setCurrentQuestionIndex(prevIndex => prevIndex - 1);
+
+
+    }
+  };
+
+  const handleSkip = () => {
+    if (currentQuestionIndex < questions.length - 1) {
+      setTransitionDirection('next');
+      setPreviousQuestionIndex(currentQuestionIndex);
+      setIsAnimating(true);
+      setCurrentQuestionIndex(prevIndex => prevIndex + 1);
+    } else {
+      handleSubmit();
     }
   };
 
@@ -209,7 +214,8 @@ const AnimatedSurvey: React.FC<SurveyProps> = ({ onSurveyComplete }) => {
       height: heightUnit === 'cm' ? height : `${feet}'${inches}"`,
       weight: `${weight}`,
       weightUnit: `${weightUnit}`,
-      medicalConditions
+      medicalConditions,
+      medication
     };
     console.log('Survey submitted:', surveyData);
 
@@ -244,6 +250,7 @@ const AnimatedSurvey: React.FC<SurveyProps> = ({ onSurveyComplete }) => {
     setHeightUnit('cm');
     setWeightUnit('kg');
     setMedicalConditions([]);
+    setMedication([]);
     setIsCompleted(false);
     setPreviousQuestionIndex(0);
     setCurrentQuestionIndex(0);
@@ -270,66 +277,16 @@ const AnimatedSurvey: React.FC<SurveyProps> = ({ onSurveyComplete }) => {
   
   const navigate = useNavigate();
 
-  // Function to calculate the slide position based on direction and indices
-  const getSlidePosition = (index: number) => {
-    if (index === currentQuestionIndex) return 0;
-    
-    if (transitionDirection === 'next') {
-      return index < currentQuestionIndex ? -100 : 100;
-    } else {
-      return index > currentQuestionIndex ? 100 : -100;
-    }
-  };
-
-  // Fetch profile data on mount
-  useEffect(() => {
-    const fetchProfile = async () => {
-      try {
-        const data = await firestoreApi.get_user_profile();
-        setUserData({
-          firstName: data['first-name'],
-          lastName: data['last-name'],
-          height: data['Height'],
-          weight: data['Weight'],
-          gender: data['Gender'],
-          sex: data['Sex'],
-          age: data['Age'],
-          conditions: data['Conditions'],
-          medications: data['Medications']
-        });
-      } catch (error) {
-        console.error('Error fetching profile:', error);
-      }
-    };
-    fetchProfile();
-  }, [setUserData]);
-
   return (
     <div className="survey-container">
       {/* Background slides */}
-      {questions.map((question, index) => (
-        <div
-          key={index}
-          className={`background-slide ${
-            activeIndices.includes(index) ? 'active' : 'inactive'
-          }`}
-          style={{
-            transform: `translateY(${activeIndices.includes(index) ? getSlidePosition(index) : index < currentQuestionIndex ? -100 : 100}vh)`,
-            backgroundColor: question.backgroundColor,
-            opacity: activeIndices.includes(index) ? 1 : 0
-          }}
-        />
-      ))}
-
       {/* Thank you background */}
       <div
         className="thank-you-background"
         style={{
           transform: `translateY(${isCompleted ? 0 : 100}vh)`,
-          backgroundColor: "#0047B3" // Deep royal blue for completion
         }}
       />
-
       {/* Survey content */}
       <div className="survey-content-container">
         {!isCompleted ? (
@@ -350,7 +307,6 @@ const AnimatedSurvey: React.FC<SurveyProps> = ({ onSurveyComplete }) => {
               {/* Question 1: Age */}
               {currentQuestionIndex === 0 && (
                 <div className="question-container">
-                  <label className="input-label">Enter your age:</label>
                   <input
                     type="number"
                     min="16"
@@ -403,7 +359,6 @@ const AnimatedSurvey: React.FC<SurveyProps> = ({ onSurveyComplete }) => {
               {/* Question 4: Height */}
               {currentQuestionIndex === 3 && (
                 <div className="question-container">
-                  <label className="input-label">Height ({heightUnit}):</label>
 
                   {heightUnit === 'cm' ? (
                     <input
@@ -448,7 +403,6 @@ const AnimatedSurvey: React.FC<SurveyProps> = ({ onSurveyComplete }) => {
               {/* Question 5: Weight */}
               {currentQuestionIndex === 4 && (
                 <div className="question-container">
-                  <label className="input-label">Weight ({weightUnit}):</label>
                   <input
                     type="text"
                     value={weight}
@@ -471,8 +425,6 @@ const AnimatedSurvey: React.FC<SurveyProps> = ({ onSurveyComplete }) => {
               {/* Question 6: Medical Conditions */}
               {currentQuestionIndex === 5 && (
                 <div className="question-container">
-                  <label className="input-label">Search and select your conditions:</label>
-
                   {/* search bar */}
                   <div className="search-container">
                     <input
@@ -565,6 +517,10 @@ const AnimatedSurvey: React.FC<SurveyProps> = ({ onSurveyComplete }) => {
                   </div>
                 </div>
               )}
+        
+
+              {/* Question 7: Medical conditions */}
+        
 
               {/* Navigation buttons */}
               <div className="navigation-buttons">
@@ -586,6 +542,16 @@ const AnimatedSurvey: React.FC<SurveyProps> = ({ onSurveyComplete }) => {
                 >
                   {currentQuestionIndex === questions.length - 1 ? 'Submit' : 'Next'}
                 </button>
+
+                {currentQuestionIndex < questions.length - 1 && (
+                  <button
+                    type="button"
+                    onClick={handleSkip}
+                    className="skip-button"
+                  >
+                    Skip
+                  </button>
+                  )}
               </div>
 
               {/* Progress indicator */}
@@ -616,6 +582,8 @@ const AnimatedSurvey: React.FC<SurveyProps> = ({ onSurveyComplete }) => {
                 <li><strong>Height:</strong> {heightUnit === 'cm' ? `${height} cm` : `${feet}'${inches}"`}</li>
                 <li><strong>Weight:</strong> {weight} {weightUnit}</li>
                 <li><strong>Medical Conditions:</strong> {medicalConditions.length > 0 ? medicalConditions.join(', ') : 'None'}</li>
+                <li><strong>Medication Prescription:</strong> {medicalConditions.length > 0 ? medicalConditions.join(', ') : 'None'}</li>
+
               </ul>
             </div>
 
