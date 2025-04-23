@@ -1,7 +1,6 @@
 .landing-container {
     min-height: 100vh;
-    background-color: #000;
-    color: #fff;
+    color: var(--text-primary);
     font-family: 'Unbounded', sans-serif;
     font-weight: 500;
     font-size: 1.5rem;
@@ -46,13 +45,13 @@
     font-family: 'Unbounded', sans-serif;
     font-size: 1.5rem;
     font-weight: 500;
-    color: #fff;
+    color: var(--text-primary);
 }
 
 .nav-link {
     background: none;
     border: none;
-    color: #fff;
+    color: var(--text-primary);
     font-size: 1rem;
     font-weight: 500;
     cursor: pointer;
