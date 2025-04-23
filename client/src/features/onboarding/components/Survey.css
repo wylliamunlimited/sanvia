@@ -294,10 +294,10 @@
 
 /* Summary card */
 .summary-card {
-  background-color: rgba(255, 255, 255, 0.9);
+  background-color: rgba(84, 84, 84, 0.3);
   padding: 2rem;
   border-radius: 0.5rem;
-  box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+  box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
   text-align: center;
   transition: all 500ms;
   max-width: 42rem;
@@ -308,21 +308,25 @@
   font-size: 1.875rem;
   font-weight: 700;
   margin-bottom: 1rem;
+  color: white;
 }
 
 /* Summary description */
 .summary-description {
   font-size: 1.25rem;
   margin-bottom: 1.5rem;
+  color: white;
 }
 
 /* Summary data container */
 .summary-data {
-  background-color: #f3f4f6;
+  background-color: rgba(84, 84, 84, 0.2);
+  border: solid 2px rgba(84, 84, 84, 0.3);
   padding: 1.5rem;
   border-radius: 0.5rem;
   margin-bottom: 1.5rem;
   text-align: left;
+  color: white;
 }
 
 /* Summary subtitle */

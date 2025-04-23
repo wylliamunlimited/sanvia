@@ -507,8 +507,6 @@ const AnimatedSurvey: React.FC<SurveyProps> = ({ onSurveyComplete }) => {
                   </div>
                 </div>
               )}
-
-              {/* Question 7: Medical conditions */}
         
 
               {/* Navigation buttons */}
