@@ -7,6 +7,7 @@ import { createUserWithEmailAndPassword } from "firebase/auth";
 import { firestoreApi } from "../../../api/firestoreApi";
 import { capitalizeFirstLetter } from "../../../shared/utils/capitalize";
 import { handleFormNavigation } from "../../../shared/utils/formNavigation";
+import securityApi from "../../../api/encryption/security";
 
 interface SignUpProps {
   onSignUpSuccess: () => void;
@@ -51,15 +52,20 @@ const SignUp: React.FC<SignUpProps> = ({ onSignUpSuccess }) => {
             console.log("Token is stored properly.");
           }).then(() => {
             firestoreApi.initializeProfile(name, lastName)
-            .then((data) => {
-              console.log(`Initialized profile with names, ${data}`);
-              setError("");
-              onSignUpSuccess();
-              navigate("/onboarding");
-            })
-            .catch((error) => {
-              setError(error);
-            });
+              .then((data) => {
+                console.log(`Initialized profile with names, ${data}`);
+                setError("");
+
+                securityApi.getEncryptionKey().then((key) => {
+                  sessionStorage.setItem("AES_KEY", key);
+                  console.log("AES Encryption Key stored properly.");
+                });
+                onSignUpSuccess();
+                navigate("/onboarding");
+              })
+              .catch((error) => {
+                setError(error);
+              });
           });
         })
         .catch((error) => {
@@ -150,9 +156,9 @@ const SignUp: React.FC<SignUpProps> = ({ onSignUpSuccess }) => {
           />
           <label htmlFor="terms" className="terms-label">
             I agree to Sanvia's{" "}
-            <a 
-              href="https://sanvia.app/privacy-policy" 
-              target="_blank" 
+            <a
+              href="https://sanvia.app/privacy-policy"
+              target="_blank"
               className="link"
             >
               Privacy Policy
