@@ -14,7 +14,17 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 import firebase_admin
 from firebase_admin import credentials
-from routers import firebase_auth, firebase_db, search, ai_agent, document_processing, public_data, whoop_connect
+from routers import (
+    firebase_auth,
+    firebase_db,
+    search,
+    ai_agent,
+    document_processing,
+    public_data,
+    whoop_connect,
+    delete_user_data,
+    encryption
+)
 from dependencies.firebase_dependencies import (
     get_settings,
     initialize_firebase,
@@ -42,6 +52,8 @@ app.include_router(ai_agent.router)
 app.include_router(document_processing.router)
 app.include_router(public_data.router)
 app.include_router(whoop_connect.router)
+app.include_router(delete_user_data.router)
+app.include_router(encryption.router)
 # = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = =
 
 
@@ -57,6 +69,7 @@ async def debug_routes():
 def hello():
     """Server is running route to test if the app is running."""
     return {"msg": "Server is running"}
+
 
 @app.get("/health")
 def health_check():

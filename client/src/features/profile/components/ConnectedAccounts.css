@@ -1,12 +1,12 @@
 .connected-accounts-header {
   font-size: 1.25rem;
   font-weight: 600;
-  color: #333;
+  color: var(--text-primary);
   margin: 0 0 8px;
 }
 
 .connected-accounts-description {
-  color: #666;
+  color: var(--text-secondary);
   font-size: 14px;
   margin: 0 0 24px;
   line-height: 1.5;
@@ -23,9 +23,9 @@
   justify-content: space-between;
   align-items: center;
   padding: 16px;
-  background-color: white;
+  background-color: var(--background);
   border-radius: 8px;
-  border: 1px solid #E4E9F2;
+  border: 1px solid var(--border-color);
 }
 
 .service-info {
@@ -41,7 +41,7 @@
   background-size: contain;
   background-repeat: no-repeat;
   background-position: center;
-  border: 1px solid #E4E9F2;
+  border: 1px solid var(--border-color);
   overflow: hidden;
 }
 
@@ -50,26 +50,16 @@
   background-image: url("https://play-lh.googleusercontent.com/RpXxly7Gn0C_MjCHbynE9QxhMgC2D3PI4CAC7E2ujha2GRqepYWgH9IletL1x5facA");
 }
 
-.apple-health-logo {
-  background-color: #fff;
-  background-image: url("https://developer.apple.com/assets/elements/icons/healthkit/healthkit-96x96_2x.png");
-}
-
-.samsung-health-logo {
-  background-color: #fff;
-  background-image: url("https://play-lh.googleusercontent.com/le2tv6aaAbpIqEnAnP-KGJbsrcEuePSLZGG4KikbC4mjzpl8itxOJg1oQo6dMgRLxw=w600-h300-pc0xffffff-pd");
-}
-
 .service-name {
   font-size: 16px;
   font-weight: 500;
-  color: #333;
+  color: var(--text-primary);
 }
 
 .connect-button {
-  background-color: white;
-  color: var(--primary);
-  border: 1px solid var(--primary);
+  background-color: var(--background-hover);
+  color: var(--text-primary);
+  border: 1px solid var(--border-color);
   padding: 8px 16px;
   border-radius: 6px;
   font-size: 14px;
@@ -79,5 +69,6 @@
 }
 
 .connect-button:hover {
-  background-color: #F2F5FC;
+  background-color: var(--primary);
+  border-color: var(--primary);
 } 

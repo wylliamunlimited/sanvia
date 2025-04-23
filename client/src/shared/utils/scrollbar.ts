@@ -1,3 +1,7 @@
+/**
+ * Get the width of the scrollbar
+ * @returns The width of the scrollbar
+ */
 export const getScrollbarWidth = () => {
   const outer = document.createElement('div')
   outer.style.visibility = 'hidden'

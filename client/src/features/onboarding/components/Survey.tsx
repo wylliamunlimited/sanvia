@@ -2,6 +2,8 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate } from "react-router-dom";
 import "./Survey.css";
 import { firestoreApi } from '../../../api/firestoreApi';
+import { useProfile } from '../../../context/ProfileContext';
+
 interface SurveyQuestion {
   id: string;
   text: string;
@@ -13,6 +15,7 @@ interface SurveyProps {
 }
 
 const AnimatedSurvey: React.FC<SurveyProps> = ({ onSurveyComplete }) => {
+  const { userData, setUserData } = useProfile();
   // Survey state
   const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0);
   const [previousQuestionIndex, setPreviousQuestionIndex] = useState(0);
@@ -204,7 +207,7 @@ const AnimatedSurvey: React.FC<SurveyProps> = ({ onSurveyComplete }) => {
       gender,
       sex,
       height: heightUnit === 'cm' ? height : `${feet}'${inches}"`,
-      weight: `${weight}` ,
+      weight: `${weight}`,
       weightUnit: `${weightUnit}`,
       medicalConditions
     };
@@ -212,9 +215,17 @@ const AnimatedSurvey: React.FC<SurveyProps> = ({ onSurveyComplete }) => {
 
     // Upload to Firestore
     try {
-      const response = await firestoreApi.uploadProfile(
-        age, gender, sex, height, weight, medicalConditions, []
-      )  // Change to chatApi.sendMessage once auth is implemented
+      const response = await firestoreApi.updateProfile(
+        userData.firstName,
+        userData.lastName,
+        age,
+        gender,
+        sex,
+        height,
+        weight,
+        medicalConditions,
+        []
+      );
       console.log(`Uploaded survey data onto Firestore, ${response}`);
 
     } catch (err) {
@@ -269,6 +280,29 @@ const AnimatedSurvey: React.FC<SurveyProps> = ({ onSurveyComplete }) => {
       return index > currentQuestionIndex ? 100 : -100;
     }
   };
+
+  // Fetch profile data on mount
+  useEffect(() => {
+    const fetchProfile = async () => {
+      try {
+        const data = await firestoreApi.get_user_profile();
+        setUserData({
+          firstName: data['first-name'],
+          lastName: data['last-name'],
+          height: data['Height'],
+          weight: data['Weight'],
+          gender: data['Gender'],
+          sex: data['Sex'],
+          age: data['Age'],
+          conditions: data['Conditions'],
+          medications: data['Medications']
+        });
+      } catch (error) {
+        console.error('Error fetching profile:', error);
+      }
+    };
+    fetchProfile();
+  }, [setUserData]);
 
   return (
     <div className="survey-container">

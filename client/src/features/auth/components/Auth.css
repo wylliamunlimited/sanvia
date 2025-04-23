@@ -4,23 +4,19 @@
     justify-content: center;
     align-items: center;
     height: 100vh;
-    background-image: url('/images/auth-bg.png');
-    background-size: cover;
-    background-position: center;
-    background-repeat: no-repeat;
-    position: relative;
+    background-color: var(--background-secondary);
   }
   
   .card {
-    background: rgba(255, 255, 255, 0.1);
-    backdrop-filter: blur(10px);
-    -webkit-backdrop-filter: blur(10px);
+    background: rgba(255, 255, 255, 0.05);
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
     padding: 1.5rem;
     border-radius: 8px;
-    border: 1px solid rgba(255, 255, 255, 0.2);
+    border: 1px solid var(--border-color);
     text-align: center;
     width: 348px;
-    box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37);
+    box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.5);
     position: relative;
   }
   
@@ -28,18 +24,18 @@
     font-size: 24px;
     margin-bottom: 0.5rem;
     text-align: left;
-    color: #ffffff;
+    color: var(--text-primary);
   }
   
   .welcome-message {
     font-size: 14px;
-    color: #e0e0e0;
+    color: var(--text-secondary);
     margin-bottom: 1.5rem;
     text-align: left;
   }
   
   .error {
-    color: #ff6b6b;
+    color: var(--error);
     font-size: 14px;
     margin-top: 1rem;
   }
@@ -48,15 +44,22 @@
     width: 100%;
     padding: 10px;
     margin-bottom: 0.5rem;
-    border: 1px solid rgba(255, 255, 255, 0.2);
+    border: 1px solid var(--border-color);
     border-radius: 4px;
     font-size: 14px;
-    background: rgba(255, 255, 255, 0.1);
-    color: #ffffff;
+    background: var(--background-hover);
+    color: var(--text-primary);
+    transition: all 0.2s ease;
+  }
+
+  .input:focus {
+    border-color: var(--primary);
+    outline: none;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.2);
   }
 
   .input::placeholder {
-    color: rgba(255, 255, 255, 0.6);
+    color: var(--text-secondary);
   }
 
   .password-container {
@@ -69,15 +72,22 @@
     width: 100%;
     padding: 10px;
     padding-right: 40px;
-    border: 1px solid rgba(255, 255, 255, 0.2);
+    border: 1px solid var(--border-color);
     border-radius: 4px;
     font-size: 14px;
-    background: rgba(255, 255, 255, 0.1);
-    color: #ffffff;
+    background: var(--background-hover);
+    color: var(--text-primary);
+    transition: all 0.2s ease;
+  }
+
+  .password-input:focus {
+    border-color: var(--primary);
+    outline: none;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.2);
   }
 
   .password-input::placeholder {
-    color: rgba(255, 255, 255, 0.6);
+    color: var(--text-secondary);
   }
 
   .toggle-password {
@@ -88,23 +98,23 @@
     background: none;
     border: none;
     cursor: pointer;
-    color: #ffffff;
+    color: var(--text-primary);
     padding: 0;
     font-size: 14px;
     outline: none;
   }
 
   .toggle-password:hover {
-    color: #e0e0e0;
+    color: var(--text-secondary);
     background: none;
   }
   
   .button {
     width: 100%;
     padding: 10px;
-    background-color: rgba(255, 255, 255, 0.2);
-    color: white;
-    border: 1px solid rgba(255, 255, 255, 0.2);
+    background-color: var(--background-hover);
+    color: var(--text-primary);
+    border: 1px solid var(--border-color);
     border-radius: 4px;
     cursor: pointer;
     font-size: 16px;
@@ -113,18 +123,19 @@
   }
 
   .button:hover {
-    background-color: rgba(255, 255, 255, 0.3);
+    background-color: var(--primary);
+    border-color: var(--primary);
   }
   
   .toggleText {
     margin-top: 1rem;
     font-size: 14px;
     text-align: center;
-    color: #ffffff;
+    color: var(--text-primary);
   }
   
   .link {
-    color: #ffffff;
+    color: var(--text-primary);
     cursor: pointer;
     text-decoration: none;
     font-weight: 500;
@@ -148,12 +159,12 @@
     width: 16px;
     height: 16px;
     cursor: pointer;
-    accent-color: rgba(255, 255, 255, 0.2);
+    accent-color: var(--primary);
   }
 
   .terms-label {
     font-size: 14px;
-    color: #ffffff;
+    color: var(--text-primary);
     cursor: pointer;
     user-select: none;
   } 

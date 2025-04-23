@@ -9,6 +9,7 @@ import Documents from '../features/documents/components/Documents'
 import History from '../features/history/components/History'
 import SignUp from '../features/auth/components/SignUp'
 import Login from '../features/auth/components/Login'
+import Landing from '../features/landing/components/Landing'
 import { FirebaseProvider } from '../context/FirebaseContext';
 import { AuthProvider, useAuth } from '../context/AuthContext';
 import { ProfileProvider } from '../context/ProfileContext';
@@ -16,19 +17,8 @@ import AnimatedSurvey from '../features/onboarding/components/Survey';
 import ProfilePage from '../features/profile/components/Profile';
 
 function App() {
-  // const [activeSection, setActiveSection] = useState('chat')
   const [isSidebarOpen, setSidebarOpen] = useState(true)
   const [isSignUp, setIsSignUp] = useState(false);
-  // const [isSurveyCompleted, setIsSurveyCompleted] = useState(false);
-
-  // const getActiveComponent = () => {
-  //   switch (activeSection) {
-  //     case 'chat': return <Chat />;
-  //     case 'documents': return <Documents />;
-  //     case 'history': return <History />;
-  //     default: return <Chat />;
-  //   }
-  // };
 
   const AppRoutes = () => {
     const { user, loading } = useAuth();
@@ -51,6 +41,12 @@ function App() {
 
     return (
       <Routes>
+        {/* Landing Page Route */}
+        <Route
+          path="/"
+          element={user ? <Navigate to="/chat" replace /> : <Landing />}
+        />
+
         {/* Sign-Up Route */}
         <Route
           path="/auth/signup"
@@ -76,7 +72,7 @@ function App() {
               <Navigate to="/chat" replace />
             ) : (
               <Login
-                onLoginSuccess={() => {
+                onLoginSuccess={async () => {
                   localStorage.setItem('isLogged', 'true');
                 }}
               />
@@ -127,7 +123,6 @@ function App() {
                   </button>
                 )}
                 <Routes>
-                  <Route path="/" element={<Navigate to="/chat" replace />} />
                   <Route path="/chat" element={<NewChat />} />
                   <Route path="/chat/:threadId" element={<Chat />} />
                   <Route path="/documents" element={<Documents />} />
@@ -137,7 +132,7 @@ function App() {
                 </Routes>
               </div>
             </div>
-          ) : <Navigate to="/auth/login" replace />}
+          ) : <Navigate to="/" replace />}
         />
       </Routes>
     );

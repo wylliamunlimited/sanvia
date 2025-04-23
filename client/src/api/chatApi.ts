@@ -1,4 +1,5 @@
 import axios from 'axios';
+import { decryptAESGCM, encryptAESGCM } from './encryption/utils/encryption';
 
 const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:8000';
 
@@ -19,7 +20,19 @@ export interface SourceItem {
 export interface ChatResponse {
   chat: ChatMessage[];
   full_response?: string;
-  simple_response?: string;
+  // simple_response?: string;
+  total_sources?: SourceItem[];
+  sources?: SourceItem[];
+  thread_id?: string;
+}
+
+export interface EncryptedChatResponse {
+  chat: ChatMessage[];
+  full_response?: {
+    "ciphertext": string,
+    "iv": string
+  };
+  // simple_response?: string;
   total_sources?: SourceItem[];
   sources?: SourceItem[];
   thread_id?: string;
@@ -63,8 +76,37 @@ export const chatApi = {
   
   sendMessageToThread: async (threadId: string, prompt: string): Promise<ChatResponse> => {
     try {
-      const response = await api.post<ChatResponse>(`/sanvia-chat/${threadId}`, { prompt });
-      return response.data;
+
+      // const rawBody = JSON.stringify({});
+      const aeskey = sessionStorage.getItem("AES_KEY");
+      if (!aeskey) throw new Error("Encryption key missing");
+      
+      // NOTE: ENCRYPT
+      console.log("Encrypting Message: ", prompt);
+      const { ciphertext, iv } = await encryptAESGCM(JSON.stringify({ "prompt": prompt }), aeskey);
+
+      const response = await api.post<EncryptedChatResponse>(`/sanvia-chat/${threadId}`, { 
+        "encrypted_prompt": ciphertext, 
+        "iv": iv 
+      });
+
+      // NOTE: DECRYPT
+      let decryptedFullResonse = "";
+      try {
+        const encrypted = response.data.full_response;
+        
+        if (!encrypted || !encrypted.ciphertext || !encrypted.iv) throw new Error("Missing encrypted repsonse.")
+
+        decryptedFullResonse = await decryptAESGCM(encrypted.ciphertext, encrypted.iv, aeskey);
+      } catch (error) {
+        console.log("Decryption failed: ", error);
+        decryptedFullResonse = "[DECRYPTION FAILED]";
+      }
+      
+      return {
+        ...response.data,
+        full_response: decryptedFullResonse
+      };
     } catch (error) {
       console.error('Error sending message to thread:', error);
       throw error;

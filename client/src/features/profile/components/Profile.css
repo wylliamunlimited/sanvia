@@ -1,25 +1,27 @@
 @import '../../../shared/styles/scrollbar.css';
 @import './ProfileForm.css';
 @import './ConnectedAccounts.css';
+@import './DangerZone.css';
 
 .profile-content {
   flex: 1;
   display: flex;
   flex-direction: column;
-  height: 100vh;
+  height: 100%;
   position: relative;
   width: 100%;
   max-width: 100%;
   box-sizing: border-box;
   padding: 0;
+  background-color: var(--background);
 }
 
 .profile-subheader {
   font-size: 1.5rem;
   font-weight: 600;
-  margin: 1rem 0 0.5rem;
-  padding: 0 calc(max(1rem, (100% - 768px) / 2));
-  color: #333;
+  margin: 2rem 0;
+  padding: 0;
+  color: var(--text-primary);
 }
 
 .profile-area {
@@ -38,8 +40,8 @@
 }
 
 .section-divider {
-  height: 1px;
-  background-color: #E4E9F2;
+  min-height: 1px;
+  background-color: var(--border-color);
   margin: 32px 0 24px;
   width: 100%;
 } 

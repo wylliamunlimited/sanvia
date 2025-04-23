@@ -4,20 +4,21 @@
   flex: 1;
   display: flex;
   flex-direction: column;
-  height: 100vh;
+  height: 100%;
   position: relative;
   width: 100%;
   max-width: 100%;
   box-sizing: border-box;
   padding: 0;
+  background-color: var(--background);
 }
 
 .history-subheader {
   font-size: 1.5rem;
   font-weight: 600;
-  margin: 1rem 0 0.5rem;
+  margin: 3rem 0 0.5rem;
   padding: 0 calc(max(1rem, (100% - 768px) / 2));
-  color: #333;
+  color: var(--text-primary);
 }
 
 .search-section {
@@ -50,9 +51,9 @@
   gap: 1rem;
   animation: fadeIn 0.2s ease-in-out;
   padding: 1rem;
-  background-color: white;
+  background-color: var(--background);
   border-radius: 8px;
-  border: 1px solid #e5e7eb;
+  border: 1px solid var(--border-color);
   cursor: pointer;
   transition: background-color 0.2s ease;
 }
@@ -63,7 +64,7 @@
 }
 
 .history-item:hover {
-  background-color: rgba(0, 0, 0, 0.05);
+  background-color: var(--background-hover);
 }
 
 .history-item .history-content {
@@ -75,12 +76,12 @@
 }
 
 .history-text {
-  color: #333;
+  color: var(--text-primary);
   line-height: 1.5;
 }
 
 .history-time {
-  color: #666;
+  color: var(--text-secondary);
   font-size: 0.875rem;
 }
 
@@ -94,8 +95,8 @@
   flex: 1;
   display: flex;
   align-items: center;
-  background-color: white;
-  border: 1px solid #ddd;
+  background-color: var(--background);
+  border: 1px solid var(--border-color);
   border-radius: 8px;
   padding: 0.35rem 0.75rem;
   gap: 0.5rem;
@@ -103,12 +104,12 @@
 }
 
 .search-input-container:focus-within {
-  border-color: #3b5eda;
-  box-shadow: 0 1px 4px rgba(59, 94, 218, 0.1);
+  border-color: var(--primary);
+  box-shadow: 0 1px 4px rgba(59, 94, 218, 0.2);
 }
 
 .search-input-container svg {
-  color: #666;
+  color: var(--text-secondary);
   width: 16px;
   height: 16px;
   flex-shrink: 0;
@@ -116,21 +117,21 @@
 
 .search-input {
   flex: 1;
-  border: none;
+  border: none !important;
   outline: none;
   font-size: 0.9rem;
   background: transparent;
-  color: #333;
+  color: var(--text-primary);
   font-family: inherit;
   line-height: 1.3;
 }
 
 .search-input::placeholder {
-  color: #999;
+  color: var(--text-secondary);
 }
 
 .clear-search {
-  background: #f2f5ff;
+  background: var(--background-hover);
   border: none;
   padding: 0.3rem;
   width: 24px;
@@ -139,27 +140,27 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  color: #666;
+  color: var(--text-secondary);
   transition: all 0.2s;
   flex-shrink: 0;
   border-radius: 4px;
 }
 
 .clear-search:hover {
-  background: #e2e8ff;
-  color: #333;
+  background: var(--primary);
+  color: var(--text-primary);
 }
 
 .no-results {
   text-align: center;
-  color: #666;
+  color: var(--text-secondary);
   padding: 2rem 0;
 }
 
 .error-message {
   text-align: center;
   padding: 2rem 0;
-  color: #e53935;
+  color: var(--error);
 }
 
 .history-group {
@@ -169,7 +170,7 @@
 }
 
 .history-date-header {
-  color: #666;
+  color: var(--text-secondary);
   font-size: 0.875rem;
   font-weight: 500;
 } 

@@ -5,6 +5,9 @@ import "./auth.css";
 import { auth } from "../../../api/firebase";
 import { createUserWithEmailAndPassword } from "firebase/auth";
 import { firestoreApi } from "../../../api/firestoreApi";
+import { capitalizeFirstLetter } from "../../../shared/utils/capitalize";
+import { handleFormNavigation } from "../../../shared/utils/formNavigation";
+import securityApi from "../../../api/encryption/security";
 
 interface SignUpProps {
   onSignUpSuccess: () => void;
@@ -48,16 +51,21 @@ const SignUp: React.FC<SignUpProps> = ({ onSignUpSuccess }) => {
             localStorage.setItem("sanvia-refreshToken", token);
             console.log("Token is stored properly.");
           }).then(() => {
-            firestoreApi.uploadNames(name, lastName)
-            .then((data) => {
-              console.log(`Upload names onto Firestore, ${data}`);
-              setError("");
-              onSignUpSuccess();
-              navigate("/onboarding");
-            })
-            .catch((error) => {
-              setError(error);
-            });
+            firestoreApi.initializeProfile(name, lastName)
+              .then((data) => {
+                console.log(`Initialized profile with names, ${data}`);
+                setError("");
+
+                securityApi.getEncryptionKey().then((key) => {
+                  sessionStorage.setItem("AES_KEY", key);
+                  console.log("AES Encryption Key stored properly.");
+                });
+                onSignUpSuccess();
+                navigate("/onboarding");
+              })
+              .catch((error) => {
+                setError(error);
+              });
           });
         })
         .catch((error) => {
@@ -79,14 +87,16 @@ const SignUp: React.FC<SignUpProps> = ({ onSignUpSuccess }) => {
           placeholder="First Name"
           className="input"
           value={name}
-          onChange={(e) => setName(e.target.value)}
+          onChange={(e) => setName(capitalizeFirstLetter(e.target.value))}
+          onKeyDown={(e) => handleFormNavigation(e, 'lastName')}
         />
         <input
           type="lastName"
           placeholder="Last Name"
           className="input"
           value={lastName}
-          onChange={(e) => setLastName(e.target.value)}
+          onChange={(e) => setLastName(capitalizeFirstLetter(e.target.value))}
+          onKeyDown={(e) => handleFormNavigation(e, 'text')}
         />
         <input
           type="text"
@@ -94,6 +104,7 @@ const SignUp: React.FC<SignUpProps> = ({ onSignUpSuccess }) => {
           className="input"
           value={email}
           onChange={(e) => setEmail(e.target.value)}
+          onKeyDown={(e) => handleFormNavigation(e, 'password')}
         />
         <div className="password-container">
           <input
@@ -102,6 +113,7 @@ const SignUp: React.FC<SignUpProps> = ({ onSignUpSuccess }) => {
             className="password-input"
             value={password}
             onChange={(e) => setPassword(e.target.value)}
+            onKeyDown={(e) => handleFormNavigation(e, 'password')}
           />
           {password && (
             <button
@@ -121,6 +133,7 @@ const SignUp: React.FC<SignUpProps> = ({ onSignUpSuccess }) => {
               className="password-input"
               value={confirmPassword}
               onChange={(e) => setConfirmPassword(e.target.value)}
+              onKeyDown={(e) => handleFormNavigation(e, undefined, handleSignUp)}
             />
             {confirmPassword && (
               <button
@@ -143,9 +156,9 @@ const SignUp: React.FC<SignUpProps> = ({ onSignUpSuccess }) => {
           />
           <label htmlFor="terms" className="terms-label">
             I agree to Sanvia's{" "}
-            <a 
-              href="https://sanvia.app/privacy-policy" 
-              target="_blank" 
+            <a
+              href="https://sanvia.app/privacy-policy"
+              target="_blank"
               className="link"
             >
               Privacy Policy
@@ -159,7 +172,7 @@ const SignUp: React.FC<SignUpProps> = ({ onSignUpSuccess }) => {
       {error && <p className="error">{error}</p>}
       <p className="toggleText">
         Already have an account?{" "}
-        <span className="link" onClick={() => navigate("/onboarding")}>
+        <span className="link" onClick={() => navigate("/auth/login")}>
           Login
         </span>
       </p>

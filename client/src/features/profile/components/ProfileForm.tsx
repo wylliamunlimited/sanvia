@@ -1,6 +1,7 @@
 import React from 'react';
 import './ProfileForm.css';
 import { cmToFeetInches, feetInchesToCm, kgToLbs, lbsToKg } from '../utils/conversionUtils';
+import { capitalizeFirstLetter } from '../../../shared/utils/capitalize';
 
 interface ProfileData {
   firstName: string;
@@ -149,7 +150,7 @@ const ProfileForm: React.FC<ProfileFormProps> = ({
             <input
               type="text"
               value={editedData.firstName}
-              onChange={(e) => handleInputChange('firstName', e.target.value)}
+              onChange={(e) => handleInputChange('firstName', capitalizeFirstLetter(e.target.value))}
               className="editable-input"
             />
           </div>
@@ -159,7 +160,7 @@ const ProfileForm: React.FC<ProfileFormProps> = ({
             <input
               type="text"
               value={editedData.lastName}
-              onChange={(e) => handleInputChange('lastName', e.target.value)}
+              onChange={(e) => handleInputChange('lastName', capitalizeFirstLetter(e.target.value))}
               className="editable-input"
             />
           </div>

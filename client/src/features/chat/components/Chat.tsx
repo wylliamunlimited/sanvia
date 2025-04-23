@@ -3,7 +3,6 @@ import { useParams, useNavigate } from 'react-router-dom'
 import './Chat.css'
 import { getScrollbarWidth } from '../../../shared/utils/scrollbar'
 import chatApi, { SourceItem } from '../../../api/chatApi'
-import Header from '../../../shared/components/Header'
 import SourcesSidebar from '../components/SourcesSidebar'
 import Message from '../components/Message'
 import { useAutoScroll } from '../hooks/useAutoScroll'
@@ -35,6 +34,13 @@ const Chat = () => {
     shouldAutoScroll,
     setShouldAutoScroll
   })
+
+  // Focus textarea on mount
+  useEffect(() => {
+    if (textareaRef.current) {
+      textareaRef.current.focus()
+    }
+  }, [])
 
   // Store threadId in localStorage whenever it changes
   useEffect(() => {
@@ -200,14 +206,6 @@ const Chat = () => {
 
   return (
     <div className={`chat-content ${isSourcesSidebarOpen ? 'sidebar-open' : ''}`}>
-      <Header 
-        icon={
-          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-            <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>
-          </svg>
-        }
-        title="Chat"
-      />
 
       <div 
         ref={messageAreaRef}
@@ -272,7 +270,7 @@ const Chat = () => {
       </form>
       
       <div className="disclaimer">
-        For informational purposes only. Not a substitute for professional medical advice.
+        Sanvia is not a substitute for professional medical advice.
       </div>
 
       <SourcesSidebar 
