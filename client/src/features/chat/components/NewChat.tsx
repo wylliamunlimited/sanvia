@@ -13,6 +13,13 @@ const NewChat = () => {
   
   const textareaRef = useRef<HTMLTextAreaElement>(null)
 
+  // Focus textarea on mount
+  useEffect(() => {
+    if (textareaRef.current) {
+      textareaRef.current.focus()
+    }
+  }, [])
+
   const getTimeOfDay = (): string => {
     const hour = new Date().getHours()
     if (hour >= 5 && hour < 12) return 'morning'
