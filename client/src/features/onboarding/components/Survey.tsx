@@ -429,7 +429,7 @@ const AnimatedSurvey: React.FC<SurveyProps> = ({ onSurveyComplete }) => {
                   <div className="search-container">
                     <input
                       type="text"
-                      className="search-input"
+                      className="search-input-survey"
                       placeholder="Start typing a condition..."
                       value={searchTerm}
                       onChange={(e) => {
