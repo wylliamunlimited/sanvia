@@ -17,11 +17,11 @@
 .documents-subheader {
   display: flex;
   margin: 0;
-  margin-left: 24px;
   padding: 0;
   padding: 2rem calc(max(1rem, (100% - 768px) / 2));
   padding-top: 16px;
 }
+
 .documents-subheader h2 {
   font-size: 20px;
   font-weight: 400;
@@ -31,6 +31,7 @@
 
 .upload-zone {
   margin: 1rem calc(max(1rem, (100% - 768px) / 2));
+  margin-left: 0;
   border: 2px dashed #837e7e;
   border-radius: 12px;
   padding: 2rem;
@@ -42,7 +43,14 @@
   transition: all 0.2s;
   background-color: #303030;
 }
+.upload-zone p {
+  color: white;
+}
 
+.uploade-text {
+  color: white;
+  font-weight: 700;
+}
 .upload-zone.dragging {
   border-color: var(--border-color);
   background-color: #a9a9a9;
@@ -59,12 +67,15 @@
 
 .upload-button {
   padding: 0.5rem 1rem;
-  background-color: var(--background);
-  border: 1px solid var(--border-color);
+  background-color: rgba(196, 196, 196, 0.38);
+  border: 1px solid #8e8d8d;
   border-radius: 6px;
-  color: var(--text-primary);
+  color: #000000;
   cursor: pointer;
   transition: all 0.2s;
+  font-size: 14px;
+  font-weight: 400;
+
 }
 
 .upload-button:hover {
@@ -318,6 +329,7 @@
   border-radius: 0.5rem;
   padding: 0.75rem 1rem;
   margin: 1rem calc(max(1rem, (100% - 768px) / 2));
+  margin-left: 0;
   color: var(--error);
   font-size: 0.9rem;
 } 
