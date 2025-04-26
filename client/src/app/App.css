@@ -28,9 +28,17 @@ html, body {
   height: 100vh;
   width: 100vw;
   position: relative;
-  background-color: white;
+  background-color: black;
   padding-left: 260px;
   transition: padding-left 0.3s ease;
+  background-image: 
+    url("/images/sideimg-top.png"),
+    url("/images/sideimg-bottom.png");
+  background-position: 
+    -20vw -25vh,
+    -5vw 85vh;
+  background-repeat: no-repeat;
+  overflow: visible;
 }
 
 body.sidebar-collapsed .app-container {
