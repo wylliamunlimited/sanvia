@@ -41,6 +41,8 @@ html, body {
   overflow: visible;
 }
 
+
+
 body.sidebar-collapsed .app-container {
   padding-left: 80px;
 }

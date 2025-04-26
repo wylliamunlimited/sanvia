@@ -287,7 +287,7 @@ body.sidebar-collapsed .menu-item {
 
 .collapse-button:hover {
   color: var(--text-primary);
-  background-color: var(--background-hover);
+  background-color: rgba(242, 245, 252, 0.1);
 }
 
 body.sidebar-collapsed .collapse-button {
