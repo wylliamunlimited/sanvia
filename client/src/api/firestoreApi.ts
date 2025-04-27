@@ -80,5 +80,45 @@ export const firestoreApi = {
             console.error('Error updating profile data:', error);
             throw error;
         }
+    },
+
+    deleteUserData: async (): Promise<any> => {
+        try {
+            const response = await api.post<any>('/delete-user-data/delete-user-data');
+            return response.data;
+        } catch (error) {
+            console.error('Error deleting user data:', error);
+            throw error;
+        }
+    },
+
+    deleteAccount: async (): Promise<any> => {
+        try {
+            const response = await api.post<any>('/delete-user-data/delete-account');
+            return response.data;
+        } catch (error) {
+            console.error('Error deleting account:', error);
+            throw error;
+        }
+    },
+
+    deleteAllChats: async (): Promise<any> => {
+        try {
+            const response = await api.post<any>('/delete-user-data/delete-all-chats');
+            return response.data;
+        } catch (error) {
+            console.error('Error deleting all chats:', error);
+            throw error;
+        }
+    },
+
+    deleteDocument: async (documentId: string): Promise<any> => {
+        try {
+            const response = await api.post<any>(`/delete-user-data/delete-document/${documentId}`);
+            return response.data;
+        } catch (error) {
+            console.error('Error deleting document:', error);
+            throw error;
+        }
     }
 };
