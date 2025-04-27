@@ -16,13 +16,19 @@
   flex-direction: column;
   justify-content: space-between;
   position: fixed;
-  border-radius: 13px;
   left: 0;
   top: 0;
   bottom: 0;
   transition: all 0.3s ease;
   overflow-y: auto;
   overflow: visible;  
+  border: 2px solid transparent;
+  border-radius: 13px;
+  background: 
+  linear-gradient(to bottom, #958F9A 0%, transparent 50%),
+  linear-gradient(to top, #2D2D2D 0%, transparent 50%);
+background-origin: border-box;
+background-clip: border-box;
 }
 
 body.sidebar-collapsed .sidebar {
@@ -137,8 +143,7 @@ body.sidebar-collapsed .menu-item {
 }
 
 .new-chat-button:hover {
-  background-color: rgba(242, 245, 252, 0.8);
-  border-color: #d1d5db;
+  background-color: rgba(242, 245, 252, 0.1);  border-color: #d1d5db;
 }
 
 .nav-item {
@@ -196,7 +201,7 @@ body.sidebar-collapsed .menu-item {
 }
 
 .profile-section:hover {
-  background-color: rgba(242, 245, 252, 0.8);
+  background-color: rgba(242, 245, 252, 0.1);
 }
 
 .profile-icon {
@@ -231,6 +236,8 @@ body.sidebar-collapsed .menu-item {
   gap: 0.5rem;
   padding: 0.5rem 1rem;
   margin: 0.125rem 0;
+  margin-left: 15px;
+  margin-right: 15px;
 }
 
 .menu-item {
@@ -276,7 +283,7 @@ body.sidebar-collapsed .menu-item {
   background: none;
   border: none;
   padding: 0.5rem;
-  color: var(--text-secondary);
+  color: var(--text-primary);
   cursor: pointer;
   display: flex;
   align-items: center;

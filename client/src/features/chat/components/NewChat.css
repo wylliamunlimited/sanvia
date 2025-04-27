@@ -115,7 +115,7 @@
 }
 
 .new-chat-content .input-container button:hover:not(:disabled) {
-  background: var(--primary);
+  background: rgba(41, 36, 88, 0.4);
   color: var(--text-primary);
 }
 

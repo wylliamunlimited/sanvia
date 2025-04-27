@@ -603,7 +603,6 @@ const AnimatedSurvey: React.FC<SurveyProps> = ({ onSurveyComplete }) => {
                   </div>
                 </div>
               )}
-
               {/* Question 7: Prescribed Medications */}
               {currentQuestionIndex === 6 && (
                 <div className="question-container">
@@ -618,16 +617,36 @@ const AnimatedSurvey: React.FC<SurveyProps> = ({ onSurveyComplete }) => {
                         const value = e.target.value;
                         setMedicationSearchTerm(value);
 
-                        // check that allMedications is an array before filtering
+                        // Log to check the current state of allMedications
+                        console.log('Current search term:', value);
+                        console.log('allMedications:', allMedications);
+
+                        // Check if allMedications is an array and contains medication strings
                         if (Array.isArray(allMedications)) {
-                          const filtered = allMedications.filter((medication) =>
-                            typeof medication === 'string' &&
-                            medication.toLowerCase().includes(value.toLowerCase())
-                          );
-                          setFilteredMedications(filtered.slice(0, 10));
+                          const filtered = allMedications
+                            .filter((medication) => {
+                              const lowerCaseMedication = medication.toLowerCase();
+                              const lowerCaseQuery = value.toLowerCase();
+
+                              // Prioritize exact matches
+                              if (lowerCaseMedication === lowerCaseQuery) {
+                                return true;
+                              }
+
+                              // Prioritize medications that start with the query
+                              if (lowerCaseMedication.startsWith(lowerCaseQuery)) {
+                                return true;
+                              }
+
+                              // Fall back to includes for case-insensitive matching
+                              return lowerCaseMedication.includes(lowerCaseQuery);
+                            })
+                            .sort(); // Sort alphabetically
+
+                          setFilteredMedications(filtered.slice(0, 10)); // Limit to first 10 results
                         } else {
                           setFilteredMedications([]);
-                          console.error('allMedications is not an array:', allMedications);
+                          console.error('allMedications is not an array or is empty:', allMedications);
                         }
                       }}
                       disabled={prescribedMedications.includes('None') || isLoadingMedications}
@@ -646,7 +665,7 @@ const AnimatedSurvey: React.FC<SurveyProps> = ({ onSurveyComplete }) => {
                       <ul className="search-results">
                         {filteredMedications.map((medication) => (
                           <li
-                            key={medication}
+                            key={medication} // Use medication name as the key since it's unique
                             className="search-result-item"
                             onClick={() => {
                               if (!prescribedMedications.includes(medication)) {
@@ -656,7 +675,7 @@ const AnimatedSurvey: React.FC<SurveyProps> = ({ onSurveyComplete }) => {
                               setFilteredMedications([]);
                             }}
                           >
-                            {medication}
+                            {medication} {/* Display the brand name directly */}
                           </li>
                         ))}
                       </ul>
@@ -700,7 +719,9 @@ const AnimatedSurvey: React.FC<SurveyProps> = ({ onSurveyComplete }) => {
 
 
 
-        
+
+
+
               {/* Question 7: Medication Name and Strength Selection */}
               {/* {currentQuestionIndex === 6 && (
                 <div className="question-container">
