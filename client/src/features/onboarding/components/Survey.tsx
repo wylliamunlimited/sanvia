@@ -45,6 +45,37 @@ const AnimatedSurvey: React.FC<SurveyProps> = ({ onSurveyComplete }) => {
   const [medicationsError, setMedicationsError] = useState('');
   const [medicationsStrengthsMap, setMedicationsStrengthsMap] = useState<Record<string, string[]>>({});
   const [selectedMedications, setSelectedMedications] = useState<{medication: string, strength: string}[]>([]);
+  const [prescribedMedications, setPrescribedMedications] = useState<string[]>([]);
+
+
+  //MED JSON
+  useEffect(() => {
+    const fetchMedications = async () => {
+      try {
+        const response = await fetch('/drug-drugsfda-0001-of-0001.json');
+        const data = await response.json();
+  
+        // Extract medication brand names
+        const medications = data.results
+          .filter((drug: { products?: { brand_name: string }[] }) => drug.products && drug.products.length > 0)
+          .map((drug: { products: { brand_name: string }[] }) => 
+            drug.products.map((product: { brand_name: string }) => product.brand_name)
+          )
+          .flat()
+          .filter(Boolean); // remove null or undefined
+  
+        setAllMedications(medications);
+      } catch (error) {
+        console.error('Error loading medications:', error);
+        setMedicationsError('Failed to load medications.');
+      } finally {
+        setIsLoadingMedications(false);
+      }
+    };
+  
+    fetchMedications();
+  }, []);
+  
   
   //medicine
   useEffect(() => {
@@ -572,12 +603,109 @@ const AnimatedSurvey: React.FC<SurveyProps> = ({ onSurveyComplete }) => {
                   </div>
                 </div>
               )}
-        
-              {/* Question 7: Medication Name and Strength Selection */}
+
+              {/* Question 7: Prescribed Medications */}
               {currentQuestionIndex === 6 && (
                 <div className="question-container">
-                  {/* Medication Name Search Bar */}
+                  {/* search bar */}
                   <div className="search-container">
+                    <input
+                      type="text"
+                      className="search-input-survey"
+                      placeholder="Start typing a medication..."
+                      value={medicationSearchTerm}
+                      onChange={(e) => {
+                        const value = e.target.value;
+                        setMedicationSearchTerm(value);
+
+                        // check that allMedications is an array before filtering
+                        if (Array.isArray(allMedications)) {
+                          const filtered = allMedications.filter((medication) =>
+                            typeof medication === 'string' &&
+                            medication.toLowerCase().includes(value.toLowerCase())
+                          );
+                          setFilteredMedications(filtered.slice(0, 10));
+                        } else {
+                          setFilteredMedications([]);
+                          console.error('allMedications is not an array:', allMedications);
+                        }
+                      }}
+                      disabled={prescribedMedications.includes('None') || isLoadingMedications}
+                    />
+
+                    {isLoadingMedications && (
+                      <div className="loading-indicator">Loading medications...</div>
+                    )}
+
+                    {medicationsError && (
+                      <div className="error-message">{medicationsError}</div>
+                    )}
+
+                    {/* results area */}
+                    {medicationSearchTerm && filteredMedications.length > 0 && !isLoadingMedications && (
+                      <ul className="search-results">
+                        {filteredMedications.map((medication) => (
+                          <li
+                            key={medication}
+                            className="search-result-item"
+                            onClick={() => {
+                              if (!prescribedMedications.includes(medication)) {
+                                setPrescribedMedications((prev) => [...prev.filter(m => m !== 'None'), medication]);
+                              }
+                              setMedicationSearchTerm('');
+                              setFilteredMedications([]);
+                            }}
+                          >
+                            {medication}
+                          </li>
+                        ))}
+                      </ul>
+                    )}
+
+                    {medicationSearchTerm && filteredMedications.length === 0 && !isLoadingMedications && (
+                      <div className="no-results">No matching medications found</div>
+                    )}
+                  </div>
+
+                  {/* Show selected medications as tags */}
+                  <div className="tags-container">
+                    {prescribedMedications.length === 0 && (
+                      <button 
+                        className="none-button"
+                        onClick={() => setPrescribedMedications(['None'])}
+                      >
+                        I am not currently prescribed any medications
+                      </button>
+                    )}
+
+                    {prescribedMedications.map((medication) => (
+                      <span
+                        key={medication}
+                        className="condition-tag"
+                      >
+                        {medication}
+                        <button
+                          className="tag-remove-button"
+                          onClick={() => {
+                            setPrescribedMedications((prev) => prev.filter((m) => m !== medication));
+                          }}
+                        >
+                          ×
+                        </button>
+                      </span>
+                    ))}
+                  </div>
+                </div>
+              )}
+
+
+
+        
+              {/* Question 7: Medication Name and Strength Selection */}
+              {/* {currentQuestionIndex === 6 && (
+                <div className="question-container">
+                  {/* Medication Name Search Bar */}
+                  {/* <div className="search-container">
                     <input
                       type="text"
                       className="search-input-survey"
@@ -613,7 +741,7 @@ const AnimatedSurvey: React.FC<SurveyProps> = ({ onSurveyComplete }) => {
                     )}
 
                     {/* Search Results */}
-                    {medicationSearchTerm && filteredMedications.length > 0 && !isLoadingMedications && (
+                    {/* {medicationSearchTerm && filteredMedications.length > 0 && !isLoadingMedications && (
                       <ul className="search-results">
                         {filteredMedications.map((medName) => (
                           <li
@@ -634,10 +762,10 @@ const AnimatedSurvey: React.FC<SurveyProps> = ({ onSurveyComplete }) => {
                     {medicationSearchTerm && filteredMedications.length === 0 && !isLoadingMedications && (
                       <div className="no-results">No matching medications found</div>
                     )}
-                  </div>
+                  </div> */}
 
                   {/* Strength Picker (after medication is selected) */}
-                  {selectedMedication && (
+                  {/* {selectedMedication && (
                     <div className="strength-selection-container">
                       <h4 className="sub-question-title">Select strength for {selectedMedication}:</h4>
 
@@ -660,14 +788,14 @@ const AnimatedSurvey: React.FC<SurveyProps> = ({ onSurveyComplete }) => {
                       </div>
 
                       {/* Option if no strength fits */}
-                      {(medicationsStrengthsMap[selectedMedication] || []).length === 0 && (
+                      {/* {(medicationsStrengthsMap[selectedMedication] || []).length === 0 && (
                         <p>No strengths available for this medication.</p>
                       )}
                     </div>
                   )}
 
                   {/* Show selected medications and strengths as tags */}
-                  <div className="tags-container">
+                  {/* <div className="tags-container">
                     {selectedMedications.map(({ medication, strength }) => (
                       <span key={`${medication}-${strength}`} className="condition-tag">
                         {medication} - {strength}
@@ -684,8 +812,9 @@ const AnimatedSurvey: React.FC<SurveyProps> = ({ onSurveyComplete }) => {
                       </span>
                     ))}
                   </div>
-                </div>
-              )}
+                </div>  */
+              // )} 
+              }
 
         
 
