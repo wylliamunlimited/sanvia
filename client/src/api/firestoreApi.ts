@@ -112,13 +112,13 @@ export const firestoreApi = {
         }
     },
 
-    deleteDocument: async (documentId: string): Promise<any> => {
-        try {
-            const response = await api.post<any>(`/delete-user-data/delete-document/${documentId}`);
-            return response.data;
-        } catch (error) {
-            console.error('Error deleting document:', error);
-            throw error;
-        }
-    }
+    // deleteDocument: async (documentId: string): Promise<any> => {
+    //     try {
+    //         const response = await api.post<any>(`/delete-user-data/delete-document/${documentId}`);
+    //         return response.data;
+    //     } catch (error) {
+    //         console.error('Error deleting document:', error);
+    //         throw error;
+    //     }
+    // }
 };

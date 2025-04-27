@@ -1,5 +1,4 @@
-import React, { useState } from 'react';
-import { deleteDocument } from '../../profile/services/deleteService';
+import React from 'react';
 import './DeleteDocumentButton.css';
 
 interface DeleteDocumentButtonProps {
@@ -8,72 +7,21 @@ interface DeleteDocumentButtonProps {
 }
 
 const DeleteDocumentButton: React.FC<DeleteDocumentButtonProps> = ({ documentId, onDelete }) => {
-  const [isConfirming, setIsConfirming] = useState(false);
-  const [confirmationText, setConfirmationText] = useState('');
-  const [error, setError] = useState<string | null>(null);
-
-  const handleDeleteClick = () => {
-    setIsConfirming(true);
-  };
-
-  const handleConfirmChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setConfirmationText(e.target.value);
-  };
-
-  const handleCancel = () => {
-    setIsConfirming(false);
-    setConfirmationText('');
-    setError(null);
-  };
-
-  const handleConfirmDelete = async () => {
-    if (confirmationText === 'DELETE') {
-      try {
-        await deleteDocument(documentId);
-        setError(null);
-        setIsConfirming(false);
-        if (onDelete) {
-          onDelete();
-        }
-      } catch (err) {
-        setError('Failed to delete document. Please try again.');
-      }
+  const handleDelete = () => {
+    if (onDelete) {
+      onDelete();
     }
   };
 
-  if (isConfirming) {
-    return (
-      <div className="delete-document-confirmation">
-        <input
-          type="text"
-          value={confirmationText}
-          onChange={handleConfirmChange}
-          placeholder="Type DELETE to confirm"
-          className="confirmation-field"
-        />
-        <div className="confirmation-buttons">
-          <button 
-            className="confirm-button" 
-            onClick={handleConfirmDelete}
-            disabled={confirmationText !== 'DELETE'}
-          >
-            Confirm Delete
-          </button>
-          <button className="cancel-button" onClick={handleCancel}>
-            Cancel
-          </button>
-        </div>
-        {error && <div className="error-message">{error}</div>}
-      </div>
-    );
-  }
-
   return (
     <button 
-      className="delete-document-button"
-      onClick={handleDeleteClick}
+      className="delete-button"
+      onClick={handleDelete}
+      aria-label="Delete document"
     >
-      Delete Document
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+        <path d="M3 6h18M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6m3 0V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"/>
+      </svg>
     </button>
   );
 };

@@ -103,11 +103,17 @@ const Documents = () => {
       try {
         await deleteDocument(documentId);
       } catch (error) {
-        // If deletion fails, we've already removed it from the UI
-        console.error('Error deleting document:', error);
+        // If the document is already deleted or not found, we can ignore the error
+        // since the UI has already been updated
+        if (!(error instanceof Error) || !error.message.includes('404')) {
+          setError('Failed to delete document. Please try again.');
+        }
       }
     } catch (err) {
-      setError('Failed to delete document. Please try again.');
+      // Only show error if it's not a 404
+      if (!(err instanceof Error) || !err.message.includes('404')) {
+        setError('Failed to delete document. Please try again.');
+      }
     }
   }
 

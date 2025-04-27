@@ -141,6 +141,16 @@ export const chatApi = {
       console.error('Error destroying chat session:', error);
       throw error;
     }
+  },
+
+  deleteChatThread: async (thread_id: string): Promise<any> => {
+    try {
+      const response = await api.post<any>(`/delete-user-data/delete-individual-chat/${thread_id}`);
+      return response.data;
+    } catch (error) {
+      console.error('Error deleting chat thread:', error);
+      throw error;
+    }
   }
 };
 

@@ -90,4 +90,28 @@
   color: var(--error);
   font-size: 14px;
   margin-top: 4px;
+}
+
+.delete-button {
+  opacity: 0;
+  background: none;
+  border: none;
+  padding: 0.5rem;
+  margin: -0.5rem;
+  cursor: pointer;
+  color: var(--text-secondary);
+  transition: all 0.2s;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 4px;
+}
+
+.document-item:hover .delete-button {
+  opacity: 1;
+}
+
+.delete-button:hover {
+  color: #ff4444;
+  background-color: rgba(255, 68, 68, 0.1);
 } 

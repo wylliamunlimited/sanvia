@@ -74,13 +74,19 @@ def delete_document_from_firestore(
 ):
     firestore_client = get_firestore_client()
     user_id = user["uid"]
-    db = (
-        firestore_client.collection("users")
+
+    # Delete from the correct Firestore collection
+    doc_ref = (
+        firestore_client.collection("documents")
         .document(user_id)
-        .collection("documents")
+        .collection("files")
         .document(document_id)
     )
-    db.delete()
+
+    # Check if document exists before deleting
+    if doc_ref.get().exists:
+        doc_ref.delete()
+
     return {"message": "Document deleted successfully from firestore"}
 
 
@@ -163,10 +169,10 @@ def delete_individual_thread(
         .collection("threads")
         .document(thread_id)
     )
-    doc = doc_ref.get()
-    if not doc.exists:
-        raise HTTPException(status_code=404, detail="Chat not found")
-    doc_ref.delete()
+    try:
+        doc_ref.delete()
+    except Exception as e:
+        raise e
     return {"message": "Chat deleted successfully"}
 
 
@@ -214,14 +220,26 @@ def delete_user_account(user: dict = Depends(get_firebase_user_from_token)):
             print(f"Error deleting from Firebase Auth: {str(auth_error)}")
             # Continue even if Firebase Auth deletion fails, as the user might already be deleted
 
-        # Then try to delete from Firestore
+        # Delete user profile
         try:
-            user_doc = firestore_client.collection("users").document(user_id)
-            if user_doc.get().exists:
-                user_doc.delete()
-        except Exception as firestore_error:
-            print(f"Error deleting from Firestore: {str(firestore_error)}")
-            # Continue even if Firestore deletion fails, as the document might already be deleted
+            profile_doc = firestore_client.collection("profiles").document(user_id)
+            if profile_doc.get().exists:
+                profile_doc.delete()
+        except Exception as profile_error:
+            print(f"Error deleting profile: {str(profile_error)}")
+
+        # Delete user documents
+        try:
+            docs_ref = (
+                firestore_client.collection("documents")
+                .document(user_id)
+                .collection("files")
+            )
+            docs = docs_ref.get()
+            for doc in docs:
+                doc.reference.delete()
+        except Exception as docs_error:
+            print(f"Error deleting documents: {str(docs_error)}")
 
         return {
             "message": "Account deletion attempted. Some operations may have been skipped if data was already deleted."

@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom'
 import './History.css'
 import { formatHistoryTime, groupSessionsByDate } from '../utils/dateUtils'
 import { ChatSession, fetchChatThreads } from '../services/historyService'
+import DeleteChatButton from './DeleteChatButton'
 
 const History = () => {
   const navigate = useNavigate()
@@ -34,6 +35,10 @@ const History = () => {
     navigate(`/chat/${chatId}`)
   }
 
+  const handleDeleteChat = (chatId: string) => {
+    setChatSessions(prev => prev.filter(session => session.id !== chatId));
+  }
+
   const filteredSessions = chatSessions.filter(session =>
     session.title.toLowerCase().includes(searchQuery.toLowerCase())
   )
@@ -42,7 +47,6 @@ const History = () => {
 
   return (
     <div className="history-content">
-
       <h2 className="history-subheader">Your chat history</h2>
 
       <div className="search-section">
@@ -92,9 +96,15 @@ const History = () => {
                       className="history-item"
                       onClick={() => handleChatItemClick(session.id)}
                     >
-                      <div>
-                        <div className="history-text">{session.title}</div>
-                        <div className="history-time">{formatHistoryTime(session.timestamp)}</div>
+                      <div className="history-item-content">
+                        <div>
+                          <div className="history-text">{session.title}</div>
+                          <div className="history-time">{formatHistoryTime(session.timestamp)}</div>
+                        </div>
+                        <DeleteChatButton 
+                          chatId={session.id}
+                          onDelete={() => handleDeleteChat(session.id)}
+                        />
                       </div>
                     </div>
                   ))}

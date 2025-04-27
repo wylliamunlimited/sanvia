@@ -35,12 +35,3 @@ export const deleteAllDocuments = async (): Promise<void> => {
     throw error
   }
 }
-
-export const deleteDocument = async (documentId: string): Promise<void> => {
-  try {
-    await firestoreApi.deleteDocument(documentId)
-  } catch (error) {
-    console.error('Error deleting document:', error)
-    throw error
-  }
-} 

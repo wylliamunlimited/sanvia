@@ -31,3 +31,12 @@ export const fetchChatThreads = async (): Promise<ChatSession[]> => {
     throw new Error('Failed to load chat history.')
   }
 }
+
+export const deleteIndividualChat = async (chatId: string): Promise<void> => {
+  try {
+    await chatApi.deleteChatThread(chatId);
+  } catch (error) {
+    console.error('Error deleting chat:', error);
+    throw error;
+  }
+};
