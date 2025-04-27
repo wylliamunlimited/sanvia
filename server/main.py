@@ -23,7 +23,7 @@ from routers import (
     public_data,
     whoop_connect,
     delete_user_data,
-    encryption
+    encryption,
 )
 from dependencies.firebase_dependencies import (
     get_settings,
