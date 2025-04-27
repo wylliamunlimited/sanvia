@@ -17,6 +17,7 @@ from langgraph.checkpoint.memory import MemorySaver
 from dependencies.rag_dependencies import get_docs_from_chroma, query_docs_from_chroma
 from dependencies.firebase_dependencies import get_firestore_client, get_profile
 from dependencies.survey_rag import get_survey_context, get_bmi_context
+from dependencies.deidentification import deidentify_text
 
 from routers.whoop_connect import (
     check_access_token, refresh_token, get_valid_whoop_token
@@ -377,14 +378,14 @@ def generate_question(thoughts: AIBrain) -> AIBrain:
         }
     ]
     
-    # Debug logging
-    print()
-    print(
-        f"- - - - - - - 🧠 [START] AGENT {thoughts['thread_id']}: 'Generate Question' Prompt [START] 🧠 - - - - - - -\n"
-        f"{json.dumps(tmp_prompt, indent=4)}\n"
-        f"- - - - - - - 🧠 [END] AGENT {thoughts['thread_id']}: 'Generate Question' Prompt [END] 🧠 - - - - - - -"
-    )
-    print()
+    # # Debug logging
+    # print()
+    # print(
+    #     f"- - - - - - - 🧠 [START] AGENT {thoughts['thread_id']}: 'Generate Question' Prompt [START] 🧠 - - - - - - -\n"
+    #     f"{json.dumps(tmp_prompt, indent=4)}\n"
+    #     f"- - - - - - - 🧠 [END] AGENT {thoughts['thread_id']}: 'Generate Question' Prompt [END] 🧠 - - - - - - -"
+    # )
+    # print()
 
     # LLM call
     ai_question = get_llm().invoke(tmp_prompt)
@@ -426,7 +427,11 @@ def doc_data_extract(thoughts: AIBrain) -> AIBrain:
     relevant_docs = query_docs_from_chroma(prompt=last_message, premise={"user_id": user_id})
     
     # Join flattened text chunks into a single context string
-    doc_content = " ".join([doc[0] for doc in relevant_docs.get("documents", [])])
+    doc_content = " ".join([doc[0] for doc in relevant_docs.get("documents", []) if len(doc) != 0])
+    doc_content = deidentify_text(doc_content)
+    
+    print(f"[DOC EXTRACT] De-identified Text: {doc_content}")
+    
     if doc_content.strip():
         thoughts["data"]["doc_context"] = doc_content
 
@@ -493,8 +498,8 @@ def knowledge_gathering(thoughts: AIBrain) -> AIBrain:
         print(f"❌ [thread {thread_id}] Invalid search category: {search_category}")
         return thoughts
 
-    print(f"🌐 [thread {thread_id}] Query: {search_query}")
-    print(f"📂 [thread {thread_id}] Category: {search_category}")
+    # print(f"🌐 [thread {thread_id}] Query: {search_query}")
+    # print(f"📂 [thread {thread_id}] Category: {search_category}")
 
 
     # print(f"AGENT: search metadata => {search_prompt.content}, {search_category.content}")
@@ -515,11 +520,11 @@ def knowledge_gathering(thoughts: AIBrain) -> AIBrain:
     thoughts["knowledge"] += results
     thoughts["shortterm_knowledge"] = results
 
-    print(
-        f"\n- - - - - - - 🧠 [START] AGENT {thread_id}: knowledge - {search_category} 🧠 - - - - - - -\n"
-        f"{json.dumps(results, indent=4)}\n"
-        f"- - - - - - - 🧠 [END] AGENT {thread_id}: knowledge - {search_category} 🧠 - - - - - - -\n"
-    )
+    # print(
+    #     f"\n- - - - - - - 🧠 [START] AGENT {thread_id}: knowledge - {search_category} 🧠 - - - - - - -\n"
+    #     f"{json.dumps(results, indent=4)}\n"
+    #     f"- - - - - - - 🧠 [END] AGENT {thread_id}: knowledge - {search_category} 🧠 - - - - - - -\n"
+    # )
 
     return thoughts
 
@@ -588,13 +593,14 @@ def summarize(thoughts: AIBrain) -> AIBrain:
     # Append the new user instruction
     prompt = processed_prompt_chain + [{"role": "user", "content": user_instruction}]
 
-    print()
-    print(
-        f"- - - - - - - 🧠 [START] AGENT {thoughts['thread_id']}: 'Summarize' Prompt [START] 🧠 - - - - - - -\n"
-        f"{json.dumps(prompt, indent=4)}\n"
-        f"- - - - - - - 🧠 [END] AGENT {thoughts['thread_id']}: 'Summarize' Prompt [END] 🧠 - - - - - - -"
-    )
-    print()
+    ## debug
+    # print()
+    # print(
+    #     f"- - - - - - - 🧠 [START] AGENT {thoughts['thread_id']}: 'Summarize' Prompt [START] 🧠 - - - - - - -\n"
+    #     f"{json.dumps(prompt, indent=4)}\n"
+    #     f"- - - - - - - 🧠 [END] AGENT {thoughts['thread_id']}: 'Summarize' Prompt [END] 🧠 - - - - - - -"
+    # )
+    # print()
 
     # === TOKEN COUNT ESTIMATION ===
     token_count = (
@@ -824,9 +830,16 @@ async def initializeGraph(with_state: bool = True, prompt_chain: list = [], user
 
 
 def trigger_response(graph, user_state: AIBrain) -> AIBrain:
-
     config = {"configurable": {"thread_id": user_state["thread_id"]}}
-    state = graph.get_state(config)
-    # print(f"Current state: {state}")
-    response = graph.invoke(user_state, config)
-    return response
+
+    try:
+        print(f"[GRAPH] Invoking with thread_id={user_state['thread_id']}")
+        response = graph.invoke(user_state, config)
+        print("[GRAPH] Invocation complete")
+        # print(f"[GRAPH] Final prompt_chain:\n{json.dumps(response.get('prompt_chain', []), indent=2)}")
+        return response
+    except Exception as e:
+        print(f"❌ [GRAPH] Error during graph execution: {e}")
+        import traceback
+        traceback.print_exc()
+        raise e

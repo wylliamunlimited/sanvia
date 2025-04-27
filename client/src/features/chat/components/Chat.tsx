@@ -35,6 +35,13 @@ const Chat = () => {
     setShouldAutoScroll
   })
 
+  // Focus textarea on mount
+  useEffect(() => {
+    if (textareaRef.current) {
+      textareaRef.current.focus()
+    }
+  }, [])
+
   // Store threadId in localStorage whenever it changes
   useEffect(() => {
     if (threadId) {

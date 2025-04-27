@@ -23,6 +23,7 @@ from routers import (
     public_data,
     whoop_connect,
     delete_user_data,
+    encryption,
 )
 from dependencies.firebase_dependencies import (
     get_settings,
@@ -52,6 +53,7 @@ app.include_router(document_processing.router)
 app.include_router(public_data.router)
 app.include_router(whoop_connect.router)
 app.include_router(delete_user_data.router)
+app.include_router(encryption.router)
 # = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = =
 
 

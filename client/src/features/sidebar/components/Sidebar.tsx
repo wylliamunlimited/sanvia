@@ -54,7 +54,10 @@ const Sidebar: React.FC<SidebarProps> = ({
   onSectionChange,
 }) => {
   const [menuOpen, setMenuOpen] = useState(false)
-  const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false)
+  const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(() => {
+    const savedState = localStorage.getItem('sidebarCollapsed');
+    return savedState ? JSON.parse(savedState) : false;
+  });
   const [userName, setUserName] = useState("");
   const { user, loading, logout } = useAuth();
   const { setUserData } = useProfile();
@@ -110,14 +113,23 @@ const Sidebar: React.FC<SidebarProps> = ({
 
   const handleLogout = () => {
     setMenuOpen(false);
+    localStorage.removeItem('lastChatId');
     logout();
     navigate('/auth/login');
   };
 
   const toggleSidebar = () => {
+    const newState = !isSidebarCollapsed;
     document.body.classList.toggle('sidebar-collapsed')
-    setIsSidebarCollapsed(!isSidebarCollapsed)
+    setIsSidebarCollapsed(newState)
+    localStorage.setItem('sidebarCollapsed', JSON.stringify(newState));
   }
+
+  useEffect(() => {
+    if (isSidebarCollapsed) {
+      document.body.classList.add('sidebar-collapsed');
+    }
+  }, []);
 
   const menuItems = [
     {

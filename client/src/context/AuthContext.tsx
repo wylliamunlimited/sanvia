@@ -71,6 +71,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       await signOut(auth);
       setUser(null); // 🔹 Update state after logout
       localStorage.removeItem("sanvia-refreshToken");
+      sessionStorage.removeItem("AES_KEY")
     } catch (error) {
       console.error("Logout Error:", error);
     }
