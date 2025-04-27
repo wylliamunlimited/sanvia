@@ -1,8 +1,10 @@
 import React, { useState } from 'react';
 import './DangerZone.css';
 import { deleteUserData, deleteAccount, deleteAllChats, deleteAllDocuments } from '../services/deleteService';
+import { useFirebase } from '../../../context/FirebaseContext';
 
 const DangerZone: React.FC = () => {
+  const { auth } = useFirebase();
   const [isConfirmingDelete, setIsConfirmingDelete] = useState(false);
   const [isConfirmingDocuments, setIsConfirmingDocuments] = useState(false);
   const [isConfirmingChats, setIsConfirmingChats] = useState(false);
@@ -43,7 +45,12 @@ const DangerZone: React.FC = () => {
     if (confirmationText === 'DELETE') {
       try {
         await deleteAccount();
-        // Redirect to logout or home page after successful deletion
+        // Sign out from Firebase
+        await auth.signOut();
+        // Clear any local storage or session data
+        localStorage.clear();
+        sessionStorage.clear();
+        // Redirect to landing page
         window.location.href = '/';
       } catch (err) {
         setError('Failed to delete account. Please try again.');

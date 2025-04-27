@@ -1,7 +1,8 @@
 import { useState, useEffect } from 'react'
 import './Documents.css'
 import { getScrollbarWidth } from '../../../shared/utils/scrollbar'
-import { Document, fetchDocuments, uploadDocuments, getPreviewUrl } from '../services/documentService'
+import { Document, fetchDocuments, uploadDocuments, getPreviewUrl, deleteDocument } from '../services/documentService'
+import DeleteDocumentButton from './DeleteDocumentButton'
 
 const Documents = () => {
   const [documents, setDocuments] = useState<Document[]>([])
@@ -90,6 +91,26 @@ const Documents = () => {
     setIsIframeLoaded(false)
   }
 
+  const handleDeleteDocument = async (documentId: string) => {
+    try {
+      // First remove from UI
+      setDocuments(prev => prev.filter(doc => doc.document_id !== documentId));
+      if (previewDoc?.document_id === documentId) {
+        closePreview();
+      }
+      
+      // Then attempt to delete from backend
+      try {
+        await deleteDocument(documentId);
+      } catch (error) {
+        // If deletion fails, we've already removed it from the UI
+        console.error('Error deleting document:', error);
+      }
+    } catch (err) {
+      setError('Failed to delete document. Please try again.');
+    }
+  }
+
   return (
     <div className="documents-content">
 
@@ -142,20 +163,28 @@ const Documents = () => {
             <div 
               key={doc.document_id} 
               className="document-item"
-              onClick={() => handlePreview(doc)}
             >
-              <div className="document-icon">
-                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                  <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
-                  <polyline points="14 2 14 8 20 8"/>
-                </svg>
-              </div>
-              <div className="document-info">
-                <div className="document-name">{doc.filename}</div>
-                <div className="document-meta">
-                  {new Date(doc.upload_date).toLocaleDateString()}
+              <div 
+                className="document-content"
+                onClick={() => handlePreview(doc)}
+              >
+                <div className="document-icon">
+                  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                    <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
+                    <polyline points="14 2 14 8 20 8"/>
+                  </svg>
+                </div>
+                <div className="document-info">
+                  <div className="document-name">{doc.filename}</div>
+                  <div className="document-meta">
+                    {new Date(doc.upload_date).toLocaleDateString()}
+                  </div>
                 </div>
               </div>
+              <DeleteDocumentButton 
+                documentId={doc.document_id}
+                onDelete={() => handleDeleteDocument(doc.document_id)}
+              />
             </div>
           ))}
         </div>

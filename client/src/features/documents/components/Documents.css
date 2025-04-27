@@ -87,12 +87,20 @@
 .document-item {
   display: flex;
   align-items: center;
+  justify-content: space-between;
   gap: 1rem;
   animation: fadeIn 0.2s ease-in-out;
   padding: 1rem;
   background-color: var(--background);
   border-radius: 8px;
   border: 1px solid var(--border-color);
+}
+
+.document-content {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  flex: 1;
   cursor: pointer;
 }
 

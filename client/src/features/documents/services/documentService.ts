@@ -1,4 +1,5 @@
 import documentApi, { DocumentMetadata } from '../../../api/documentApi'
+import { firestoreApi } from '../../../api/firestoreApi'
 
 export type Document = DocumentMetadata
 
@@ -39,3 +40,15 @@ export const getPreviewUrl = async (documentId: string): Promise<string> => {
     throw new Error('Failed to load document preview')
   }
 }
+
+export const deleteDocument = async (documentId: string): Promise<void> => {
+  try {
+    const response = await firestoreApi.deleteDocument(documentId);
+    if (!response.ok) {
+      throw new Error('Failed to delete document');
+    }
+  } catch (error) {
+    console.error('Error deleting document:', error);
+    throw error;
+  }
+};
