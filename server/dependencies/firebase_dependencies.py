@@ -50,7 +50,8 @@ def update_profile(user_id: str, survey_data: Survey) -> None:
     """Updates a user's profile in Firestore."""
     try:
         doc_ref = get_firestore_client().collection("profiles").document(user_id)
-        doc_ref.set(survey_data.to_dict(), merge=True)
+        cleaned_data = {k: v for k, v in survey_data.to_dict().items() if v is not None}
+        doc_ref.set(cleaned_data, merge=True)
     except Exception as e:
         print(f"❌ Error updating profile: {str(e)}")
         raise
