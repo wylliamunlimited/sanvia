@@ -35,100 +35,100 @@ const AnimatedSurvey: React.FC<SurveyProps> = ({ onSurveyComplete }) => {
   const [medication, setMedication] = useState<string[]>([]);
 
     //meds
-  const [medicationSearchTerm, setMedicationSearchTerm] = useState('');
-  const [allMedications, setAllMedications] = useState<any[]>([]); // loaded from file 2
-  const [filteredMedications, setFilteredMedications] = useState<any[]>([]);
-  const [selectedMedication, setSelectedMedication] = useState<any | null>(null);
-  const [strengthOptions, setStrengthOptions] = useState<string[]>([]);
-  const [selectedStrength, setSelectedStrength] = useState('');
-  const [isLoadingMedications, setIsLoadingMedications] = useState(false);
-  const [medicationsError, setMedicationsError] = useState('');
-  const [medicationsStrengthsMap, setMedicationsStrengthsMap] = useState<Record<string, string[]>>({});
-  const [selectedMedications, setSelectedMedications] = useState<{medication: string, strength: string}[]>([]);
-  const [prescribedMedications, setPrescribedMedications] = useState<string[]>([]);
+  // const [medicationSearchTerm, setMedicationSearchTerm] = useState('');
+  // const [allMedications, setAllMedications] = useState<any[]>([]); // loaded from file 2
+  // const [filteredMedications, setFilteredMedications] = useState<any[]>([]);
+  // const [selectedMedication, setSelectedMedication] = useState<any | null>(null);
+  // const [strengthOptions, setStrengthOptions] = useState<string[]>([]);
+  // const [selectedStrength, setSelectedStrength] = useState('');
+  // const [isLoadingMedications, setIsLoadingMedications] = useState(false);
+  // const [medicationsError, setMedicationsError] = useState('');
+  // const [medicationsStrengthsMap, setMedicationsStrengthsMap] = useState<Record<string, string[]>>({});
+  // const [selectedMedications, setSelectedMedications] = useState<{medication: string, strength: string}[]>([]);
+  // const [prescribedMedications, setPrescribedMedications] = useState<string[]>([]);
 
 
   //MED JSON
-  useEffect(() => {
-    const fetchMedications = async () => {
-      try {
-        const response = await fetch('/drug-drugsfda-0001-of-0001.json');
-        const data = await response.json();
+  // useEffect(() => {
+  //   const fetchMedications = async () => {
+  //     try {
+  //       const response = await fetch('/drug-drugsfda-0001-of-0001.json');
+  //       const data = await response.json();
   
-        // Extract medication brand names
-        const medications = data.results
-          .filter((drug: { products?: { brand_name: string }[] }) => drug.products && drug.products.length > 0)
-          .map((drug: { products: { brand_name: string }[] }) => 
-            drug.products.map((product: { brand_name: string }) => product.brand_name)
-          )
-          .flat()
-          .filter(Boolean); // remove null or undefined
+  //       // Extract medication brand names
+  //       const medications = data.results
+  //         .filter((drug: { products?: { brand_name: string }[] }) => drug.products && drug.products.length > 0)
+  //         .map((drug: { products: { brand_name: string }[] }) => 
+  //           drug.products.map((product: { brand_name: string }) => product.brand_name)
+  //         )
+  //         .flat()
+  //         .filter(Boolean); // remove null or undefined
   
-        setAllMedications(medications);
-      } catch (error) {
-        console.error('Error loading medications:', error);
-        setMedicationsError('Failed to load medications.');
-      } finally {
-        setIsLoadingMedications(false);
-      }
-    };
+  //       setAllMedications(medications);
+  //     } catch (error) {
+  //       console.error('Error loading medications:', error);
+  //       setMedicationsError('Failed to load medications.');
+  //     } finally {
+  //       setIsLoadingMedications(false);
+  //     }
+  //   };
   
-    fetchMedications();
-  }, []);
+  //   fetchMedications();
+  // }, []);
   
   
-  //medicine
-  useEffect(() => {
-    async function fetchMedications() {
-      setIsLoadingMedications(true);
-      try {
-        const response = await fetch('/RxTermsArchive202504.txt');
-        const textData = await response.text();
+  // //medicine
+  // useEffect(() => {
+  //   async function fetchMedications() {
+  //     setIsLoadingMedications(true);
+  //     try {
+  //       const response = await fetch('/RxTermsArchive202504.txt');
+  //       const textData = await response.text();
   
-        // Split into lines
-        const lines = textData.split('\n');
+  //       // Split into lines
+  //       const lines = textData.split('\n');
   
-        // First line is headers
-        const headers = lines[0].trim().split('|');
+  //       // First line is headers
+  //       const headers = lines[0].trim().split('|');
   
-        // Parse the rest into objects
-        const data = lines.slice(1).map((line) => {
-          const values = line.trim().split('|');
-          const entry: Record<string, string> = {};
-          headers.forEach((header, index) => {
-            entry[header] = values[index] || '';
-          });
-          return entry;
-        });
+  //       // Parse the rest into objects
+  //       const data = lines.slice(1).map((line) => {
+  //         const values = line.trim().split('|');
+  //         const entry: Record<string, string> = {};
+  //         headers.forEach((header, index) => {
+  //           entry[header] = values[index] || '';
+  //         });
+  //         return entry;
+  //       });
   
-        setAllMedications(data);
+  //       setAllMedications(data);
   
-        const strengthsMap: Record<string, string[]> = {};
-        data.forEach((med) => {
-          const genericName = med['FULL_GENERIC_NAME'];
-          const strength = med['STRENGTH'];
+  //       const strengthsMap: Record<string, string[]> = {};
+  //       data.forEach((med) => {
+  //         const genericName = med['FULL_GENERIC_NAME'];
+  //         const strength = med['STRENGTH'];
   
-          if (genericName) {
-            if (!strengthsMap[genericName]) {
-              strengthsMap[genericName] = [];
-            }
-            if (strength && !strengthsMap[genericName].includes(strength)) {
-              strengthsMap[genericName].push(strength);
-            }
-          }
-        });
+  //         if (genericName) {
+  //           if (!strengthsMap[genericName]) {
+  //             strengthsMap[genericName] = [];
+  //           }
+  //           if (strength && !strengthsMap[genericName].includes(strength)) {
+  //             strengthsMap[genericName].push(strength);
+  //           }
+  //         }
+  //       });
   
-        setMedicationsStrengthsMap(strengthsMap);
-      } catch (error) {
-        console.error('Failed to fetch medications', error);
-        setMedicationsError('Failed to load medications.');
-      } finally {
-        setIsLoadingMedications(false);
-      }
-    }
+  //       setMedicationsStrengthsMap(strengthsMap);
+  //     } catch (error) {
+  //       console.error('Failed to fetch medications', error);
+  //       setMedicationsError('Failed to load medications.');
+  //     } finally {
+  //       setIsLoadingMedications(false);
+  //     }
+  //   }
   
-    fetchMedications();
-  }, []);
+  //   fetchMedications();
+  // }, []);
 
   //medical info
   useEffect(() => {
@@ -191,10 +191,6 @@ const AnimatedSurvey: React.FC<SurveyProps> = ({ onSurveyComplete }) => {
     {
       id: 'medicalConditions',
       text: "6. Select any medical conditions you have:",
-    },
-    {
-      id: 'medication',
-      text: "7. Select any medications thathave been prescribed:",
     }
   ];
 
@@ -515,7 +511,7 @@ const AnimatedSurvey: React.FC<SurveyProps> = ({ onSurveyComplete }) => {
                   <div className="search-container">
                     <input
                       type="text"
-                      className="search-input-survey"
+                      className="input-field"
                       placeholder="Start typing a condition..."
                       value={searchTerm}
                       onChange={(e) => {
@@ -604,10 +600,10 @@ const AnimatedSurvey: React.FC<SurveyProps> = ({ onSurveyComplete }) => {
                 </div>
               )}
               {/* Question 7: Prescribed Medications */}
-              {currentQuestionIndex === 6 && (
-                <div className="question-container">
+              {/* {currentQuestionIndex === 6 && (
+                <div className="question-container"> */}
                   {/* search bar */}
-                  <div className="search-container">
+                  {/* <div className="search-container">
                     <input
                       type="text"
                       className="search-input-survey"
@@ -619,9 +615,9 @@ const AnimatedSurvey: React.FC<SurveyProps> = ({ onSurveyComplete }) => {
 
                         // Log to check the current state of allMedications
                         console.log('Current search term:', value);
-                        console.log('allMedications:', allMedications);
+                        console.log('allMedications:', allMedications); */}
 
-                        // Check if allMedications is an array and contains medication strings
+                        {/* // Check if allMedications is an array and contains medication strings
                         if (Array.isArray(allMedications)) {
                           const filtered = allMedications
                             .filter((medication) => {
@@ -650,9 +646,9 @@ const AnimatedSurvey: React.FC<SurveyProps> = ({ onSurveyComplete }) => {
                         }
                       }}
                       disabled={prescribedMedications.includes('None') || isLoadingMedications}
-                    />
+                    /> */}
 
-                    {isLoadingMedications && (
+                    {/* {isLoadingMedications && (
                       <div className="loading-indicator">Loading medications...</div>
                     )}
 
@@ -661,7 +657,7 @@ const AnimatedSurvey: React.FC<SurveyProps> = ({ onSurveyComplete }) => {
                     )}
 
                     {/* results area */}
-                    {medicationSearchTerm && filteredMedications.length > 0 && !isLoadingMedications && (
+                    {/* {medicationSearchTerm && filteredMedications.length > 0 && !isLoadingMedications && (
                       <ul className="search-results">
                         {filteredMedications.map((medication) => (
                           <li
@@ -674,20 +670,20 @@ const AnimatedSurvey: React.FC<SurveyProps> = ({ onSurveyComplete }) => {
                               setMedicationSearchTerm('');
                               setFilteredMedications([]);
                             }}
-                          >
-                            {medication} {/* Display the brand name directly */}
-                          </li>
+                          > */}
+                            {/* {medication} {/* Display the brand name directly */}
+                          {/* </li>
                         ))}
                       </ul>
-                    )}
+                    )} */} 
 
-                    {medicationSearchTerm && filteredMedications.length === 0 && !isLoadingMedications && (
+                    {/* {medicationSearchTerm && filteredMedications.length === 0 && !isLoadingMedications && (
                       <div className="no-results">No matching medications found</div>
                     )}
-                  </div>
+                  </div>  */}
 
                   {/* Show selected medications as tags */}
-                  <div className="tags-container">
+                  {/* <div className="tags-container">
                     {prescribedMedications.length === 0 && (
                       <button 
                         className="none-button"
@@ -716,11 +712,7 @@ const AnimatedSurvey: React.FC<SurveyProps> = ({ onSurveyComplete }) => {
                   </div>
                 </div>
               )}
-
-
-
-
-
+            */}
 
               {/* Question 7: Medication Name and Strength Selection */}
               {/* {currentQuestionIndex === 6 && (
@@ -836,8 +828,6 @@ const AnimatedSurvey: React.FC<SurveyProps> = ({ onSurveyComplete }) => {
                 </div>  */
               // )} 
               }
-
-        
 
               {/* Navigation buttons */}
               <div className="navigation-buttons">
