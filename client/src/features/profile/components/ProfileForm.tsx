@@ -222,9 +222,8 @@ const ProfileForm: React.FC<ProfileFormProps> = ({
             {renderWeightInput()}
           </div>
         </div>
-      </div>
 
-      <div className="profile-field">
+        <div className="profile-field">
             <div className="field-label">Conditions</div>
             <input
               type="text"
@@ -233,6 +232,9 @@ const ProfileForm: React.FC<ProfileFormProps> = ({
               className="editable-input"
             />
           </div>
+      </div>
+
+
 
       {hasChanges && (
         <div className="profile-action-buttons">
