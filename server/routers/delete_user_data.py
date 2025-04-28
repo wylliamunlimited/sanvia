@@ -63,9 +63,10 @@ def delete_all_from_gcs(user: dict = Depends(get_firebase_user_from_token)):
 async def delete_user_data(user: dict = Depends(get_firebase_user_from_token)):
     """Delete all user data from Firestore, ChromaDB, and GCS"""
     # Delete from all storage systems
+    delete_all_from_gcs(user)
     delete_all_from_firestore(user)
     delete_all_from_chroma(user["uid"])
-    delete_all_from_gcs(user)
+
     return {"message": "User data deleted successfully from all storage systems"}
 
 
@@ -151,9 +152,10 @@ async def delete_document(
     user: Annotated[dict, Depends(get_firebase_user_from_token)], document_id: str
 ):
     """Delete document from firestore, chroma and gcs"""
+    delete_document_from_gcs(document_id, user)
     delete_document_from_firestore(document_id, user)
     delete_document_from_chroma(document_id, user)
-    delete_document_from_gcs(document_id, user)
+
     return {"message": "Document deleted successfully"}
 
 
@@ -255,9 +257,9 @@ def delete_user_account(user: dict = Depends(get_firebase_user_from_token)):
 async def delete_account(user: dict = Depends(get_firebase_user_from_token)):
     """Delete user account and all associated data"""
     # First delete all user data
+    delete_all_from_gcs(user)
     delete_all_from_firestore(user)
     delete_all_from_chroma(user["uid"])
-    delete_all_from_gcs(user)
     delete_all_threads(user)
 
     # Then delete the account
