@@ -117,6 +117,24 @@ const Profile = () => {
         </div>
       )}
 
+      {showSnackBar && (
+        <div className="snackbar">
+          ✅ {connectMessage}
+          <button onClick={() => setShowSnackBar(false)} style={{ marginLeft: '12px', background: 'none', border: 'none', color: '#fff', fontWeight: 'bold', cursor: 'pointer' }}>
+            ✕
+          </button>
+        </div>
+      )}
+
+      {showSnackBar && (
+        <div className="snackbar">
+          ✅ {connectMessage}
+          <button onClick={() => setShowSnackBar(false)} style={{ marginLeft: '12px', background: 'none', border: 'none', color: '#fff', fontWeight: 'bold', cursor: 'pointer' }}>
+            ✕
+          </button>
+        </div>
+      )}
+
       <div className="profile-area scrollable-area">
         <h2 className="profile-subheader">Your profile</h2>
         <ProfileForm 
