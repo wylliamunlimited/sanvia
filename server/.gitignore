@@ -11,3 +11,6 @@ uploaded_documents
 
 service-account.json
 messaging.py
+agents/__pycache__/
+agents/.ipynb_checkpoints/
+agents/langgraph-agent-test.ipynb
