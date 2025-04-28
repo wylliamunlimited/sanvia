@@ -224,7 +224,7 @@ const ProfileForm: React.FC<ProfileFormProps> = ({
         </div>
 
         <div className="profile-field">
-            <div className="field-label">Conditions</div>
+          <div className="field-label">Conditions</div>
             <input
               type="text"
               value={editedData.conditions}
@@ -233,8 +233,6 @@ const ProfileForm: React.FC<ProfileFormProps> = ({
             />
           </div>
       </div>
-
-
 
       {hasChanges && (
         <div className="profile-action-buttons">
