@@ -118,7 +118,7 @@
 
 /* Unit toggle button */
 .unit-toggle-button {
-  margin-top: 0.5rem;
+  margin-top: 12px;
   padding: 0.5rem 1rem;
   background-color: rgb(0, 41, 205, 0.3);
   color: white;
