@@ -71,6 +71,7 @@ const Sidebar: React.FC<SidebarProps> = ({
     } else {
       navigate('/chat');
     }
+
   };
 
   // Fetch profile only after the auth state is determined
@@ -166,93 +167,96 @@ const Sidebar: React.FC<SidebarProps> = ({
   ]
 
   return (
-    <div className="sidebar">
-      <div className="sidebar-header">
-        <div className="logo-container">
-          <div className="logo-wrapper">
-            <img src="/images/logo.svg" alt="Logo" />
-            <span className="logo-text">Sanvia</span>
-          </div>
-          <button 
-            className="collapse-button"
-            onClick={toggleSidebar}
-            aria-label="Toggle sidebar"
-          >
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-              <polyline points="15 18 9 12 15 6" />
-            </svg>
-          </button>
-        </div>
-      </div>
-      <div className="sidebar-content">
-        <nav className="sidebar-nav">
-          <button
-            className="nav-item collapse-nav-item"
-            onClick={toggleSidebar}
-          >
-            <span className="nav-item-icon">
-              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                <polyline points="9 18 15 12 9 6" />
-              </svg>
-            </span>
-            <span className="nav-item-text">Expand sidebar</span>
-          </button>
-          <button 
-            className="new-chat-button"
-            onClick={() => navigate('/chat')}
-          >
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-              <line x1="12" y1="5" x2="12" y2="19"></line>
-              <line x1="5" y1="12" x2="19" y2="12"></line>
-            </svg>
-            <span className="nav-item-text">New Chat</span>
-          </button>
-          {navItems.map((item) => (
-            <button
-              key={item.id}
-              className={`nav-item ${activeSection === item.id ? 'active' : ''}`}
-              onClick={() => {
-                if (item.id === 'chat') {
-                  handleChatNavigation();
-                } else {
-                  onSectionChange(item.id);
-                }
-              }}
+    // adding the back design
+    <div className="sidebar-back"> 
+      <div className="sidebar">
+        <div className="sidebar-header">
+          <div className="logo-container">
+            <div className="logo-wrapper">
+              <img src="/images/logo.svg" alt="Logo" />
+              <span className="logo-text">Sanvia</span>
+            </div>
+            <button 
+              className="collapse-button"
+              onClick={toggleSidebar}
+              aria-label="Toggle sidebar"
             >
-              <span className="nav-item-icon">{item.icon}</span>
-              <span className="nav-item-text">{item.label}</span>
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <polyline points="15 18 9 12 15 6" />
+              </svg>
             </button>
-          ))}
-        </nav>
-      </div>
-      
-      <div className="profile-menu">
-        <button
-          className="profile-section"
-          onClick={() => setMenuOpen(!menuOpen)}
-        >
-          <div className="profile-icon">
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-              <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" />
-              <circle cx="12" cy="7" r="4" />
-            </svg>
           </div>
-          {userName && <span className="user-name">{userName}</span>}
-        </button>
-        {menuOpen && (
-          <div className="menu-dropdown">
-            {menuItems.map(item => (
+        </div>
+        <div className="sidebar-content">
+          <nav className="sidebar-nav">
+            <button
+              className="nav-item collapse-nav-item"
+              onClick={toggleSidebar}
+            >
+              <span className="nav-item-icon">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                  <polyline points="9 18 15 12 9 6" />
+                </svg>
+              </span>
+              <span className="nav-item-text">Expand sidebar</span>
+            </button>
+            <button 
+              className="new-chat-button"
+              onClick={() => navigate('/chat')}
+            >
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <line x1="12" y1="5" x2="12" y2="19"></line>
+                <line x1="5" y1="12" x2="19" y2="12"></line>
+              </svg>
+              <span className="nav-item-text">New Chat</span>
+            </button>
+            {navItems.map((item) => (
               <button
                 key={item.id}
-                className={`menu-item ${activeSection === item.id ? 'active' : ''}`}
-                onClick={item.onClick}
+                className={`nav-item ${activeSection === item.id ? 'active' : ''}`}
+                onClick={() => {
+                  if (item.id === 'chat') {
+                    handleChatNavigation();
+                  } else {
+                    onSectionChange(item.id);
+                  }
+                }}
               >
-                <span className="menu-item-icon">{item.icon}</span>
+                <span className="nav-item-icon">{item.icon}</span>
                 <span className="nav-item-text">{item.label}</span>
               </button>
             ))}
-          </div>
-        )}
+          </nav>
+        </div>
+        
+        <div className="profile-menu">
+          <button
+            className="profile-section"
+            onClick={() => setMenuOpen(!menuOpen)}
+          >
+            <div className="profile-icon">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" />
+                <circle cx="12" cy="7" r="4" />
+              </svg>
+            </div>
+            {userName && <span className="user-name">{userName}</span>}
+          </button>
+          {menuOpen && (
+            <div className="menu-dropdown">
+              {menuItems.map(item => (
+                <button
+                  key={item.id}
+                  className={`menu-item ${activeSection === item.id ? 'active' : ''}`}
+                  onClick={item.onClick}
+                >
+                  <span className="menu-item-icon">{item.icon}</span>
+                  <span className="nav-item-text">{item.label}</span>
+                </button>
+              ))}
+            </div>
+          )}
+        </div>
       </div>
     </div>
   )

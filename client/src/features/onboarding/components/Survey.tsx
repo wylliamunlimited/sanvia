@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { useNavigate } from "react-router-dom";
 import "./Survey.css";
 import { firestoreApi } from '../../../api/firestoreApi';
@@ -7,8 +7,9 @@ import { useProfile } from '../../../context/ProfileContext';
 interface SurveyQuestion {
   id: string;
   text: string;
-  backgroundColor: string;
 }
+
+
 
 interface SurveyProps {
   onSurveyComplete: () => void;
@@ -22,7 +23,6 @@ const AnimatedSurvey: React.FC<SurveyProps> = ({ onSurveyComplete }) => {
   const [isAnimating, setIsAnimating] = useState(false);
   const [isCompleted, setIsCompleted] = useState(false);
   const [transitionDirection, setTransitionDirection] = useState<'next' | 'prev'>('next');
-  const [activeIndices, setActiveIndices] = useState<number[]>([0]);
   //medical serch
   const [allConditions, setAllConditions] = useState<string[]>([]);
   const [conditionsMap, setConditionsMap] = useState<Record<string, string>>({});
@@ -32,6 +32,103 @@ const AnimatedSurvey: React.FC<SurveyProps> = ({ onSurveyComplete }) => {
   const [searchTerm, setSearchTerm] = useState('');
   const [filteredConditions, setFilteredConditions] = useState<string[]>([]);
   const [medicalConditions, setMedicalConditions] = useState<string[]>([]);
+  const [medication, setMedication] = useState<string[]>([]);
+
+    //meds
+  // const [medicationSearchTerm, setMedicationSearchTerm] = useState('');
+  // const [allMedications, setAllMedications] = useState<any[]>([]); // loaded from file 2
+  // const [filteredMedications, setFilteredMedications] = useState<any[]>([]);
+  // const [selectedMedication, setSelectedMedication] = useState<any | null>(null);
+  // const [strengthOptions, setStrengthOptions] = useState<string[]>([]);
+  // const [selectedStrength, setSelectedStrength] = useState('');
+  // const [isLoadingMedications, setIsLoadingMedications] = useState(false);
+  // const [medicationsError, setMedicationsError] = useState('');
+  // const [medicationsStrengthsMap, setMedicationsStrengthsMap] = useState<Record<string, string[]>>({});
+  // const [selectedMedications, setSelectedMedications] = useState<{medication: string, strength: string}[]>([]);
+  // const [prescribedMedications, setPrescribedMedications] = useState<string[]>([]);
+
+
+  //MED JSON
+  // useEffect(() => {
+  //   const fetchMedications = async () => {
+  //     try {
+  //       const response = await fetch('/drug-drugsfda-0001-of-0001.json');
+  //       const data = await response.json();
+  
+  //       // Extract medication brand names
+  //       const medications = data.results
+  //         .filter((drug: { products?: { brand_name: string }[] }) => drug.products && drug.products.length > 0)
+  //         .map((drug: { products: { brand_name: string }[] }) => 
+  //           drug.products.map((product: { brand_name: string }) => product.brand_name)
+  //         )
+  //         .flat()
+  //         .filter(Boolean); // remove null or undefined
+  
+  //       setAllMedications(medications);
+  //     } catch (error) {
+  //       console.error('Error loading medications:', error);
+  //       setMedicationsError('Failed to load medications.');
+  //     } finally {
+  //       setIsLoadingMedications(false);
+  //     }
+  //   };
+  
+  //   fetchMedications();
+  // }, []);
+  
+  
+  // //medicine
+  // useEffect(() => {
+  //   async function fetchMedications() {
+  //     setIsLoadingMedications(true);
+  //     try {
+  //       const response = await fetch('/RxTermsArchive202504.txt');
+  //       const textData = await response.text();
+  
+  //       // Split into lines
+  //       const lines = textData.split('\n');
+  
+  //       // First line is headers
+  //       const headers = lines[0].trim().split('|');
+  
+  //       // Parse the rest into objects
+  //       const data = lines.slice(1).map((line) => {
+  //         const values = line.trim().split('|');
+  //         const entry: Record<string, string> = {};
+  //         headers.forEach((header, index) => {
+  //           entry[header] = values[index] || '';
+  //         });
+  //         return entry;
+  //       });
+  
+  //       setAllMedications(data);
+  
+  //       const strengthsMap: Record<string, string[]> = {};
+  //       data.forEach((med) => {
+  //         const genericName = med['FULL_GENERIC_NAME'];
+  //         const strength = med['STRENGTH'];
+  
+  //         if (genericName) {
+  //           if (!strengthsMap[genericName]) {
+  //             strengthsMap[genericName] = [];
+  //           }
+  //           if (strength && !strengthsMap[genericName].includes(strength)) {
+  //             strengthsMap[genericName].push(strength);
+  //           }
+  //         }
+  //       });
+  
+  //       setMedicationsStrengthsMap(strengthsMap);
+  //     } catch (error) {
+  //       console.error('Failed to fetch medications', error);
+  //       setMedicationsError('Failed to load medications.');
+  //     } finally {
+  //       setIsLoadingMedications(false);
+  //     }
+  //   }
+  
+  //   fetchMedications();
+  // }, []);
 
   //medical info
   useEffect(() => {
@@ -68,44 +165,34 @@ const AnimatedSurvey: React.FC<SurveyProps> = ({ onSurveyComplete }) => {
   const [heightUnit, setHeightUnit] = useState('cm');
   const [weightUnit, setWeightUnit] = useState('kg');
 
+
   // Define questions
   const questions: SurveyQuestion[] = [
     {
       id: 'age',
-      text: "How old are you?",
-      backgroundColor: "#E6F2FF" // Very light blue
+      text: "1. How old are you?",
     },
     {
       id: 'gender',
-      text: "Select your gender?",
-      backgroundColor: "#B3D9FF" // Light blue
+      text: "2. Select your gender:",
     },
     {
       id: 'sex',
-      text: "Select your sex?",
-      backgroundColor: "#80C1FF" // Medium blue
+      text: "3. Select your sex:",
     },
     {
       id: 'height',
-      text: "What is your height?",
-      backgroundColor: "#4DA6FF" // Bright blue
+      text: "4. What is your height?",
     },
     {
       id: 'weight',
-      text: "What is your weight?",
-      backgroundColor: "#1A75FF" // Deep blue
+      text: "5. What is your weight?",
     },
     {
       id: 'medicalConditions',
-      text: "Select any medical conditions you have:",
-      backgroundColor: "#0052cc" // Darker blue
+      text: "6. Select any medical conditions you have:",
     }
   ];
-
-  // Keep track of active indices for animation
-  useEffect(() => {
-    setActiveIndices([previousQuestionIndex, currentQuestionIndex]);
-  }, [currentQuestionIndex, previousQuestionIndex]);
 
   // Handle input validation
   const handleNumericInput = (setter: React.Dispatch<React.SetStateAction<string>>) => (
@@ -124,14 +211,8 @@ const AnimatedSurvey: React.FC<SurveyProps> = ({ onSurveyComplete }) => {
       setTransitionDirection('next');
       setPreviousQuestionIndex(currentQuestionIndex);
       setIsAnimating(true);
-      
-      // Delay changing the current question to allow animation to start
-      setTimeout(() => {
-        setCurrentQuestionIndex(prevIndex => prevIndex + 1);
-        setTimeout(() => {
-          setIsAnimating(false);
-        }, 50); // Small delay to ensure state is updated
-      }, 50);
+      setCurrentQuestionIndex(prevIndex => prevIndex + 1);
+
     } else {
       handleSubmit();
     }
@@ -143,14 +224,20 @@ const AnimatedSurvey: React.FC<SurveyProps> = ({ onSurveyComplete }) => {
       setTransitionDirection('prev');
       setPreviousQuestionIndex(currentQuestionIndex);
       setIsAnimating(true);
-      
-      // Delay changing the current question to allow animation to start
-      setTimeout(() => {
-        setCurrentQuestionIndex(prevIndex => prevIndex - 1);
-        setTimeout(() => {
-          setIsAnimating(false);
-        }, 50); // Small delay to ensure state is updated
-      }, 50);
+      setCurrentQuestionIndex(prevIndex => prevIndex - 1);
+
+
+    }
+  };
+
+  const handleSkip = () => {
+    if (currentQuestionIndex < questions.length - 1) {
+      setTransitionDirection('next');
+      setPreviousQuestionIndex(currentQuestionIndex);
+      setIsAnimating(true);
+      setCurrentQuestionIndex(prevIndex => prevIndex + 1);
+    } else {
+      handleSubmit();
     }
   };
 
@@ -209,7 +296,8 @@ const AnimatedSurvey: React.FC<SurveyProps> = ({ onSurveyComplete }) => {
       height: heightUnit === 'cm' ? height : `${feet}'${inches}"`,
       weight: `${weight}`,
       weightUnit: `${weightUnit}`,
-      medicalConditions
+      medicalConditions,
+      medication
     };
     console.log('Survey submitted:', surveyData);
 
@@ -244,6 +332,7 @@ const AnimatedSurvey: React.FC<SurveyProps> = ({ onSurveyComplete }) => {
     setHeightUnit('cm');
     setWeightUnit('kg');
     setMedicalConditions([]);
+    setMedication([]);
     setIsCompleted(false);
     setPreviousQuestionIndex(0);
     setCurrentQuestionIndex(0);
@@ -270,66 +359,16 @@ const AnimatedSurvey: React.FC<SurveyProps> = ({ onSurveyComplete }) => {
   
   const navigate = useNavigate();
 
-  // Function to calculate the slide position based on direction and indices
-  const getSlidePosition = (index: number) => {
-    if (index === currentQuestionIndex) return 0;
-    
-    if (transitionDirection === 'next') {
-      return index < currentQuestionIndex ? -100 : 100;
-    } else {
-      return index > currentQuestionIndex ? 100 : -100;
-    }
-  };
-
-  // Fetch profile data on mount
-  useEffect(() => {
-    const fetchProfile = async () => {
-      try {
-        const data = await firestoreApi.get_user_profile();
-        setUserData({
-          firstName: data['first-name'],
-          lastName: data['last-name'],
-          height: data['Height'],
-          weight: data['Weight'],
-          gender: data['Gender'],
-          sex: data['Sex'],
-          age: data['Age'],
-          conditions: data['Conditions'],
-          medications: data['Medications']
-        });
-      } catch (error) {
-        console.error('Error fetching profile:', error);
-      }
-    };
-    fetchProfile();
-  }, [setUserData]);
-
   return (
     <div className="survey-container">
       {/* Background slides */}
-      {questions.map((question, index) => (
-        <div
-          key={index}
-          className={`background-slide ${
-            activeIndices.includes(index) ? 'active' : 'inactive'
-          }`}
-          style={{
-            transform: `translateY(${activeIndices.includes(index) ? getSlidePosition(index) : index < currentQuestionIndex ? -100 : 100}vh)`,
-            backgroundColor: question.backgroundColor,
-            opacity: activeIndices.includes(index) ? 1 : 0
-          }}
-        />
-      ))}
-
       {/* Thank you background */}
       <div
         className="thank-you-background"
         style={{
           transform: `translateY(${isCompleted ? 0 : 100}vh)`,
-          backgroundColor: "#0047B3" // Deep royal blue for completion
         }}
       />
-
       {/* Survey content */}
       <div className="survey-content-container">
         {!isCompleted ? (
@@ -350,7 +389,6 @@ const AnimatedSurvey: React.FC<SurveyProps> = ({ onSurveyComplete }) => {
               {/* Question 1: Age */}
               {currentQuestionIndex === 0 && (
                 <div className="question-container">
-                  <label className="input-label">Enter your age:</label>
                   <input
                     type="number"
                     min="16"
@@ -403,7 +441,6 @@ const AnimatedSurvey: React.FC<SurveyProps> = ({ onSurveyComplete }) => {
               {/* Question 4: Height */}
               {currentQuestionIndex === 3 && (
                 <div className="question-container">
-                  <label className="input-label">Height ({heightUnit}):</label>
 
                   {heightUnit === 'cm' ? (
                     <input
@@ -448,7 +485,6 @@ const AnimatedSurvey: React.FC<SurveyProps> = ({ onSurveyComplete }) => {
               {/* Question 5: Weight */}
               {currentQuestionIndex === 4 && (
                 <div className="question-container">
-                  <label className="input-label">Weight ({weightUnit}):</label>
                   <input
                     type="text"
                     value={weight}
@@ -471,13 +507,11 @@ const AnimatedSurvey: React.FC<SurveyProps> = ({ onSurveyComplete }) => {
               {/* Question 6: Medical Conditions */}
               {currentQuestionIndex === 5 && (
                 <div className="question-container">
-                  <label className="input-label">Search and select your conditions:</label>
-
                   {/* search bar */}
                   <div className="search-container">
                     <input
                       type="text"
-                      className="search-input"
+                      className="input-field"
                       placeholder="Start typing a condition..."
                       value={searchTerm}
                       onChange={(e) => {
@@ -565,6 +599,235 @@ const AnimatedSurvey: React.FC<SurveyProps> = ({ onSurveyComplete }) => {
                   </div>
                 </div>
               )}
+              {/* Question 7: Prescribed Medications */}
+              {/* {currentQuestionIndex === 6 && (
+                <div className="question-container"> */}
+                  {/* search bar */}
+                  {/* <div className="search-container">
+                    <input
+                      type="text"
+                      className="search-input-survey"
+                      placeholder="Start typing a medication..."
+                      value={medicationSearchTerm}
+                      onChange={(e) => {
+                        const value = e.target.value;
+                        setMedicationSearchTerm(value);
+
+                        // Log to check the current state of allMedications
+                        console.log('Current search term:', value);
+                        console.log('allMedications:', allMedications); */}
+
+                        {/* // Check if allMedications is an array and contains medication strings
+                        if (Array.isArray(allMedications)) {
+                          const filtered = allMedications
+                            .filter((medication) => {
+                              const lowerCaseMedication = medication.toLowerCase();
+                              const lowerCaseQuery = value.toLowerCase();
+
+                              // Prioritize exact matches
+                              if (lowerCaseMedication === lowerCaseQuery) {
+                                return true;
+                              }
+
+                              // Prioritize medications that start with the query
+                              if (lowerCaseMedication.startsWith(lowerCaseQuery)) {
+                                return true;
+                              }
+
+                              // Fall back to includes for case-insensitive matching
+                              return lowerCaseMedication.includes(lowerCaseQuery);
+                            })
+                            .sort(); // Sort alphabetically
+
+                          setFilteredMedications(filtered.slice(0, 10)); // Limit to first 10 results
+                        } else {
+                          setFilteredMedications([]);
+                          console.error('allMedications is not an array or is empty:', allMedications);
+                        }
+                      }}
+                      disabled={prescribedMedications.includes('None') || isLoadingMedications}
+                    /> */}
+
+                    {/* {isLoadingMedications && (
+                      <div className="loading-indicator">Loading medications...</div>
+                    )}
+
+                    {medicationsError && (
+                      <div className="error-message">{medicationsError}</div>
+                    )}
+
+                    {/* results area */}
+                    {/* {medicationSearchTerm && filteredMedications.length > 0 && !isLoadingMedications && (
+                      <ul className="search-results">
+                        {filteredMedications.map((medication) => (
+                          <li
+                            key={medication} // Use medication name as the key since it's unique
+                            className="search-result-item"
+                            onClick={() => {
+                              if (!prescribedMedications.includes(medication)) {
+                                setPrescribedMedications((prev) => [...prev.filter(m => m !== 'None'), medication]);
+                              }
+                              setMedicationSearchTerm('');
+                              setFilteredMedications([]);
+                            }}
+                          > */}
+                            {/* {medication} {/* Display the brand name directly */}
+                          {/* </li>
+                        ))}
+                      </ul>
+                    )} */} 
+
+                    {/* {medicationSearchTerm && filteredMedications.length === 0 && !isLoadingMedications && (
+                      <div className="no-results">No matching medications found</div>
+                    )}
+                  </div>  */}
+
+                  {/* Show selected medications as tags */}
+                  {/* <div className="tags-container">
+                    {prescribedMedications.length === 0 && (
+                      <button 
+                        className="none-button"
+                        onClick={() => setPrescribedMedications(['None'])}
+                      >
+                        I am not currently prescribed any medications
+                      </button>
+                    )}
+
+                    {prescribedMedications.map((medication) => (
+                      <span
+                        key={medication}
+                        className="condition-tag"
+                      >
+                        {medication}
+                        <button
+                          className="tag-remove-button"
+                          onClick={() => {
+                            setPrescribedMedications((prev) => prev.filter((m) => m !== medication));
+                          }}
+                        >
+                          ×
+                        </button>
+                      </span>
+                    ))}
+                  </div>
+                </div>
+              )}
+            */}
+
+              {/* Question 7: Medication Name and Strength Selection */}
+              {/* {currentQuestionIndex === 6 && (
+                <div className="question-container">
+                  {/* Medication Name Search Bar */}
+                  {/* <div className="search-container">
+                    <input
+                      type="text"
+                      className="search-input-survey"
+                      placeholder="Start typing a medication..."
+                      value={medicationSearchTerm}
+                      onChange={(e) => {
+                        const value = e.target.value;
+                        setMedicationSearchTerm(value);
+
+                        if (Array.isArray(allMedications)) {
+                          const filtered = allMedications
+                            .filter((med) =>
+                              typeof med['DISPLAY_NAME'] === 'string' &&
+                              med['DISPLAY_NAME'].toLowerCase().includes(value.toLowerCase())
+                            )
+                            .map((med) => med['DISPLAY_NAME']);
+
+                          setFilteredMedications([...new Set(filtered)].slice(0, 10));
+                        } else {
+                          setFilteredMedications([]);
+                          console.error('allMedications is not an array:', allMedications);
+                        }
+                      }}
+                      disabled={selectedMedications.length > 0 || isLoadingMedications}
+                    />
+
+                    {isLoadingMedications && (
+                      <div className="loading-indicator">Loading medications...</div>
+                    )}
+
+                    {medicationsError && (
+                      <div className="error-message">{medicationsError}</div>
+                    )}
+
+                    {/* Search Results */}
+                    {/* {medicationSearchTerm && filteredMedications.length > 0 && !isLoadingMedications && (
+                      <ul className="search-results">
+                        {filteredMedications.map((medName) => (
+                          <li
+                            key={medName}
+                            className="search-result-item"
+                            onClick={() => {
+                              setSelectedMedication(medName);
+                              setMedicationSearchTerm('');
+                              setFilteredMedications([]);
+                            }}
+                          >
+                            {medName}
+                          </li>
+                        ))}
+                      </ul>
+                    )}
+
+                    {medicationSearchTerm && filteredMedications.length === 0 && !isLoadingMedications && (
+                      <div className="no-results">No matching medications found</div>
+                    )}
+                  </div> */}
+
+                  {/* Strength Picker (after medication is selected) */}
+                  {/* {selectedMedication && (
+                    <div className="strength-selection-container">
+                      <h4 className="sub-question-title">Select strength for {selectedMedication}:</h4>
+
+                      <div className="strength-buttons">
+                        {(medicationsStrengthsMap[selectedMedication] || []).map((strength) => (
+                          <button
+                            key={strength}
+                            className="strength-button"
+                            onClick={() => {
+                              setSelectedMedications((prev) => [
+                                ...prev,
+                                { medication: selectedMedication, strength }
+                              ]);
+                              setSelectedMedication(''); // Clear after selecting
+                            }}
+                          >
+                            {strength}
+                          </button>
+                        ))}
+                      </div>
+
+                      {/* Option if no strength fits */}
+                      {/* {(medicationsStrengthsMap[selectedMedication] || []).length === 0 && (
+                        <p>No strengths available for this medication.</p>
+                      )}
+                    </div>
+                  )}
+
+                  {/* Show selected medications and strengths as tags */}
+                  {/* <div className="tags-container">
+                    {selectedMedications.map(({ medication, strength }) => (
+                      <span key={`${medication}-${strength}`} className="condition-tag">
+                        {medication} - {strength}
+                        <button
+                          className="tag-remove-button"
+                          onClick={() => {
+                            setSelectedMedications((prev) =>
+                              prev.filter((item) => !(item.medication === medication && item.strength === strength))
+                            );
+                          }}
+                        >
+                          ×
+                        </button>
+                      </span>
+                    ))}
+                  </div>
+                </div>  */
+              // )} 
+              }
 
               {/* Navigation buttons */}
               <div className="navigation-buttons">
@@ -586,6 +849,16 @@ const AnimatedSurvey: React.FC<SurveyProps> = ({ onSurveyComplete }) => {
                 >
                   {currentQuestionIndex === questions.length - 1 ? 'Submit' : 'Next'}
                 </button>
+
+                {currentQuestionIndex < questions.length - 1 && (
+                  <button
+                    type="button"
+                    onClick={handleSkip}
+                    className="skip-button"
+                  >
+                    Skip
+                  </button>
+                  )}
               </div>
 
               {/* Progress indicator */}
@@ -616,6 +889,8 @@ const AnimatedSurvey: React.FC<SurveyProps> = ({ onSurveyComplete }) => {
                 <li><strong>Height:</strong> {heightUnit === 'cm' ? `${height} cm` : `${feet}'${inches}"`}</li>
                 <li><strong>Weight:</strong> {weight} {weightUnit}</li>
                 <li><strong>Medical Conditions:</strong> {medicalConditions.length > 0 ? medicalConditions.join(', ') : 'None'}</li>
+                <li><strong>Medication Prescription:</strong> {medicalConditions.length > 0 ? medicalConditions.join(', ') : 'None'}</li>
+
               </ul>
             </div>
 

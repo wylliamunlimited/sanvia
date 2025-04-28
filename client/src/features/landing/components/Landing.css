@@ -16,34 +16,38 @@
 
 .landing-nav {
     display: flex;
-    justify-content: space-between;
     align-items: center;
     padding: 1rem 2rem;
     position: relative;
     z-index: 1;
-    max-width: 1200px;
-    margin: 0 auto;
+    margin: 0;
     width: 100%;
+    max-width: 100vw;
+    object-fit: contain;
 }
 
-.nav-left, .nav-right {
-    display: flex;
-    align-items: center;
-    gap: 1rem;
+.landing-nav img {
+    width: 70%; 
+    height: auto; 
+    min-width: 100px;
+    object-fit: contain;
+  }
+
+.nav-left,
+.nav-right {
+  display: flex;
+  gap: 1.5rem; 
 }
 
-.nav-center {
-    position: absolute;
-    left: 50%;
-    transform: translateX(-50%);
-    display: flex;
-    align-items: center;
-    gap: 1rem;
+.nav-right {
+  justify-content: flex-end; 
 }
+
+
 
 .landing-logo-text {
     font-family: 'Unbounded', sans-serif;
-    font-size: 1.5rem;
+    font-size: 28px;
     font-weight: 500;
     color: var(--text-primary);
 }
@@ -66,10 +70,11 @@
 .nav-button {
     padding: 0.5rem 1rem;
     border-radius: 6px;
-    font-size: 1rem;
+    font-size: 16px;
     font-weight: 500;
     cursor: pointer;
     transition: all 0.2s ease;
+    white-space: nowrap;
 }
 
 .nav-button.login {
@@ -78,15 +83,21 @@
     color: var(--text-primary);
 }
 
+.nav-button.about {
+    background: none;
+    border: none;
+    color: var(--text-primary);   
+}
+
 .nav-button.signup {
-    background: var(--background-hover);
+    background: linear-gradient(to right, black, #363636);
     border: 1px solid var(--border-color);
     color: var(--text-primary);
 }
 
-.nav-button:hover {
-    background: var(--primary);
-    border-color: var(--primary);
+.nav-button.signup:hover {
+    background: rgba(100, 100, 100, 0.5);
+    border-color: rgba(117, 116, 116, 0.5);
 }
 
 .hero-section {
@@ -128,20 +139,19 @@
 }
 
 .cta-button {
-    background: var(--background-hover);
-    border: 1px solid var(--border-color);
+    background: linear-gradient(to right, #2E405A, #556B85) 80%;
     color: var(--text-primary);
     padding: 0.75rem 1.5rem;
-    border-radius: 8px;
+    border: none;
+    border-radius: 10px;
     font-size: 1.125rem;
     font-weight: 500;
     cursor: pointer;
-    transition: all 0.2s ease;
+    transition: all 0.3s ease;
 }
 
 .cta-button:hover {
-    background: var(--primary);
-    border-color: var(--primary);
+    background: #445d79;
 }
 
 @media (max-width: 768px) {

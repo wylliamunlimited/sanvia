@@ -1,10 +1,17 @@
 @import url('https://fonts.googleapis.com/css2?family=Unbounded:wght@400&display=swap');
 
+.sidebar-back {
+  overflow: visible;
+  position: relative;
+}
+
 .sidebar {
-  width: 260px;
-  min-width: 260px;
+  margin: 10px;
+  backdrop-filter: blur(7px);
+  width: 240px;
+  min-width: 240px;
   flex-shrink: 0;
-  background-color: var(--background-secondary);
+  background-color:  hsla(210, 15%, 76%, 0.2);
   display: flex;
   flex-direction: column;
   justify-content: space-between;
@@ -13,11 +20,20 @@
   top: 0;
   bottom: 0;
   transition: all 0.3s ease;
+  overflow-y: auto;
+  overflow: visible;  
+  border: 2px solid transparent;
+  border-radius: 13px;
+  background: 
+  linear-gradient(to bottom, #958F9A 0%, transparent 50%),
+  linear-gradient(to top, #2D2D2D 0%, transparent 50%);
+background-origin: border-box;
+background-clip: border-box;
 }
 
 body.sidebar-collapsed .sidebar {
-  width: 80px;
-  min-width: 80px;
+  width: 62px;
+  min-width: 62px;
 }
 
 body.sidebar-collapsed .logo-text,
@@ -55,10 +71,6 @@ body.sidebar-collapsed .collapse-button {
 body.sidebar-collapsed .menu-item {
   padding: 0.5rem;
   justify-content: center;
-}
-
-body.sidebar-collapsed .menu-item-icon {
-  margin-right: 0;
 }
 
 .sidebar-header {
@@ -116,9 +128,9 @@ body.sidebar-collapsed .menu-item-icon {
 .new-chat-button {
   width: 100%;
   padding: 0.5rem 0.75rem;
-  border: 1px solid var(--border-color);
+  border: 1px solid rgba(255,255,255, 0.8);
   border-radius: 6px;
-  background: #1E1E1E;
+  background: transparent;
   color: var(--text-primary);
   font-size: 14px;
   text-align: left;
@@ -131,8 +143,7 @@ body.sidebar-collapsed .menu-item-icon {
 }
 
 .new-chat-button:hover {
-  background-color: var(--background-hover);
-  border-color: var(--border-color);
+  background-color: rgba(242, 245, 252, 0.1);  border-color: #d1d5db;
 }
 
 .nav-item {
@@ -141,7 +152,7 @@ body.sidebar-collapsed .menu-item-icon {
   border: none;
   border-radius: 6px;
   background: none;
-  color: var(--text-secondary);
+  color: var(--text-primary);
   font-size: 14px;
   text-align: left;
   cursor: pointer;
@@ -152,11 +163,11 @@ body.sidebar-collapsed .menu-item-icon {
 }
 
 .nav-item:hover {
-  background-color: var(--background-hover);
+  background-color: rgba(242, 245, 252, 0.1);
 }
 
 .nav-item.active {
-  background-color: var(--background-hover);
+  background-color: rgba(242, 245, 252, 0.5);
   color: var(--text-primary);
   font-weight: 500;
 }
@@ -164,7 +175,7 @@ body.sidebar-collapsed .menu-item-icon {
 .nav-item-icon {
   display: flex;
   align-items: center;
-  color: var(--text-secondary);
+  color: var(--text-primary);
 }
 
 .nav-item.active .nav-item-icon {
@@ -190,7 +201,7 @@ body.sidebar-collapsed .menu-item-icon {
 }
 
 .profile-section:hover {
-  background-color: var(--background-hover);
+  background-color: rgba(242, 245, 252, 0.1);
 }
 
 .profile-icon {
@@ -200,9 +211,9 @@ body.sidebar-collapsed .menu-item-icon {
   display: flex;
   align-items: center;
   justify-content: center;
-  background-color: var(--background-hover);
+  background-color: #F2F5FC;
   border-radius: 50%;
-  color: var(--text-secondary);
+  color: rgba(0,0,0, 0.87);
   flex-shrink: 0;
 }
 
@@ -217,14 +228,16 @@ body.sidebar-collapsed .menu-item-icon {
   bottom: 100%;
   left: 0;
   right: 0;
-  background-color: var(--background-secondary);
   border-radius: 8px;
+  background-color: rgba(255,255,255, 0.1);
   overflow: hidden;
   display: flex;
   flex-direction: column;
   gap: 0.5rem;
   padding: 0.5rem 1rem;
   margin: 0.125rem 0;
+  margin-left: 15px;
+  margin-right: 15px;
 }
 
 .menu-item {
@@ -236,7 +249,7 @@ body.sidebar-collapsed .menu-item-icon {
   border: none;
   border-radius: 6px;
   background: none;
-  color: var(--text-secondary);
+  color: var(--text-primary);
   font-size: 14px;
   text-align: left;
   cursor: pointer;
@@ -263,14 +276,14 @@ body.sidebar-collapsed .menu-item-icon {
 .menu-item-icon {
   display: flex;
   align-items: center;
-  color: var(--text-secondary);
+  color: white;
 }
 
 .collapse-button {
   background: none;
   border: none;
   padding: 0.5rem;
-  color: var(--text-secondary);
+  color: var(--text-primary);
   cursor: pointer;
   display: flex;
   align-items: center;
@@ -281,7 +294,7 @@ body.sidebar-collapsed .menu-item-icon {
 
 .collapse-button:hover {
   color: var(--text-primary);
-  background-color: var(--background-hover);
+  background-color: rgba(242, 245, 252, 0.1);
 }
 
 body.sidebar-collapsed .collapse-button {
