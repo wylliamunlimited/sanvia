@@ -57,8 +57,8 @@ async def update_user_profile(
             weight=survey_data['weight'], 
             conditions=survey_data['conditions'], 
             medications=survey_data['medications'],
-            first_name=survey_data['first_name'],
-            last_name=survey_data['last_name']
+            first_name=survey_data['first_name'] if len(survey_data['first_name'].strip()) > 0 else None,
+            last_name=survey_data['last_name'] if len(survey_data['last_name'].strip()) > 0 else None
         ))
         return {"msg": "Profile updated successfully"}
     except KeyError as ke:

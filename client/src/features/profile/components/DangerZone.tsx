@@ -1,11 +1,15 @@
 import React, { useState } from 'react';
 import './DangerZone.css';
+import { deleteUserData, deleteAccount, deleteAllChats, deleteAllDocuments } from '../services/deleteService';
+import { useFirebase } from '../../../context/FirebaseContext';
 
 const DangerZone: React.FC = () => {
+  const { auth } = useFirebase();
   const [isConfirmingDelete, setIsConfirmingDelete] = useState(false);
   const [isConfirmingDocuments, setIsConfirmingDocuments] = useState(false);
   const [isConfirmingChats, setIsConfirmingChats] = useState(false);
   const [confirmationText, setConfirmationText] = useState('');
+  const [error, setError] = useState<string | null>(null);
 
   const handleDeleteClick = () => {
     setIsConfirmingDelete(true);
@@ -34,26 +38,47 @@ const DangerZone: React.FC = () => {
     setIsConfirmingDocuments(false);
     setIsConfirmingChats(false);
     setConfirmationText('');
+    setError(null);
   };
 
-  const handleConfirmDelete = () => {
+  const handleConfirmDelete = async () => {
     if (confirmationText === 'DELETE') {
-      // TODO: Implement account deletion logic
-      console.log('Account deletion confirmed');
+      try {
+        await deleteAccount();
+        // Sign out from Firebase
+        await auth.signOut();
+        // Clear any local storage or session data
+        localStorage.clear();
+        sessionStorage.clear();
+        // Redirect to landing page
+        window.location.href = '/';
+      } catch (err) {
+        setError('Failed to delete account. Please try again.');
+      }
     }
   };
 
-  const handleConfirmDocuments = () => {
+  const handleConfirmDocuments = async () => {
     if (confirmationText === 'DELETE') {
-      // TODO: Implement documents deletion logic
-      console.log('Documents deletion confirmed');
+      try {
+        await deleteAllDocuments();
+        setError(null);
+        handleCancel();
+      } catch (err) {
+        setError('Failed to delete documents. Please try again.');
+      }
     }
   };
 
-  const handleConfirmChats = () => {
+  const handleConfirmChats = async () => {
     if (confirmationText === 'DELETE') {
-      // TODO: Implement chats deletion logic
-      console.log('Chats deletion confirmed');
+      try {
+        await deleteAllChats();
+        setError(null);
+        handleCancel();
+      } catch (err) {
+        setError('Failed to delete chats. Please try again.');
+      }
     }
   };
 
@@ -80,6 +105,7 @@ const DangerZone: React.FC = () => {
           </button>
         </div>
       </div>
+      {error && <div className="error-message">{error}</div>}
     </div>
   );
 

@@ -9,10 +9,9 @@ const Landing: React.FC = () => {
       <nav className="landing-nav">
         <div className="nav-left">
             <span className="landing-logo-text">Sanvia</span>
+            <button className="nav-button about"> About </button>
         </div>
-        <div className="nav-center">
-          <button className="nav-link">Features</button>
-        </div>
+        <img src="./images/Vector.png"></img>
         <div className="nav-right">
           <button 
             className="nav-button login"

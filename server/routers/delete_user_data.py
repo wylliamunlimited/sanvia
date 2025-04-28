@@ -10,6 +10,7 @@ from typing import Annotated
 from fastapi import Depends, HTTPException, status
 from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
 import firebase_admin
+from firebase_admin import auth
 from firebase_admin.auth import verify_id_token
 from firebase_admin import credentials, firestore
 from constants.credentials import FIREBASE_ADMIN_API_KEY
@@ -62,9 +63,10 @@ def delete_all_from_gcs(user: dict = Depends(get_firebase_user_from_token)):
 async def delete_user_data(user: dict = Depends(get_firebase_user_from_token)):
     """Delete all user data from Firestore, ChromaDB, and GCS"""
     # Delete from all storage systems
+    delete_all_from_gcs(user)
     delete_all_from_firestore(user)
     delete_all_from_chroma(user["uid"])
-    delete_all_from_gcs(user)
+
     return {"message": "User data deleted successfully from all storage systems"}
 
 
@@ -73,13 +75,19 @@ def delete_document_from_firestore(
 ):
     firestore_client = get_firestore_client()
     user_id = user["uid"]
-    db = (
-        firestore_client.collection("users")
+
+    # Delete from the correct Firestore collection
+    doc_ref = (
+        firestore_client.collection("documents")
         .document(user_id)
-        .collection("documents")
+        .collection("files")
         .document(document_id)
     )
-    db.delete()
+
+    # Check if document exists before deleting
+    if doc_ref.get().exists:
+        doc_ref.delete()
+
     return {"message": "Document deleted successfully from firestore"}
 
 
@@ -109,9 +117,33 @@ def delete_document_from_gcs(
         FIREBASE_ADMIN_API_KEY
     )
     storage_client = storage.Client(credentials=credentials)
+    db = get_firestore_client()
     bucket = storage_client.bucket(BUCKET_NAME)
-    blob = bucket.blob(f"documents/{user_id}/{document_id}")
-    blob.delete()
+    doc_ref = (
+        db.collection("documents")
+        .document(user_id)
+        .collection("files")
+        .document(document_id)
+    )
+    doc = doc_ref.get()
+
+    if not doc.exists:
+        raise HTTPException(status_code=404, detail="Document not found")
+
+    document_data = doc.to_dict()
+    gcs_path = document_data.get("gcs_path")
+    blob = bucket.blob(gcs_path)
+
+    try:
+        blob.delete()
+    except Exception as e:
+        # If the file doesn't exist in GCS, we can ignore the error
+        # since we still want to delete the Firestore record
+        if "No such object" not in str(e):
+            raise HTTPException(
+                status_code=500, detail=f"Error deleting from GCS: {str(e)}"
+            )
+
     return {"message": "Document deleted successfully from GCS"}
 
 
@@ -120,9 +152,10 @@ async def delete_document(
     user: Annotated[dict, Depends(get_firebase_user_from_token)], document_id: str
 ):
     """Delete document from firestore, chroma and gcs"""
+    delete_document_from_gcs(document_id, user)
     delete_document_from_firestore(document_id, user)
     delete_document_from_chroma(document_id, user)
-    delete_document_from_gcs(document_id, user)
+
     return {"message": "Document deleted successfully"}
 
 
@@ -138,10 +171,10 @@ def delete_individual_thread(
         .collection("threads")
         .document(thread_id)
     )
-    doc = doc_ref.get()
-    if not doc.exists:
-        raise HTTPException(status_code=404, detail="Chat not found")
-    doc_ref.delete()
+    try:
+        doc_ref.delete()
+    except Exception as e:
+        raise e
     return {"message": "Chat deleted successfully"}
 
 
@@ -177,15 +210,58 @@ async def delete_all_chats(user: dict = Depends(get_firebase_user_from_token)):
 
 
 def delete_user_account(user: dict = Depends(get_firebase_user_from_token)):
-    """Delete user account from firestore"""
+    """Delete user account from firestore and Firebase Authentication"""
     firestore_client = get_firestore_client()
     user_id = user["uid"]
-    firestore_client.collection("users").document(user_id).delete()
-    return {"message": "Account deleted successfully"}
+
+    try:
+        # First try to delete from Firebase Authentication
+        try:
+            auth.delete_user(user_id)
+        except Exception as auth_error:
+            print(f"Error deleting from Firebase Auth: {str(auth_error)}")
+            # Continue even if Firebase Auth deletion fails, as the user might already be deleted
+
+        # Delete user profile
+        try:
+            profile_doc = firestore_client.collection("profiles").document(user_id)
+            if profile_doc.get().exists:
+                profile_doc.delete()
+        except Exception as profile_error:
+            print(f"Error deleting profile: {str(profile_error)}")
+
+        # Delete user documents
+        try:
+            docs_ref = (
+                firestore_client.collection("documents")
+                .document(user_id)
+                .collection("files")
+            )
+            docs = docs_ref.get()
+            for doc in docs:
+                doc.reference.delete()
+        except Exception as docs_error:
+            print(f"Error deleting documents: {str(docs_error)}")
+
+        return {
+            "message": "Account deletion attempted. Some operations may have been skipped if data was already deleted."
+        }
+    except Exception as e:
+        print(f"Unexpected error during account deletion: {str(e)}")
+        raise HTTPException(
+            status_code=500, detail=f"Error during account deletion: {str(e)}"
+        )
 
 
 @router.post("/delete-account")
 async def delete_account(user: dict = Depends(get_firebase_user_from_token)):
-    """Delete user account from firestore"""
+    """Delete user account and all associated data"""
+    # First delete all user data
+    delete_all_from_gcs(user)
+    delete_all_from_firestore(user)
+    delete_all_from_chroma(user["uid"])
+    delete_all_threads(user)
+
+    # Then delete the account
     delete_user_account(user)
-    return {"message": "Account deleted successfully"}
+    return {"message": "Account and all associated data deleted successfully"}

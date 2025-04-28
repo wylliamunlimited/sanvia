@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom'
 import './History.css'
 import { formatHistoryTime, groupSessionsByDate } from '../utils/dateUtils'
 import { ChatSession, fetchChatThreads } from '../services/historyService'
+import Header from "../../../shared/components/Header";
 
 const History = () => {
   const navigate = useNavigate()
@@ -42,9 +43,17 @@ const History = () => {
 
   return (
     <div className="history-content">
-
-      <h2 className="history-subheader">Your chat history</h2>
-
+    <div className = "history-header">
+    <Header 
+        icon={
+          <svg className = "history-logo" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="var(--page-title)" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+            <path d="M12 8v4l3 3"/>
+            <circle cx="12" cy="12" r="9"/>
+          </svg>
+        }
+        title="History"
+      />
+      </div>
       <div className="search-section">
         <div className="search-row">
           <div className="search-input-container">

@@ -79,6 +79,20 @@ export const documentApi = {
       console.error('Error getting fresh signed URL:', error);
       throw error;
     }
+  },
+
+  deleteDocument: async (documentId: string): Promise<void> => {
+    try {
+      await api.post(`/delete-user-data/delete-document/${documentId}`);
+    } catch (error) {
+      // If the document is already deleted or not found, we can ignore the error
+      // since the UI has already been updated
+      if (error instanceof Error && error.message.includes('404')) {
+        return;
+      }
+      console.error('Error deleting document:', error);
+      throw error;
+    }
   }
 };
 
