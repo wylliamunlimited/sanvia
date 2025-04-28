@@ -35,8 +35,8 @@ html, body {
     url("/images/sideimg-top.png"),
     url("/images/sideimg-bottom.png");
   background-position: 
-    -20vw -25vh,
-    -5vw 85vh;
+    -300px -200px,
+    -250px calc(100% + 200px);
   background-repeat: no-repeat;
   overflow: visible;
 }
