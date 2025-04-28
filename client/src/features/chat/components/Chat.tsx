@@ -6,6 +6,7 @@ import chatApi, { SourceItem } from '../../../api/chatApi'
 import SourcesSidebar from '../components/SourcesSidebar'
 import Message from '../components/Message'
 import { useAutoScroll } from '../hooks/useAutoScroll'
+import Header from "../../../shared/components/Header";
 
 type Message = {
   id: number
@@ -206,6 +207,18 @@ const Chat = () => {
 
   return (
     <div className={`chat-content ${isSourcesSidebarOpen ? 'sidebar-open' : ''}`}>
+    
+    <div className="chat-header">
+        <Header 
+          icon={
+            <svg className="chat-logo" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#757575" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+              <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>
+            </svg>
+          }
+          title="Chat"
+        />
+      </div>
+
 
       <div 
         ref={messageAreaRef}
@@ -263,13 +276,13 @@ const Chat = () => {
           </button>
           <button type="submit" disabled={isThinking || isLoading}>
             <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-              <path d="M12 2L12 20M12 2L5 9M12 2L19 9" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+              <path d="M12 2L12 20M12 2L5 9M12 2L19 9" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"/>
             </svg>
           </button>
         </div>
       </form>
       
-      <div className="disclaimer">
+      <div className="disclaimer-chat">
         Sanvia is not a substitute for professional medical advice.
       </div>
 
