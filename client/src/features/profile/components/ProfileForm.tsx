@@ -10,6 +10,7 @@ interface ProfileData {
   weight: string;
   sex: string;
   age: string;
+  conditions: string[];
 }
 
 interface ProfileFormProps {
@@ -222,6 +223,16 @@ const ProfileForm: React.FC<ProfileFormProps> = ({
           </div>
         </div>
       </div>
+
+      <div className="profile-field">
+            <div className="field-label">Conditions</div>
+            <input
+              type="text"
+              value={editedData.conditions}
+              onChange={(e) => handleInputChange('conditions', capitalizeFirstLetter(e.target.value))}
+              className="editable-input"
+            />
+          </div>
 
       {hasChanges && (
         <div className="profile-action-buttons">
