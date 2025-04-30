@@ -55,7 +55,6 @@
 }
 
 .history-item {
-  display: flex;
   gap: 1rem;
   animation: fadeIn 0.2s ease-in-out;
   padding: 0.7rem 1rem;
@@ -64,7 +63,14 @@
   border: 1px solid #494848;
   cursor: pointer;
   transition: background-color 0.2s ease;
-  padding-right: 0;
+  justify-content: space-between;
+
+}
+
+.history-item-content {
+  display: flex;
+  flex-direction: row;
+  justify-content: space-between;
 }
 
 .history-item:hover {
