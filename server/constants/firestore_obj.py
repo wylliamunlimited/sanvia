@@ -70,12 +70,7 @@ class Survey:
                 f'conditions={self.conditions}, medications={self.medications})')
     
     def contextualize(self):
-        f"""Patient Profile:
-                Age: {self.age}
-                Gender: {self.gender}
-                Sex: {self.sex}
-                Height: {self.height} cm
-                Weight: {self.weight} kg"""
+        f"""Patient Profile:\nAge: {self.age}\nGender: {self.gender}\nSex: {self.sex}\nHeight: {self.height} cm\nWeight: {self.weight} kg\nConditions: {self.conditions}\nMedications: {self.medications}"""
                 
                 
 class WhoopTokenData:
