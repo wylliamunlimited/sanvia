@@ -55,7 +55,7 @@ function App() {
         />
 
         {/* Sign-Up Route */}
-        {/* <Route
+        <Route
           path="/auth/signup"
           element={
             isSignUp ? (
@@ -69,7 +69,7 @@ function App() {
               />
             ) 
           }
-        /> */}
+        />
 
         {/* Login Route */}
         <Route

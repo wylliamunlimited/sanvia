@@ -1,9 +1,9 @@
 import documentApi, { DocumentMetadata } from '../../../api/documentApi'
-import { firestoreApi } from '../../../api/firestoreApi'
+// import { firestoreApi } from '../../../api/firestoreApi'
 
 export type Document = DocumentMetadata
 
-const MAX_FILE_SIZE = 5 * 1024 * 1024 // 5MB in bytes
+// const MAX_FILE_SIZE = 5 * 1024 * 1024 // 5MB in bytes
 
 export const fetchDocuments = async (): Promise<Document[]> => {
   try {
