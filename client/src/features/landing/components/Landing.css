@@ -1,3 +1,5 @@
+@import '../../../shared/styles/scrollbar.css';
+
 .landing-container {
     min-height: 100vh;
     color: var(--text-primary);
@@ -12,6 +14,7 @@
     background-size: cover;
     background-position: center;
     background-repeat: no-repeat;
+
 }
 
 .landing-nav {
@@ -29,7 +32,7 @@
 .landing-nav img {
     width: 70%; 
     height: auto; 
-    min-width: 100px;
+    min-width: 10px;
     object-fit: contain;
   }
 
@@ -37,6 +40,7 @@
 .nav-right {
   display: flex;
   gap: 1.5rem; 
+
 }
 
 .nav-right {
@@ -61,6 +65,7 @@
     cursor: pointer;
     padding: 0.5rem 1rem;
     transition: opacity 0.2s ease;
+
 }
 
 .nav-link:hover {
@@ -75,6 +80,8 @@
     cursor: pointer;
     transition: all 0.2s ease;
     white-space: nowrap;
+    font-family: 'Unbounded', sans-serif;
+
 }
 
 .nav-button.login {
@@ -128,7 +135,9 @@
 }
 
 .hero-text-bold {
-    font-weight: 700;
+    font-weight: 650;
+    font-style: italic;
+
 }
 
 .hero-subtitle {
