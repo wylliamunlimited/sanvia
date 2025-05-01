@@ -15,6 +15,7 @@ import { AuthProvider, useAuth } from '../context/AuthContext';
 import { ProfileProvider } from '../context/ProfileContext';
 import AnimatedSurvey from '../features/onboarding/components/Survey';
 import ProfilePage from '../features/profile/components/Profile';
+import WaitlistPage from '../features/waitlist/pages/WaitlistPage';
 
 function App() {
   const [isSidebarOpen, setSidebarOpen] = useState(true)
@@ -48,7 +49,7 @@ function App() {
         />
 
         {/* Sign-Up Route */}
-        <Route
+        {/* <Route
           path="/auth/signup"
           element={
             isSignUp ? (
@@ -62,7 +63,7 @@ function App() {
               />
             ) 
           }
-        />
+        /> */}
 
         {/* Login Route */}
         <Route
@@ -94,6 +95,12 @@ function App() {
               <Navigate to="/" replace />
             )
           }
+        />
+        
+        {/* Waitlist Route */}
+        <Route
+          path="/waitlist"
+          element={<WaitlistPage />}
         />
         
         {/* Main App Routes */}

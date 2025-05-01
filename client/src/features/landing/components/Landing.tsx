@@ -21,9 +21,9 @@ const Landing: React.FC = () => {
           </button>
           <button 
             className="nav-button signup"
-            onClick={() => navigate('/auth/signup')}
+            onClick={() => navigate('/waitlist')}
           >
-            Sign Up
+            Waitlist
           </button>
         </div>
       </nav>
@@ -45,9 +45,9 @@ const Landing: React.FC = () => {
 
         <button 
           className="cta-button"
-          onClick={() => navigate('/auth/signup')}
+          onClick={() => navigate('/waitlist')}
         >
-          Ask Sanvia
+          Join the Waitlist
         </button>
       </main>
     </div>
