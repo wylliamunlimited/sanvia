@@ -1,8 +1,10 @@
 import { useState } from "react";
+import { useNavigate } from "react-router-dom";
 import "./WaitlistForm.css";
 import { submitWaitlist } from "../../../api/waitlist";
 
 const WaitlistForm = () => {
+    const navigate = useNavigate();
     const [formData, setFormData] = useState({
         name: "",
         email: "",
@@ -56,6 +58,12 @@ const WaitlistForm = () => {
                 <div className="success-message">
                     <h2>Thank you for joining our waitlist!</h2>
                     <p>We'll be in touch soon with updates about Sanvia.</p>
+                    <button 
+                        className="return-home-button"
+                        onClick={() => navigate('/')}
+                    >
+                        Return to Home
+                    </button>
                 </div>
             </div>
         );

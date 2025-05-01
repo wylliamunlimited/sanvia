@@ -164,4 +164,26 @@
   animation: fadeUp 0.5s ease-out 0.6s forwards;
   opacity: 0;
   transform: translateY(10px);
+}
+
+.return-home-button {
+  margin-top: 2rem;
+  padding: 0.75rem 1.5rem;
+  background-color: var(--primary);
+  color: white;
+  border: none;
+  border-radius: 8px;
+  font-size: 1rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background-color 0.2s ease;
+}
+
+.return-home-button:hover {
+  background-color: var(--primary-dark);
+}
+
+.return-home-button:focus {
+  outline: none;
+  box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.5);
 } 
