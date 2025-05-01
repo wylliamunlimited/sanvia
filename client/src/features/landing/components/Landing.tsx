@@ -9,7 +9,7 @@ const Landing: React.FC = () => {
       <nav className="landing-nav">
         <div className="nav-left">
             <span className="landing-logo-text">Sanvia</span>
-            <button className="nav-button about"> About </button>
+            <button className="nav-button about" onClick={() => navigate('/about')}> About </button>
         </div>
         <img src="./images/Vector.png"></img>
         <div className="nav-right">
