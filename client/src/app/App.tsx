@@ -15,6 +15,8 @@ import { AuthProvider, useAuth } from '../context/AuthContext';
 import { ProfileProvider } from '../context/ProfileContext';
 import AnimatedSurvey from '../features/onboarding/components/Survey';
 import ProfilePage from '../features/profile/components/Profile';
+import WaitlistPage from '../features/waitlist/pages/WaitlistPage';
+import About from '../features/about/components/About';
 
 function App() {
   const [isSidebarOpen, setSidebarOpen] = useState(true)
@@ -45,6 +47,11 @@ function App() {
         <Route
           path="/"
           element={user ? <Navigate to="/chat" replace /> : <Landing />}
+        />
+
+        <Route
+          path="/about"
+          element={<About />}
         />
 
         {/* Sign-Up Route */}
@@ -94,6 +101,12 @@ function App() {
               <Navigate to="/" replace />
             )
           }
+        />
+        
+        {/* Waitlist Route */}
+        <Route
+          path="/waitlist"
+          element={<WaitlistPage />}
         />
         
         {/* Main App Routes */}

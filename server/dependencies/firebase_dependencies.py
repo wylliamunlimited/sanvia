@@ -54,7 +54,7 @@ def update_profile(user_id: str, survey_data: Survey) -> None:
         print(type(data))
         if data.get("first-name", "").strip() == "":
             data.pop("first-name")
-        elif data.get("last-name", "").strip() == "":
+        if data.get("last-name", "").strip() == "":
             data.pop("last-name")
         doc_ref.set(data, merge=True)
     except Exception as e:
