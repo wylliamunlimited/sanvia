@@ -43,7 +43,7 @@ const Documents = () => {
   const handleDrop = (e: React.DragEvent) => {
     e.preventDefault()
     setIsDragging(false)
-    
+
     const files = Array.from(e.dataTransfer.files)
     handleFiles(files)
   }
@@ -99,7 +99,6 @@ const Documents = () => {
       if (previewDoc?.document_id === documentId) {
         closePreview();
       }
-      
       // Then attempt to delete from backend
       try {
         await deleteDocument(documentId);
@@ -125,8 +124,8 @@ const Documents = () => {
        <Header
           icon={
             <svg className="documents-logo" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#757575" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-              <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
-              <polyline points="14 2 14 8 20 8"/>
+              <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" />
+              <polyline points="14 2 14 8 20 8" />
             </svg>
           }
           title="Documents"
@@ -157,7 +156,7 @@ const Documents = () => {
             <label className="upload-button">
               <input 
                 type="file" 
-                multiple 
+                multiple
                 onChange={handleFileInput}
                 accept=".pdf"
                 disabled={isUploading}
@@ -211,6 +210,7 @@ const Documents = () => {
             <div className="preview-content">
               <div className="preview-header">
                 <h3>{previewDoc.filename}</h3>
+
                 <button 
                   className="preview-close-button"
                   onClick={closePreview}
