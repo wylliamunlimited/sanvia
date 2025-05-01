@@ -30,10 +30,10 @@ const Landing: React.FC = () => {
 
       <main className="hero-section">
         <h1 className="hero-title">
-          <span className="hero-text-italic">Your&nbsp;</span>
+          <span className="hero-text-bold">Secure&nbsp;</span>
           <span className="hero-text-regular"> Health,</span>
           <br />
-          <span className="hero-text-bold">Clearly</span>
+          <span className="hero-text-bold">Secure</span>
           <span className="hero-text-regular"> Explained</span>
         </h1>
         

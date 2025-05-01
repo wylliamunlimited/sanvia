@@ -105,6 +105,12 @@
   gap: 1rem;
 }
 
+.document-content{
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+
 .document-item {
   display: flex;
   align-items: center;
@@ -115,7 +121,9 @@
   border-radius: 8px;
   border: 1.5px solid rgba(117, 117, 117, 0.31);
   cursor: pointer;
+  flex-direction: row;
   transition: background-color 0.3s ease;
+  justify-content: space-between;
 }
 
 .document-item:hover {
