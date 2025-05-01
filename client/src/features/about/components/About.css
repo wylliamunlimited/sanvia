@@ -99,33 +99,11 @@
 .about-section {
     padding: 2rem;
     margin-bottom: 2rem;
-    background: rgba(255, 255, 255, 0.05);
-    border-radius: 8px;
-    opacity: 0;
-    transform: translateY(20px);
-    animation: fadeUp 0.8s ease forwards;
 }
 
 .legal-section {
     padding: 2rem;
     margin-bottom: 2rem;
-    background: rgba(255, 255, 255, 0.05);
-    border-radius: 8px;
-    opacity: 0;
-    transform: translateY(20px);
-    animation: fadeUp 0.8s ease forwards;
-    animation-delay: 0.2s;
-}
-
-@keyframes fadeUp {
-    from {
-        opacity: 0;
-        transform: translateY(20px);
-    }
-    to {
-        opacity: 1;
-        transform: translateY(0);
-    }
 }
 
 .about-section h1 {
@@ -177,7 +155,7 @@
 }
 
 .sections-container {
-    margin-left: 12rem;
+    margin-left: 16rem;
     padding: 2rem;
     max-width: 800px;
     display: flex;
@@ -190,22 +168,14 @@
 .about-section,
 .legal-section {
     padding: 3rem;
-    background: rgba(0, 0, 0, 0.4);
-    border-radius: 16px;
-    border: 1px solid rgba(255, 255, 255, 0.15);
     min-height: fit-content;
     display: flex;
     flex-direction: column;
     justify-content: center;
-    backdrop-filter: blur(12px);
-    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
-    transition: all 0.3s ease;
 }
 
 .about-section:hover,
 .legal-section:hover {
-    background: rgba(0, 0, 0, 0.45);
-    border-color: rgba(255, 255, 255, 0.2);
     transform: translateY(-2px);
 }
 
@@ -228,14 +198,15 @@
 
 .legal-section h3 {
     font-size: 1.5rem;
-    margin-bottom: 0.75rem;
+    margin-top: 2.5rem;
+    margin-bottom: 1rem;
     color: var(--text-primary);
 }
 
 .legal-section p {
     font-size: 1.1rem;
     line-height: 1.6;
-    margin-bottom: 0.75rem;
+    margin-bottom: 1.5rem;
     color: var(--text-primary);
 }
 
@@ -263,7 +234,7 @@
 
 .vertical-nav {
     position: fixed;
-    left: 2rem;
+    left: 4rem;
     top: 50%;
     transform: translateY(-50%);
     display: flex;

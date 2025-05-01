@@ -27,11 +27,11 @@
 }
 
 .landing-nav img {
-    width: 70%; 
-    height: auto; 
-    min-width: 100px;
+    margin: 0 2rem;
+    height: 24px;
+    width: auto;
     object-fit: contain;
-  }
+}
 
 .nav-left,
 .nav-right {

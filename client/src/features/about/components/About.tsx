@@ -113,7 +113,7 @@ const About = () => {
                             <ul>
                                 <li>Processes complex medical questions with context</li>
                                 <li>Connects with your health records and fitness trackers</li>
-                                <li>Uses trusted medical sources like MD Wiki and Wikidocs</li>
+                                <li>Uses publicly available & trusted medical sources, just like your general Google search</li>
                                 <li>Provides personalized, easy-to-understand explanations</li>
                                 <li>Helps you make informed decisions about your health</li>
                             </ul>
