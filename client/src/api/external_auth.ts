@@ -10,6 +10,8 @@ const api = axios.create({
   },
 });
 
+// const EPIC_PROVIDERS_MAPPER = {};
+
 // Add auth token to requests
 api.interceptors.request.use((config) => {
   const token = localStorage.getItem("sanvia-refreshToken");
@@ -29,8 +31,35 @@ export const whoopapi = {
       window.location.href = whoopRedirectUrl; // Redirect browser to WHOOP directly
     } catch (error) {
       console.error("Error during WHOOP redirect:", error);
+      alert("Failed to connect to WHOOP. Please try again later.");
     }
   },
 };
 
-export default whoopapi;
+export const epicapi = {
+  connectEpic: async (providerUrl: string = "https://fhir.epic.com/interconnect-fhir-oauth/api/FHIR/R4/") => {
+
+    if (!providerUrl.startsWith("https://")) {
+      alert("Invalid provider URL format.");
+      return;
+    }
+
+    try {
+      const response = await api.get("/auth/epic/redirect", {
+        params: {
+          provider_url: providerUrl
+        }
+      });
+      const epicRedirectUrl = response.data.url;
+      console.log(epicRedirectUrl) 
+      window.location.href = epicRedirectUrl;
+    } catch (error) {
+      console.error("Error during EPIC redirect", error);
+      alert("Failed to connect to EPIC. Please try again later.");
+    }
+  },
+};
+
+export default {
+  whoopapi, epicapi
+};

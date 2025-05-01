@@ -19,7 +19,7 @@ from constants.credentials import FIREBASE_ADMIN_API_KEY
 from constants.firestore_obj import Survey
 from constants.langgraph_obj import AIBrain
 from constants.firestore_obj import (
-    WhoopTokenData
+    WhoopTokenData, EPICTokenData
 )
 
 
@@ -201,7 +201,6 @@ def update_whoop_tokens(user_id: str, token_data: dict):
     """
     
     try:
-        ## TODO: encrypt refresh token
         whoop_token_data = WhoopTokenData(
             access_token=token_data["access_token"],
             refresh_token=token_data["refresh_token"],
@@ -264,4 +263,71 @@ def get_whoop_tokens(user_id: str):
     
 def get_recent_whoop_token(user_id: str):
     token_history = get_whoop_tokens(user_id=user_id)
+    return token_history[-1]
+
+def update_epic_tokens(user_id: str, token_data: Dict): 
+    """Store EPIC Authentication Token Pair & Metadata"""
+    
+    try:
+        epic_token_data = EPICTokenData(
+            patient=token_data["patient"],
+            access_token=token_data["access_token"],
+            scope=token_data["scope"],
+            token_type=token_data["token_type"],
+            expires_in=token_data["expires_in"],
+            expiration_date=datetime.utcnow() + timedelta(seconds=token_data["expires_in"]),
+            last_updated=datetime.utcnow(),
+        )
+        
+        ## get list of token 
+        token_history = get_whoop_tokens(user_id=user_id)
+        
+        token_history.append(epic_token_data.to_dict())
+        
+        doc_ref = get_firestore_client().collection("epic-tokens").document(user_id)
+        doc_ref.set({"tokens": token_history}, merge=True)
+        
+        return {
+            "access_token": epic_token_data.access_token,
+            "patient": epic_token_data.patient,
+            "expiration_date": epic_token_data.expiration_date,
+        }
+    except KeyError as ke:
+        print(f"Key Error - EPIC Token Data missing value: {ke}")
+        raise HTTPException(status_code=400, detail=f"EPIC authorization data corrupted.")
+    except Exception as e:
+        print(f"❌ EPIC authorization error: {str(e)}")
+        
+
+def get_epic_tokens(user_id: str):
+    """Retrieve EPIC Authorization Token data from Firestore
+    
+    Format:
+        access_token: str
+        refresh_token: str
+        expires_in: int
+        scope: str
+        token_type: str
+        last_updated: datetime
+        expiration_date: datetime
+    """
+    
+    try:
+        doc_ref = get_firestore_client().collection("epic-tokens").document(user_id)
+        doc = doc_ref.get() ## returning {"tokens": [...]}
+        
+        if not doc.exists:
+            return []
+        
+        token_history = doc.to_dict().get("tokens", [])
+
+        # Return the list of token
+        return token_history
+
+    except Exception as e:
+        print(f"Error retrieving EPIC token information: {e}")
+        raise HTTPException(status_code=500, detail="Database: EPIC Token Retrieval Failed.")
+    
+def get_recent_epic_token(user_id: str):
+    token_history = get_epic_tokens(user_id=user_id)
     return token_history[-1]

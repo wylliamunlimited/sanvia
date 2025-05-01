@@ -15,3 +15,6 @@ FRONTEND_URL = os.getenv("FRONTEND_URL", "http://localhost:5173")
 SANVIA_BACKEND_BASE_URL = os.getenv("SANVIA_BACKEND_BASE_URL", "https://oauth-dev.sanvia.app")
 
 WHOOP_BASE_URL = "https://api.prod.whoop.com/"
+
+EPIC_BASE_URL = "https://fhir.epic.com/interconnect-fhir-oauth/"
+EPIC_TEST_SERVER_URL = "https://fhir.epic.com/interconnect-fhir-oauth/api/FHIR/R4/"

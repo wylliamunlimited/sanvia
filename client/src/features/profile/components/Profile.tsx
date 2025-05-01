@@ -6,10 +6,14 @@ import { updateProfile } from '../services/profileService'
 import ProfileForm from './ProfileForm'
 import ConnectedAccounts from './ConnectedAccounts'
 import DangerZone from './DangerZone'
+import { useLocation } from 'react-router-dom'
 
 const Profile = () => {
   const { userData, updateUserData } = useProfile()
   const [hasChanges, setHasChanges] = useState(false)
+  const location = useLocation()
+  const [showSnackBar, setShowSnackBar] = useState(false)
+  const [connectMessage, setConnectMessage] = useState("")
 
   // Form state
   const [editedData, setEditedData] = useState({
@@ -30,6 +34,20 @@ const Profile = () => {
   useEffect(() => {
     document.documentElement.style.setProperty('--scrollbar-width', `${getScrollbarWidth()}px`)
   }, [])
+
+  // detect connection success
+  useEffect(() => {
+    const params = new URLSearchParams(location.search);
+    if (params.get("connect-status") == "success") {
+      
+      setConnectMessage(`${params.get("provider")} successfully connected! We can now talk about your health based on ${params.get("provider")}.`)
+      setShowSnackBar(true);
+      window.history.replaceState({}, document.title, location.pathname);
+      setTimeout(() => {
+        setShowSnackBar(false);
+      }, 4000);
+    }
+  }, [location]);
 
   // If userData changes, update form state
   useEffect(() => {
@@ -89,6 +107,33 @@ const Profile = () => {
 
   return (
     <div className="profile-content">
+
+      {showSnackBar && (
+        <div className="snackbar">
+          ✅ {connectMessage}
+          <button onClick={() => setShowSnackBar(false)} style={{ marginLeft: '12px', background: 'none', border: 'none', color: '#fff', fontWeight: 'bold', cursor: 'pointer' }}>
+            ✕
+          </button>
+        </div>
+      )}
+
+      {showSnackBar && (
+        <div className="snackbar">
+          ✅ {connectMessage}
+          <button onClick={() => setShowSnackBar(false)} style={{ marginLeft: '12px', background: 'none', border: 'none', color: '#fff', fontWeight: 'bold', cursor: 'pointer' }}>
+            ✕
+          </button>
+        </div>
+      )}
+
+      {showSnackBar && (
+        <div className="snackbar">
+          ✅ {connectMessage}
+          <button onClick={() => setShowSnackBar(false)} style={{ marginLeft: '12px', background: 'none', border: 'none', color: '#fff', fontWeight: 'bold', cursor: 'pointer' }}>
+            ✕
+          </button>
+        </div>
+      )}
 
       <div className="profile-area scrollable-area">
         <h2 className="profile-subheader">Your profile</h2>
