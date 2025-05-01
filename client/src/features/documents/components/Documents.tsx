@@ -3,7 +3,7 @@ import './Documents.css'
 import { getScrollbarWidth } from '../../../shared/utils/scrollbar'
 import { Document, fetchDocuments, uploadDocuments, getPreviewUrl, deleteDocument } from '../services/documentService'
 import DeleteDocumentButton from './DeleteDocumentButton'
-import Header from "../../../shared/components/Header"
+import Header from "../../../shared/components/Header";
 
 const Documents = () => {
   const [documents, setDocuments] = useState<Document[]>([])
@@ -99,7 +99,6 @@ const Documents = () => {
       if (previewDoc?.document_id === documentId) {
         closePreview();
       }
-
       // Then attempt to delete from backend
       try {
         await deleteDocument(documentId);
@@ -121,8 +120,8 @@ const Documents = () => {
   return (
     <div className="documents-content">
 
-      <div className="documents-subheader">
-        <Header
+<div className="documents-subheader">
+       <Header
           icon={
             <svg className="documents-logo" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#757575" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
               <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" />
@@ -133,7 +132,7 @@ const Documents = () => {
         />
       </div>
       
-      <div
+      <div 
         className={`upload-zone ${isDragging ? 'dragging' : ''} ${isUploading ? 'uploading' : ''}`}
         onDragOver={handleDragOver}
         onDragLeave={handleDragLeave}
@@ -142,21 +141,21 @@ const Documents = () => {
         {isUploading ? (
           <>
             <svg className="spinner" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-              <path d="M21 12a9 9 0 1 1-6.219-8.56" />
+              <path d="M21 12a9 9 0 1 1-6.219-8.56"/>
             </svg>
             <p>Uploading files...</p>
           </>
         ) : (
           <>
             <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-              <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
-              <polyline points="17 8 12 3 7 8" />
-              <line x1="12" y1="3" x2="12" y2="15" />
+              <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+              <polyline points="17 8 12 3 7 8"/>
+              <line x1="12" y1="3" x2="12" y2="15"/>
             </svg>
             <p>Drag and drop files here or</p>
             <label className="upload-button">
-              <input
-                type="file"
+              <input 
+                type="file" 
                 multiple
                 onChange={handleFileInput}
                 accept=".pdf"
@@ -177,18 +176,18 @@ const Documents = () => {
       <div className="documents-area scrollable-area">
         <div className="documents-list">
           {documents.map(doc => (
-            <div
-              key={doc.document_id}
+            <div 
+              key={doc.document_id} 
               className="document-item"
             >
-              <div
+              <div 
                 className="document-content"
                 onClick={() => handlePreview(doc)}
               >
                 <div className="document-icon">
                   <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                    <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" />
-                    <polyline points="14 2 14 8 20 8" />
+                    <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
+                    <polyline points="14 2 14 8 20 8"/>
                   </svg>
                 </div>
                 <div className="document-info">
@@ -198,7 +197,7 @@ const Documents = () => {
                   </div>
                 </div>
               </div>
-              <DeleteDocumentButton
+              <DeleteDocumentButton 
                 documentId={doc.document_id}
                 onDelete={() => handleDeleteDocument(doc.document_id)}
               />
@@ -211,25 +210,26 @@ const Documents = () => {
             <div className="preview-content">
               <div className="preview-header">
                 <h3>{previewDoc.filename}</h3>
-                <button
+
+                <button 
                   className="preview-close-button"
                   onClick={closePreview}
                   aria-label="Close preview"
                 >
                   <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                    <path d="M18 6L6 18M6 6l12 12" />
+                    <path d="M18 6L6 18M6 6l12 12"/>
                   </svg>
                 </button>
               </div>
               <div className="preview-body">
                 <div className={`preview-loading ${isIframeLoaded ? 'hidden' : ''}`}>
                   <svg className="spinner" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                    <path d="M21 12a9 9 0 1 1-6.219-8.56" />
+                    <path d="M21 12a9 9 0 1 1-6.219-8.56"/>
                   </svg>
                   <p>Loading preview...</p>
                 </div>
-                <iframe
-                  src={previewUrl ?? ''}
+                <iframe 
+                  src={previewUrl ?? ''} 
                   title={previewDoc.filename}
                   width="100%"
                   height="100%"

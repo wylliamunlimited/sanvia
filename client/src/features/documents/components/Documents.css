@@ -30,6 +30,7 @@
 }
 
 .upload-zone {
+  margin: 1rem calc(max(1rem, (100% - 768px) / 2));
   display: flex;
   border: 2px dashed #837e7e;
   border-radius: 12px;

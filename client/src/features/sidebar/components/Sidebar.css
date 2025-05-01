@@ -234,7 +234,7 @@ body.sidebar-collapsed .menu-item {
   display: flex;
   flex-direction: column;
   gap: 0.5rem;
-  padding: 0.5rem 1rem;
+  padding: 0.5rem 0.2rem;
   margin: 0.125rem 0;
   margin-left: 15px;
   margin-right: 15px;

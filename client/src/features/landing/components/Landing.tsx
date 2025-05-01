@@ -9,7 +9,7 @@ const Landing: React.FC = () => {
       <nav className="landing-nav">
         <div className="nav-left">
             <span className="landing-logo-text">Sanvia</span>
-            <button className="nav-button about"> About </button>
+            <button className="nav-button about" onClick={() => navigate('/about')}> About </button>
         </div>
         <img src="./images/Vector.png"></img>
         <div className="nav-right">
@@ -21,9 +21,9 @@ const Landing: React.FC = () => {
           </button>
           <button 
             className="nav-button signup"
-            onClick={() => navigate('/auth/signup')}
+            onClick={() => navigate('/waitlist')}
           >
-            Sign Up
+            Waitlist
           </button>
         </div>
       </nav>
@@ -45,9 +45,9 @@ const Landing: React.FC = () => {
 
         <button 
           className="cta-button"
-          onClick={() => navigate('/auth/signup')}
+          onClick={() => navigate('/waitlist')}
         >
-          Ask Sanvia
+          Join the Waitlist
         </button>
       </main>
     </div>

@@ -3,7 +3,9 @@ import { useNavigate } from 'react-router-dom'
 import './History.css'
 import { formatHistoryTime, groupSessionsByDate } from '../utils/dateUtils'
 import { ChatSession, fetchChatThreads } from '../services/historyService'
+import DeleteChatButton from './DeleteChatButton'
 import Header from "../../../shared/components/Header";
+
 
 const History = () => {
   const navigate = useNavigate()
@@ -35,6 +37,10 @@ const History = () => {
     navigate(`/chat/${chatId}`)
   }
 
+  const handleDeleteChat = (chatId: string) => {
+    setChatSessions(prev => prev.filter(session => session.id !== chatId));
+  }
+
   const filteredSessions = chatSessions.filter(session =>
     session.title.toLowerCase().includes(searchQuery.toLowerCase())
   )
@@ -43,7 +49,7 @@ const History = () => {
 
   return (
     <div className="history-content">
-    <div className = "history-header">
+<div className = "history-header">
     <Header 
         icon={
           <svg className = "history-logo" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="var(--page-title)" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
@@ -101,9 +107,15 @@ const History = () => {
                       className="history-item"
                       onClick={() => handleChatItemClick(session.id)}
                     >
-                      <div>
-                        <div className="history-text">{session.title}</div>
-                        <div className="history-time">{formatHistoryTime(session.timestamp)}</div>
+                      <div className="history-item-content">
+                        <div>
+                          <div className="history-text">{session.title}</div>
+                          <div className="history-time">{formatHistoryTime(session.timestamp)}</div>
+                        </div>
+                        <DeleteChatButton 
+                          chatId={session.id}
+                          onDelete={() => handleDeleteChat(session.id)}
+                        />
                       </div>
                     </div>
                   ))}
