@@ -125,19 +125,12 @@
     margin-bottom: 1rem;
 }
 
-.hero-text-italic {
-    font-style: italic;
-    font-weight: 400;
-}
-
 .hero-text-regular {
     font-weight: 400;
 }
 
 .hero-text-bold {
     font-weight: 650;
-    font-style: italic;
-
 }
 
 .hero-subtitle {
