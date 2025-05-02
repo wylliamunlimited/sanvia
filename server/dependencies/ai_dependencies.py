@@ -15,7 +15,7 @@ from langgraph.graph import START, StateGraph, END
 from langchain_core.prompts import ChatPromptTemplate, MessagesPlaceholder
 from langgraph.checkpoint.memory import MemorySaver
 from dependencies.rag_dependencies import get_docs_from_chroma, query_docs_from_chroma
-from dependencies.firebase_dependencies import get_firestore_client, get_profile
+from dependencies.firebase_dependencies import get_firestore_client, get_profile, get_recent_epic_token
 from dependencies.survey_rag import get_survey_context, get_bmi_context
 from dependencies.deidentification import deidentify_text
 
@@ -24,6 +24,11 @@ from routers.whoop_connect import (
 )
 from dependencies.whoop_dependencies import (
     get_whoop_sleep, get_whoop_cycle, 
+)
+
+from routers.epic_fhir_connect import (
+    EPIC_TEST_SERVER_URL as EPIC_PROVIDER_URL,
+    epic_access_token
 )
 
 
@@ -76,7 +81,7 @@ def determine_relevance(thoughts: AIBrain) -> AIBrain:
                 "Examples:\n"
                 "'I feel dizzy in the morning' → 0.8\n"
                 "'Thanks, bye!' → -1\n"
-                "'What’s your favorite movie?' → 0.1\n"
+                "'What's your favorite movie?' → 0.1\n"
                 "\n"
                 f"Evaluate this message: \"{last_user_msg}\"\n"
                 "\nReturn **only** the decimal score (no explanation)."
@@ -125,8 +130,8 @@ def respond_manner(thoughts: AIBrain) -> AIBrain:
     system_prompt = {
         "role": "system",
         "content": (
-            "You are a friendly, helpful assistant. If the user greeted you, greet them warmly and ask what health concern they’d like to discuss. "
-            "If they thanked you or ended the conversation, respond kindly and let them know you’re here if they need anything else. "
+            "You are a friendly, helpful assistant. If the user greeted you, greet them warmly and ask what health concern they'd like to discuss. "
+            "If they thanked you or ended the conversation, respond kindly and let them know you're here if they need anything else. "
             "Keep it natural, short, and respectful."
         )
     }
@@ -351,7 +356,7 @@ def generate_question(thoughts: AIBrain) -> AIBrain:
     # Ensure profile context is present in system prompt
     if "Patient Profile:" not in prompt_chain[0].get("content", ""):
         prompt_chain[0]["content"] += (
-            "\n\nYou must consider the patient’s profile and history in all your reasoning.\n"
+            "\n\nYou must consider the patient's profile and history in all your reasoning.\n"
             f"Patient Profile:\n{survey_data or 'None'}"
         )
         
@@ -552,7 +557,7 @@ def summarize(thoughts: AIBrain) -> AIBrain:
     # Append structured patient profile to the last user-facing instruction
     processed_prompt_chain = thoughts["prompt_chain"]
     processed_prompt_chain[0]["content"] += (
-        "\n\nYou must consider the patient’s profile and history in all your reasoning.\n"
+        "\n\nYou must consider the patient's profile and history in all your reasoning.\n"
         f"Patient Profile:\n{survey_data or 'None'}"
     )
 
@@ -719,9 +724,7 @@ async def initializeGraph(with_state: bool = True, prompt_chain: list = [], user
     memory = MemorySaver()
     
     if with_state:
-        
-        
-        ## get token 
+        ## get whoop data
         sleep_summary = ""
         cycle_summary = ""
         try:
@@ -737,6 +740,35 @@ async def initializeGraph(with_state: bool = True, prompt_chain: list = [], user
                 print("WHOOP token is missing or invalid. Skipping WHOOP data.")
         except Exception as e:
             print(f"⚠️ WHOOP data fetch failed: {e}")
+            
+        ## get epic data
+        epic_summary = ""
+        try:
+            epic_token_data = epic_access_token.get(user_id, {}).get(EPIC_PROVIDER_URL, {})
+            
+            if epic_token_data and epic_token_data.get("access_token"):  # ✅ Important check: don't try to fetch if token is None
+                from dependencies.epic_dependencies import get_epic_diagnostic_reports
+                
+                diagnostic_reports = await get_epic_diagnostic_reports(
+                    access_token=epic_token_data["access_token"],
+                    provider_url=EPIC_PROVIDER_URL,
+                    patient_id=epic_token_data.get("patient")
+                )
+                
+                # Format each lab report
+                epic_summaries = []
+                for report in diagnostic_reports:
+                    formatted_report = format_epic_diagnostic_report(report)
+                    if formatted_report:
+                        epic_summaries.append(formatted_report)
+                
+                epic_summary = "\n\n".join(epic_summaries) if epic_summaries else ""
+            else:
+                print("Epic token is missing or invalid. Skipping Epic data.")
+        except Exception as e:
+            print(f"⚠️ Epic data fetch failed: {e}")
+            import traceback
+            traceback.print_exc()
         
         # Initialize assistant prompt
         default_prompt = [
@@ -746,14 +778,19 @@ async def initializeGraph(with_state: bool = True, prompt_chain: list = [], user
                     "You are a kind, helpful health assistant. You are not a licensed medical professional and cannot give direct medical advice, but you can provide insights based on provided health records and user responses. "
                     "If you do not have enough information to give useful insight, you will ask the user 1–3 follow-up questions to gather it. Always write your questions in **simple, easy-to-understand language** suitable for someone without medical training. "
                     "You may highlight or bold the phrases (particularly questions or key terminology) for readability. "
-                    "If the user’s last message contains a **quick clarification question** (e.g., “Does that mean it’s the milk?”, “Should I be worried about that?”), respond to that in 1–2 brief, clear sentences **first**, then continue asking follow-up questions afterward — all in the same message. "
+                    "If the user's last message contains a **quick clarification question** (e.g., Does that mean it's the milk?, Should I be worried about that?), respond to that in 1–2 brief, clear sentences **first**, then continue asking follow-up questions afterward — all in the same message. "
                     "Do not repeat questions the user has already answered. Your goal is to keep the conversation helpful, informative, and easy to follow."
-                    f"Here is the user's most recent sleep and strain data:\n\n"
+                    f"\n\nHere is the user's most recent sleep and strain data:\n\n"
                     f"{sleep_summary}\n\n"
                     f"{cycle_summary}"
+                    f"\n\nHere is the user's most recent lab data:\n\n"
+                    f"{epic_summary}"
                 ),
             }
         ]
+
+        print("🧠 Default prompt:")
+        print(default_prompt)
 
         state = AIBrain(
             thread_id="",
@@ -843,3 +880,102 @@ def trigger_response(graph, user_state: AIBrain) -> AIBrain:
         import traceback
         traceback.print_exc()
         raise e
+
+def format_epic_lab_result(observation: dict) -> str:
+    """Format a single lab observation into a readable string.
+    
+    Args:
+        observation (dict): The observation data from Epic FHIR API
+        
+    Returns:
+        str: Formatted string with lab result information
+    """
+    try:
+        # Extract basic information
+        test_name = observation.get("code", {}).get("text", "Unknown Test")
+        value = observation.get("valueQuantity", {}).get("value", "N/A")
+        unit = observation.get("valueQuantity", {}).get("unit", "")
+        date = observation.get("effectiveDateTime", "Unknown Date")
+        
+        # Convert date to more readable format
+        try:
+            parsed_date = datetime.fromisoformat(date.replace('Z', '+00:00'))
+            formatted_date = parsed_date.strftime("%B %d, %Y")
+        except:
+            formatted_date = date
+            
+        # Format the result
+        result = f"{test_name}: {value}"
+        if unit:
+            result += f" {unit}"
+        result += f" (Measured on {formatted_date})"
+        
+        # Add interpretation if available
+        interpretation = observation.get("interpretation", [{}])[0].get("text")
+        if interpretation:
+            result += f" - {interpretation}"
+            
+        # Add reference range if available
+        ref_range = observation.get("referenceRange", [{}])[0]
+        if ref_range:
+            low = ref_range.get("low", {}).get("value")
+            high = ref_range.get("high", {}).get("value")
+            if low is not None and high is not None:
+                result += f" [Normal range: {low}-{high}]"
+                
+        return result
+    except Exception as e:
+        print(f"Error formatting lab result: {str(e)}")
+        return "Error formatting lab result"
+
+def format_epic_diagnostic_report(report: dict) -> str:
+    """Format a diagnostic report into a readable string.
+    
+    Args:
+        report (dict): The diagnostic report data from Epic FHIR API
+        
+    Returns:
+        str: Formatted string with report information
+    """
+    try:
+        # Extract basic report information
+        report_name = report.get("code", {}).get("text", "Unknown Report")
+        date = report.get("effectiveDateTime", "Unknown Date")
+        
+        # Convert date to more readable format
+        try:
+            parsed_date = datetime.fromisoformat(date.replace('Z', '+00:00'))
+            formatted_date = parsed_date.strftime("%B %d, %Y")
+        except:
+            formatted_date = date
+            
+        # Start building the formatted string
+        formatted = f"📋 {report_name} Report ({formatted_date})\n"
+        
+        # Add status if available
+        status = report.get("status", "").capitalize()
+        if status:
+            formatted += f"Status: {status}\n"
+            
+        # Add performers if available
+        performers = report.get("performer", [])
+        if performers:
+            formatted += f"Performed by: {', '.join(performers)}\n"
+            
+        # Add results
+        results = report.get("results", [])
+        if results:
+            formatted += "\nResults:\n"
+            for result in results:
+                if isinstance(result, dict) and result.get("resourceType") == "Observation":
+                    formatted += f"• {format_epic_lab_result(result)}\n"
+                    
+        # Add conclusion if available
+        conclusion = report.get("conclusion")
+        if conclusion and conclusion.lower() != "none":
+            formatted += f"\nConclusion: {conclusion}\n"
+            
+        return formatted
+    except Exception as e:
+        print(f"Error formatting diagnostic report: {str(e)}")
+        return "Error formatting diagnostic report"
