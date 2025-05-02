@@ -6,7 +6,6 @@ import { submitWaitlist } from "../../../api/waitlist";
 const WaitlistForm = () => {
     const navigate = useNavigate();
     const [formData, setFormData] = useState({
-        name: "",
         email: "",
         age: "",
         role: "",
@@ -28,15 +27,8 @@ const WaitlistForm = () => {
         setError("");
         setIsSubmitting(true);
 
-        // Name validation
-        if (/\d/.test(formData.name)) {
-            setError("Name should not contain numbers");
-            setIsSubmitting(false);
-            return;
-        }
-
         // Basic validation
-        if (!formData.email || !formData.name) {
+        if (!formData.email) {
             setError("Please fill in all required fields");
             setIsSubmitting(false);
             return;
@@ -58,7 +50,7 @@ const WaitlistForm = () => {
                 <div className="success-message">
                     <h2>Thank you for joining our waitlist!</h2>
                     <p>We'll be in touch soon with updates about Sanvia.</p>
-                    <button 
+                    <button
                         className="return-home-button"
                         onClick={() => navigate('/')}
                     >
@@ -78,28 +70,17 @@ const WaitlistForm = () => {
                     <span className="hero-text-regular">Waitlist</span>
                 </h2>
                 <p className="subtitle">
-                    <span className="hero-text-bold">Reclaim Control</span>{" "}
-                    <span className="hero-text-regular">of Your Health,</span>
-                    <br />
-                    <span className="hero-text-italic">with Intelligence</span>{" "}
-                    <span className="hero-text-bold">You Can Trust.</span>
+                    <span>
+                        <span className="hero-text-bold">Reclaim Control</span>{" "}
+                        <span className="hero-text-regular">of Your Health,</span>
+                    </span>
+                    <span>
+                        <span className="hero-text-italic">with Intelligence</span>{" "}
+                        <span className="hero-text-bold">You Can Trust.</span>
+                    </span>
                 </p>
 
                 <form onSubmit={handleSubmit} className="waitlist-form">
-                    <div className="form-group">
-                        <label htmlFor="name">Name *</label>
-                        <input
-                            type="text"
-                            id="name"
-                            name="name"
-                            value={formData.name}
-                            onChange={handleChange}
-                            required
-                            placeholder="Your full name"
-                            disabled={isSubmitting}
-                        />
-                    </div>
-
                     <div className="form-group">
                         <label htmlFor="email">Email *</label>
                         <input
@@ -115,7 +96,7 @@ const WaitlistForm = () => {
                     </div>
 
                     <div className="form-group">
-                        <label htmlFor="age">Age</label>
+                        <label htmlFor="age">Age (optional)</label>
                         <input
                             type="text"
                             id="age"
@@ -128,19 +109,21 @@ const WaitlistForm = () => {
                     </div>
 
                     <div className="form-group">
-                        <label htmlFor="role">Role</label>
+                        <label htmlFor="role">Role (optional)</label>
                         <input
                             type="text"
                             id="role"
                             name="role"
                             value={formData.role}
                             onChange={handleChange}
-                            placeholder="Your role"
+                            placeholder="What best describes you?"
                             disabled={isSubmitting}
                         />
                     </div>
 
                     {error && <p className="error-message">{error}</p>}
+                    {!error &&
+                        <div className="spacer"></div>}
 
                     <button
                         type="submit"
