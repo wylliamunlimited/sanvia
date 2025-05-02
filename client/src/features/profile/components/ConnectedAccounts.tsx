@@ -1,8 +1,16 @@
-import React from 'react';
+import React, { useState } from 'react';
 import './ConnectedAccounts.css';
 import { whoopapi, epicapi } from '../../../api/external_auth';
+import EpicOrganizationSelector from './EpicOrganizationSelector';
 
 const ConnectedAccounts: React.FC = () => {
+  const [showEpicSelector, setShowEpicSelector] = useState(false);
+
+  const handleEpicSelect = (endpoint: string) => {
+    setShowEpicSelector(false);
+    epicapi.connectEpic(endpoint);
+  };
+
   return (
     <>
       <h3 className="connected-accounts-header">Connected accounts</h3>
@@ -22,10 +30,20 @@ const ConnectedAccounts: React.FC = () => {
             <div className="service-logo epic-logo"></div>
             <span className="service-name">EPIC</span>
           </div>
-          <button className="connect-button" onClick={() => {
-            const providerUrl = "https://fhir.epic.com/interconnect-fhir-oauth/";
-            epicapi.connectEpic(providerUrl) // default: test server
-          }}>Connect</button>
+          <div style={{ position: 'relative' }}>
+            <button 
+              className="connect-button" 
+              onClick={() => setShowEpicSelector(true)}
+            >
+              Connect
+            </button>
+            {showEpicSelector && (
+              <EpicOrganizationSelector
+                onSelect={handleEpicSelect}
+                onClose={() => setShowEpicSelector(false)}
+              />
+            )}
+          </div>
         </div>
       </div>
     </>

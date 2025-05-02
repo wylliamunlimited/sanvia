@@ -127,7 +127,6 @@ class EPICTokenData:
     def __init__(self, 
                  patient: str,
                  access_token: str,
-                 refresh_token: str,
                  scope: str,
                  token_type: str,
                  expires_in: int,

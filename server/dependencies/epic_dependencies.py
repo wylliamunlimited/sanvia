@@ -11,6 +11,7 @@ from constants.url import (
 from fastapi import HTTPException
 from typing import Dict
 import json
+import xmltodict
 import httpx
 from datetime import datetime, timedelta
 
@@ -20,15 +21,19 @@ async def get_epic_patient_data(access_token: str, provider_url: str, patient_id
     headers = {
         "Authorization": f"Bearer {access_token}"
         }
+    
+    print(f"Fetching EPIC patient data for patient {patient_id} from", f"{provider_url}/Patient/{patient_id}")
 
     async with httpx.AsyncClient() as client:
         res = await client.get(
-            f"{provider_url}/{patient_id}",
+            f"{provider_url}/Patient/{patient_id}", ## format of provider_url: https://fhir.epic.com/interconnect-fhir-oauth/api/FHIR/R4/
             headers=headers
             )
         
     if res.status_code != 200:
-        print(f"WHOOP sleep fetch failed: {res.text}")
-        raise HTTPException(status_code=500, detail="Failed to fetch WHOOP sleep data")
+        print(f"EPIC user data fetch failed: {res.text}")
+        raise HTTPException(status_code=500, detail="Failed to fetch EPIC user data")
+    
+    data = xmltodict.parse(res.text)
+    return data
 
-    return res.json()
