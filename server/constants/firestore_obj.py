@@ -143,7 +143,7 @@ class EPICTokenData:
     @staticmethod
     def from_dict(source: dict):
         try:
-            return WhoopTokenData(
+            return EPICTokenData(
                 patient=source["patient"],
                 access_token=source['access_token'],
                 scope=source['scope'],
