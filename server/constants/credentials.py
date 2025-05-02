@@ -104,3 +104,11 @@ if AES_ENCRYPTION_KEY:
 else:
     print("❌ AES_ENCRYPTION_KEY is NOT set.")
     raise ValueError("AES Encryption key is missing. Check your .env file.")
+
+EPIC_CLIENT_ID = os.getenv("EPIC_CLIENT_ID")
+
+if EPIC_CLIENT_ID:
+    print(f"✅ EPIC_CLIENT_ID is Detected")
+else:
+    print("❌ EPIC_CLIENT_ID is NOT set.")
+    raise ValueError("EPIC Client id is missing. Check your .env file.")

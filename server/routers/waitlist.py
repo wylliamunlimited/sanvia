@@ -12,7 +12,6 @@ from datetime import datetime
 router = APIRouter()
 
 class WaitlistEntry(BaseModel):
-    name: str
     email: str
     age: Optional[int] = None
     role: Optional[str] = None
@@ -29,7 +28,6 @@ async def submit_waitlist(entry: WaitlistEntry):
         
         # Add the entry with timestamp
         waitlist_ref.add({
-            "name": entry.name,
             "email": entry.email,
             "age": entry.age,
             "role": entry.role,

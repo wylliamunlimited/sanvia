@@ -122,3 +122,53 @@ class WhoopTokenData:
         return (f"WhoopTokenData(access_token='{self.access_token[:10]}...', refresh_token='{self.refresh_token[:10]}...', "
                 f"scope='{self.scope}', token_type='{self.token_type}', expires_in={self.expires_in}, "
                 f"expiration_date='{self.expiration_date}', last_updated='{self.last_updated}')")
+                
+class EPICTokenData:
+    def __init__(self, 
+                 patient: str,
+                 access_token: str,
+                 scope: str,
+                 token_type: str,
+                 expires_in: int,
+                 expiration_date: datetime,
+                 last_updated: datetime):
+        self.patient = patient
+        self.access_token = access_token
+        self.scope = scope
+        self.token_type = token_type
+        self.expires_in = expires_in
+        self.expiration_date = expiration_date
+        self.last_updated = last_updated
+
+    @staticmethod
+    def from_dict(source: dict):
+        try:
+            return WhoopTokenData(
+                patient=source["patient"],
+                access_token=source['access_token'],
+                scope=source['scope'],
+                token_type=source['token_type'],
+                expires_in=int(source['expires_in']),
+                expiration_date=datetime.fromisoformat(source['expiration_date']),
+                last_updated=datetime.fromisoformat(source['last_updated']),
+            )
+        except KeyError as e:
+            raise ValueError(f"Missing key in source data: {e}")
+        except Exception as e:
+            raise ValueError(f"Invalid token data: {e}")
+
+    def to_dict(self):
+        return {
+            "patient": self.patient,
+            "access_token": self.access_token,
+            "scope": self.scope,
+            "token_type": self.token_type,
+            "expires_in": self.expires_in,
+            "expiration_date": self.expiration_date.isoformat(),
+            "last_updated": self.last_updated.isoformat(),
+        }
+
+    def __repr__(self):
+        return (f"EPICTokenData(patient='{self.patient[:10]}...', access_token='{self.access_token[:10]}...', "
+                f"scope='{self.scope}', token_type='{self.token_type}', expires_in={self.expires_in}, "
+                f"expiration_date='{self.expiration_date}', last_updated='{self.last_updated}')")

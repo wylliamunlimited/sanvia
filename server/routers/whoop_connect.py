@@ -34,6 +34,8 @@ SCOPES = "offline read:recovery read:cycles read:sleep read:workout read:profile
 
 
 router = APIRouter()
+
+## IMPORTANT: WHOOP ACCESS DATA 
 whoop_access_token = dict()
 
 def check_access_token(user_id: str) -> dict:
@@ -163,7 +165,7 @@ async def whoop_callback(request: Request):
             ## Verify user authentication is successful 
             user_data = await get_whoop_user(access_token=whoop_access_token[user_id]["access_token"])
             
-        return RedirectResponse(url=f"{FRONTEND_URL}/profile")
+        return RedirectResponse(url=f"{FRONTEND_URL}/profile?provider=whoop&connect-status=success")
     except Exception as e:
         print(f"Whoop Callback Error: {e}")
         raise HTTPException(status_code=400, detail=f"Whoop Callback Failed. {e}")
@@ -183,6 +185,8 @@ async def whoop_redirect(request: Request, user: Annotated[dict, Depends(get_fir
             "scope": SCOPES,
             "state": user["uid"]
         }
+        
+        print("Connecting to WHOOP")
         
         whoop_redirect = WHOOP_AUTH_CODE_API_URL + "?" + urllib.parse.urlencode(params)
         return {"url": whoop_redirect}
