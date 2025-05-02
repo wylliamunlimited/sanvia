@@ -1,0 +1,7 @@
+tunnel: oauth-dev
+credentials-file: ~/.cloudflared/e4d4c73f-9539-48d3-bbf6-40a5fafdef40.json
+
+ingress:
+  - hostname: oauth-dev.sanvia.app
+    service: http://localhost:8000
+  - service: http_status:404
