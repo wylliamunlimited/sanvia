@@ -92,8 +92,8 @@ const Login: React.FC<LoginProps> = ({ onLoginSuccess }) => {
       {error && <p className="error">{error}</p>}
       <p className="toggleText">
         Don't have an account?{" "}
-        <span className="link" onClick={() => navigate("/auth/signup")}>
-          Sign Up
+        <span className="link" onClick={() => navigate("/waitlist")}>
+          Join the Waitlist
         </span>
       </p>
     </div>

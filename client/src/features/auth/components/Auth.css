@@ -135,16 +135,18 @@
   }
   
   .link {
-    color: var(--text-primary);
+    color: var(--primary);
     cursor: pointer;
     text-decoration: none;
     font-weight: 500;
-    transition: opacity 0.3s ease;
+    transition: all 0.3s ease;
+    border-bottom: 1px solid transparent;
   }
 
   .link:hover {
-    text-decoration: underline;
+    text-decoration: none;
     opacity: 0.8;
+    border-bottom: 1px solid var(--primary);
   }
   
   .terms-container {

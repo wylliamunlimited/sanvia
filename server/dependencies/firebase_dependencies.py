@@ -52,10 +52,15 @@ def update_profile(user_id: str, survey_data: Survey) -> None:
         doc_ref = get_firestore_client().collection("profiles").document(user_id)
         data = survey_data.to_dict()
         print(type(data))
-        if data.get("first-name", "").strip() == "":
-            data.pop("first-name")
-        elif data.get("last-name", "").strip() == "":
-            data.pop("last-name")
+        # Remove empty strings for first and last name
+        first_name = data.get("first-name")
+        last_name = data.get("last-name")
+        
+        if first_name is None or first_name.strip() == "":
+            data.pop("first-name", None)  # Use pop with None to avoid KeyError
+        if last_name is None or last_name.strip() == "":
+            data.pop("last-name", None)  # Use pop with None to avoid KeyError
+            
         doc_ref.set(data, merge=True)
     except Exception as e:
         print(f"❌ Error updating profile: {str(e)}")

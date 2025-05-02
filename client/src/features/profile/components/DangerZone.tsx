@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import './DangerZone.css';
-import { deleteUserData, deleteAccount, deleteAllChats, deleteAllDocuments } from '../services/deleteService';
+import { deleteAccount, deleteAllChats, deleteAllDocuments } from '../services/deleteService';
 import { useFirebase } from '../../../context/FirebaseContext';
 
 const DangerZone: React.FC = () => {
